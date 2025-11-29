@@ -1,4 +1,4 @@
-package dev.cristianinbits.hyron.hyrox.domain;
+package dev.cristianinbits.hyron.run.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,8 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,42 +16,38 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "hyrox_run_segments")
+@Table(name = "run_intervals")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class HyroxRunSegment {
+public class RunInterval {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Distance of the segment (meters).
+     * Type of interval (e.g. "WORK", "REST", "WARMUP", "COOLDOWN").
      */
-    private Integer distance;
+    private String type;
 
-    /**
-     * Duration of the segment (seconds)
-     */
-    private Integer durationSec;
+    @Column(nullable = false)
+    private Integer orderIndex;
 
-    /**
-     * Average pace as a formatted string (e.g. "4:30/km")
-     */
+    private Integer distance; // meters (optional)
+    private Integer durationSec; // planned duration (seconds)
+    private Integer timeSec; // actual time (seconds)
+
     private String averagePace;
-
-    /**
-     * Average heart rate (bpm).
-     */
     private Integer averageHr;
+    private Integer rpe;
 
     @Column(length = 2000)
     private String notes;
 
-    @OneToOne
-    @JoinColumn(name = "block_item_id", nullable = false, unique = true)
-    private HyroxBlockItem blockItem;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "run_workout_details_id")
+    private RunWorkoutDetails runWorkout;
 }
