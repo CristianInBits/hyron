@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
 import dev.cristianinbits.hyron.run.domain.RunWorkoutDetails;
+import dev.cristianinbits.hyron.swim.SwimWorkoutDetails;
 import dev.cristianinbits.hyron.user.domain.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -74,7 +75,7 @@ public class Workout {
     private RunWorkoutDetails runDetails;
 
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
-    private SwinWorkoutDetails swimDetails;
+    private SwimWorkoutDetails swimDetails;
 
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private GymWorkoutDetails gymDetails;
