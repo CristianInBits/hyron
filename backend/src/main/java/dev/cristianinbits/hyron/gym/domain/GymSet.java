@@ -1,4 +1,4 @@
-package dev.cristianinbits.hyron.gym;
+package dev.cristianinbits.hyron.gym.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

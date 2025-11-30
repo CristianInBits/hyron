@@ -2,7 +2,7 @@ package dev.cristianinbits.hyron.workout.domain;
 
 import java.time.LocalDateTime;
 
-import dev.cristianinbits.hyron.gym.GymWorkoutDetails;
+import dev.cristianinbits.hyron.gym.domain.GymWorkoutDetails;
 import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
 import dev.cristianinbits.hyron.run.domain.RunWorkoutDetails;
 import dev.cristianinbits.hyron.swim.domain.SwimWorkoutDetails;
