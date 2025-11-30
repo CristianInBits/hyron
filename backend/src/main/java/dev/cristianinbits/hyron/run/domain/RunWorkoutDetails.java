@@ -3,7 +3,7 @@ package dev.cristianinbits.hyron.run.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.cristianinbits.hyron.workout.Workout;
+import dev.cristianinbits.hyron.workout.domain.Workout;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

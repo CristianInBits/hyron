@@ -1,4 +1,4 @@
-package dev.cristianinbits.hyron.workout;
+package dev.cristianinbits.hyron.workout.domain;
 
 public enum WorkoutType {
     HYROX,
