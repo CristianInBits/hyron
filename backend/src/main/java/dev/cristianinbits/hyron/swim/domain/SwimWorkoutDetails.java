@@ -1,4 +1,4 @@
-package dev.cristianinbits.hyron.swim;
+package dev.cristianinbits.hyron.swim.domain;
 
 import java.util.ArrayList;
 import java.util.List;

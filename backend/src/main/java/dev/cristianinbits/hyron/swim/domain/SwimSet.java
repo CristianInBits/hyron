@@ -1,4 +1,4 @@
-package dev.cristianinbits.hyron.swim;
+package dev.cristianinbits.hyron.swim.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
