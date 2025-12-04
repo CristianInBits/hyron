@@ -40,7 +40,9 @@ public class RunInterval {
     private Integer durationSec; // planned duration (seconds)
     private Integer timeSec; // actual time (seconds)
 
+    @Column(length = 20)
     private String averagePace;
+    
     private Integer averageHr;
     private Integer rpe;
 

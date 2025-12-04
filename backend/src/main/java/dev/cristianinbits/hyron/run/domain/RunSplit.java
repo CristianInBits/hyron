@@ -1,5 +1,6 @@
 package dev.cristianinbits.hyron.run.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +32,7 @@ public class RunSplit {
 
     private Integer timeSec; // seconds for that km
 
+    @Column(length = 20)
     private String pace; // formatted pace string
 
     private Integer averageHr;
