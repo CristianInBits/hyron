@@ -53,7 +53,7 @@ public class HyroxBlock {
     private String notes;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "hyrox_workout_details_id")
+    @JoinColumn(name = "hyrox_workout_details_id", nullable = false)
     private HyroxWorkoutDetails workoutDetails;
 
     @OneToMany(mappedBy = "block", cascade = CascadeType.ALL, orphanRemoval = true)

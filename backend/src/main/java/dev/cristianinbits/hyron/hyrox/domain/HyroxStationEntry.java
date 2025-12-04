@@ -33,10 +33,11 @@ public class HyroxStationEntry {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private HyroxStation station;
-
+    
     /**
      * Duration of the station (seconds).
-     */
+    */
+    @Column(nullable = false)
     private Integer durationSec;
 
     private Integer rpe;
@@ -66,7 +67,7 @@ public class HyroxStationEntry {
     @Column(length = 2000)
     private String notes;
 
-    @OneToOne
+    @OneToOne(optional = false)
     @JoinColumn(name = "block_item_id", nullable = false, unique = true)
     private HyroxBlockItem blockItem;
 }

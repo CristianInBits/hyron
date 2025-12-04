@@ -30,16 +30,19 @@ public class HyroxRunSegment {
     /**
      * Distance of the segment (meters).
      */
+    @Column(nullable = false)
     private Integer distance;
-
+    
     /**
      * Duration of the segment (seconds)
-     */
+    */
+    @Column(nullable = false)
     private Integer durationSec;
 
     /**
      * Average pace as a formatted string (e.g. "4:30/km")
      */
+    @Column(length = 20)
     private String averagePace;
 
     /**
@@ -50,7 +53,7 @@ public class HyroxRunSegment {
     @Column(length = 2000)
     private String notes;
 
-    @OneToOne
+    @OneToOne(optional = false)
     @JoinColumn(name = "block_item_id", nullable = false, unique = true)
     private HyroxBlockItem blockItem;
 }

@@ -47,7 +47,7 @@ public class HyroxBlockItem {
     private Integer restAfterItemSec;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "hyrox_block_id")
+    @JoinColumn(name = "hyrox_block_id", nullable = false)
     private HyroxBlock block;
 
     @OneToOne(mappedBy = "blockItem", cascade = CascadeType.ALL, orphanRemoval = true)

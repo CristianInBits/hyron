@@ -37,12 +37,13 @@ public class HyroxWorkoutDetails {
     /**
      * Format of the workout, for example: FULL, HALF, CUSTOM...
      */
+    @Column(length = 50)
     private String format;
 
     @Column(length = 4000)
     private String strategyNotes;
 
-    @OneToOne
+    @OneToOne(optional = false)
     @JoinColumn(name = "workout_id", nullable = false, unique = true)
     private Workout workout;
 
