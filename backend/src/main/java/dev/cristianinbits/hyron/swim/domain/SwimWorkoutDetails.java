@@ -40,7 +40,7 @@ public class SwimWorkoutDetails {
     private String averagePace; // e.g. "1:50/100m"
 
     @Enumerated(EnumType.STRING)
-    private SwinStroke mainStroke;
+    private SwimStroke mainStroke;
 
     private String sessionType; // e.g. "TECHNIQUE", "ENDURANCE"
 

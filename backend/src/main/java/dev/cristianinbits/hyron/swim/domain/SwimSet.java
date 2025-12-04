@@ -50,5 +50,5 @@ public class SwimSet {
     private SwimWorkoutDetails swimWorkout;
 
     @Enumerated(EnumType.STRING)
-    private SwinStroke stroke;
+    private SwimStroke stroke;
 }
