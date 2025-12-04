@@ -40,7 +40,7 @@ public class Workout {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private WorkoutType type;
 
     @Column(nullable = false)
@@ -56,11 +56,13 @@ public class Workout {
     @Column(length = 4000)
     private String notes;
 
+    @Column(length = 255)
     private String location;
 
     /**
      * Source of the workout data (e.g. "MANUAL", "GARMIN", "STRAVA")
      */
+    @Column(length = 255)
     private String source;
 
     // --- relationships ---
