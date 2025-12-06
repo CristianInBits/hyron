@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record HyroxStationEntryRequest(
-    
+
     @NotNull
     HyroxStation station,
 

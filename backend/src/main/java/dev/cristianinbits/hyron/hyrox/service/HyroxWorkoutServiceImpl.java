@@ -1,10 +1,13 @@
-package dev.cristianinbits.hyron.run.service;
+package dev.cristianinbits.hyron.hyrox.service;
 
 import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import dev.cristianinbits.hyron.exception.BadRequestException;
+import dev.cristianinbits.hyron.exception.NotFoundException;
 
 import dev.cristianinbits.hyron.hyrox.domain.HyroxBlock;
 import dev.cristianinbits.hyron.hyrox.domain.HyroxBlockItem;
@@ -26,12 +29,9 @@ import dev.cristianinbits.hyron.hyrox.dto.response.HyroxStationEntryResponse;
 import dev.cristianinbits.hyron.hyrox.dto.response.HyroxWorkoutDetailsResponse;
 
 import dev.cristianinbits.hyron.hyrox.repo.HyroxWorkoutDetailsRepository;
-import dev.cristianinbits.hyron.hyrox.service.HyroxWorkoutService;
-
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import dev.cristianinbits.hyron.workout.repo.WorkoutRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -48,10 +48,8 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
         Long workoutId = request.workoutId();
 
         Workout workout = workoutRepository.findById(workoutId)
-                .orElseThrow(() -> new EntityNotFoundException("Workout not found with id " + workoutId));
+                .orElseThrow(() -> new NotFoundException("Workout not found with id " + workoutId));
 
-        // Si ya existen detalles Hyrox para este workout, los eliminamos (reemplazo
-        // completo)
         hyroxWorkoutDetailsRepository.findByWorkoutId(workoutId)
                 .ifPresent(existing -> hyroxWorkoutDetailsRepository.delete(existing));
 
@@ -60,7 +58,6 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
         details.setFormat(request.format());
         details.setStrategyNotes(request.strategyNotes());
 
-        // Mapear bloques + items (incluyendo segmentos de carrera y estaciones)
         List<HyroxBlock> blocks = request.blocks().stream()
                 .map(blockRequest -> toBlockEntity(blockRequest, details))
                 .toList();
@@ -77,7 +74,7 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
     public HyroxWorkoutDetailsResponse getHyroxDetailsByWorkoutId(Long workoutId) {
 
         HyroxWorkoutDetails details = hyroxWorkoutDetailsRepository.findByWorkoutId(workoutId)
-                .orElseThrow(() -> new EntityNotFoundException("Hyrox details not found for workout id " + workoutId));
+                .orElseThrow(() -> new NotFoundException("Hyrox details not found for workout id " + workoutId));
 
         return toResponse(details);
     }
@@ -86,7 +83,7 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
     public void deleteHyroxDetailsWorkoutById(Long workoutId) {
 
         HyroxWorkoutDetails details = hyroxWorkoutDetailsRepository.findByWorkoutId(workoutId)
-                .orElseThrow(() -> new EntityNotFoundException("Hyrox details not found for workout id " + workoutId));
+                .orElseThrow(() -> new NotFoundException("Hyrox details not found for workout id " + workoutId));
 
         hyroxWorkoutDetailsRepository.delete(details);
     }
@@ -122,32 +119,36 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
         item.setRestBeforeItemSec(request.restBeforeItemSec());
         item.setRestAfterItemSec(request.restAfterItemSec());
 
-        // Validamos coherencia RUN/STATION vs DTOs adjuntos
         if (request.itemType() == ItemType.RUN) {
 
             if (request.runSegment() == null) {
-                throw new IllegalArgumentException("HyroxBlockItem of type RUN must include runSegment");
+                throw new BadRequestException("HyroxBlockItem of type RUN must include runSegment");
             }
 
             if (request.stationEntry() != null) {
-                throw new IllegalArgumentException("HyroxBlockItem of type RUN cannot include stationEntry");
+                throw new BadRequestException("HyroxBlockItem of type RUN cannot include stationEntry");
             }
 
             HyroxRunSegment segment = toRunSegmentEntity(request.runSegment(), item);
+
             item.setRunSegment(segment);
 
         } else if (request.itemType() == ItemType.STATION) {
 
             if (request.stationEntry() == null) {
-                throw new IllegalArgumentException("HyroxBlockItem of type STATION must include stationEntry");
+                throw new BadRequestException("HyroxBlockItem of type STATION must include stationEntry");
             }
 
             if (request.runSegment() != null) {
-                throw new IllegalArgumentException("HyroxBlockItem of type STATION cannot include runSegment");
+                throw new BadRequestException("HyroxBlockItem of type STATION cannot include runSegment");
             }
 
             HyroxStationEntry entry = toStationEntryEntity(request.stationEntry(), item);
+
             item.setStationEntry(entry);
+            
+        } else {
+            throw new BadRequestException("Unsupported itemType: " + request.itemType());
         }
 
         return item;

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record HyroxRunSegmentRequest(
-
+    
     @NotNull
     @Positive
     Integer distance,    // m
@@ -24,5 +24,5 @@ public record HyroxRunSegmentRequest(
 
     @Size(max = 2000)
     String notes
-    
+
 ) { }

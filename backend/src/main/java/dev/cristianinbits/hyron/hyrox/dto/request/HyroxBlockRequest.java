@@ -2,6 +2,7 @@ package dev.cristianinbits.hyron.hyrox.dto.request;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -15,7 +16,7 @@ public record HyroxBlockRequest(
 
     @PositiveOrZero
     Integer restBeforeBlockSec,
-    
+
     @PositiveOrZero
     Integer restAfterBlockSec,
 
@@ -24,5 +25,6 @@ public record HyroxBlockRequest(
 
     @NotNull
     @Size(min = 1)
-    List<@NotNull HyroxBlockItemRequest> items
+    List<@NotNull @Valid HyroxBlockItemRequest> items
+
 ) { }
