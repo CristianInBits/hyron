@@ -49,5 +49,5 @@ public class HyroxWorkoutDetails {
 
     @OneToMany(mappedBy = "workoutDetails", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<HyroxBlock> block = new ArrayList<>();
+    private List<HyroxBlock> blocks = new ArrayList<>();
 }
