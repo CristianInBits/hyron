@@ -5,8 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.cristianinbits.hyron.exception.BadRequestException;
 import dev.cristianinbits.hyron.exception.ConflictException;
 import dev.cristianinbits.hyron.exception.NotFoundException;
+
 import dev.cristianinbits.hyron.user.domain.User;
 import dev.cristianinbits.hyron.user.dto.UserCreateRequest;
 import dev.cristianinbits.hyron.user.dto.UserResponse;
@@ -25,7 +27,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse createUser(UserCreateRequest request) {
 
-        // Comprobación de email duplicado
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ConflictException("Email already in use: " + request.email());
         }
@@ -63,8 +64,16 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id " + id));
 
-        // Solo compruebo conflicto si viene email en el request
+        if (request.name() != null && request.name().isBlank()) {
+            throw new BadRequestException("Name cannot be blank");
+        }
+
+        if (request.email() != null && request.email().isBlank()) {
+            throw new BadRequestException("Email cannot be blank");
+        }
+
         if (request.email() != null) {
+
             userRepository.findByEmail(request.email())
                     .filter(existing -> !existing.getId().equals(id))
                     .ifPresent(existing -> {
