@@ -3,7 +3,7 @@ package dev.cristianinbits.hyron.workout.dto;
 import java.time.LocalDateTime;
 
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
-
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +20,7 @@ public record WorkoutCreateRequest(
     WorkoutType type,
 
     @NotNull
-    LocalDateTime starDateTime,
+    LocalDateTime startDateTime,
 
     LocalDateTime endDateTime,
 
@@ -36,4 +36,15 @@ public record WorkoutCreateRequest(
 
     @Size(max = 255)
     String source
-) { }
+) {
+    
+    @AssertTrue(message = "endDateTime must be after startDateTime")
+    public boolean isStartBeforeEnd() {
+
+        if (startDateTime == null || endDateTime == null) {
+            return true;
+        }
+
+        return endDateTime.isAfter(startDateTime);
+    }
+}

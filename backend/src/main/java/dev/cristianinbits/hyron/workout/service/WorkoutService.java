@@ -19,7 +19,7 @@ public interface WorkoutService {
 
     List<WorkoutSummaryResponse> getWorkoutByUserAndType(Long userId, WorkoutType type);
 
-    List<WorkoutSummaryResponse> getWorkoutByUserAndDataRange(Long userId, LocalDateTime start, LocalDateTime end);
+    List<WorkoutSummaryResponse> getWorkoutByUserAndDateRange(Long userId, LocalDateTime start, LocalDateTime end);
 
     WorkoutDetailResponse updateWorkout (Long id, WorkoutUpdateRequest request);
 
