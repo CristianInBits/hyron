@@ -36,7 +36,9 @@ public class SwimWorkoutDetails {
     private Long id;
 
     private Integer totalDistance; // meters
+
     private Integer totalDurationSec; // seconds
+    
     private String averagePace; // e.g. "1:50/100m"
 
     @Enumerated(EnumType.STRING)

@@ -46,7 +46,7 @@ public class SwimSet {
     private String notes;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "swim_workout_deatils_id")
+    @JoinColumn(name = "swim_workout_details_id")
     private SwimWorkoutDetails swimWorkout;
 
     @Enumerated(EnumType.STRING)
