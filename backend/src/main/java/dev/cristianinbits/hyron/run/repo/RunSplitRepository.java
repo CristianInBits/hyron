@@ -9,5 +9,4 @@ import dev.cristianinbits.hyron.run.domain.RunSplit;
 public interface RunSplitRepository extends JpaRepository<RunSplit, Long> {
 
     List<RunSplit> findByRunWorkoutIdOrderByKilometer(Long runWorkoutDetailsId);
-
 }

@@ -34,10 +34,15 @@ public class RunWorkoutDetails {
     private Long id;
 
     private Integer totalDistance; // meters
+
     private Integer totalDurationSec; // seconds
+
     private String averagePace; // e.g. "5:00/km"
+
     private Integer elevationGain; // meters
+
     private String surfaceType; // e.g. "TREADMILL", "ROAD"
+    
     private String sessionType; // e.g. "INTERVALS", "EASY", ...
 
     @OneToOne

@@ -13,9 +13,11 @@ public record RunWorkoutDetailsCreateRequest(
         @Positive
         Long workoutId,           // o fuera, en la ruta
 
+        @NotNull
         @Positive
         Integer totalDistance,    // m
-
+        
+        @NotNull
         @Positive
         Integer totalDurationSec, // s
 
