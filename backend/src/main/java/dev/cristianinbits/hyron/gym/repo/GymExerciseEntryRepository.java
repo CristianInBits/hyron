@@ -7,6 +7,7 @@ import dev.cristianinbits.hyron.gym.domain.GymExerciseEntry;
 
 @Repository
 public interface GymExerciseEntryRepository extends JpaRepository<GymExerciseEntry, Long> {
-
-    List<GymExerciseEntry> findByWorkoutIdOrderByOrderIndex(Long gymWorkoutDetailsId);
+    
+    List<GymExerciseEntry> findByGymWorkoutIdOrderByOrderIndex(Long gymWorkoutDetailsId);
 }
+

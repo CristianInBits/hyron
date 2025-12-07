@@ -9,8 +9,9 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record GymWorkoutDetailsUpdateRequest(
 
     String goal,
-    MuscleGroup mainMuscleGroup,
     
+    MuscleGroup mainMuscleGroup,
+
     @PositiveOrZero
     Integer totalVolume,
 

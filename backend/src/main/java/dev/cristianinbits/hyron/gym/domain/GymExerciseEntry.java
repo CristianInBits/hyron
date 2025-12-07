@@ -51,5 +51,5 @@ public class GymExerciseEntry {
 
     @OneToMany(mappedBy = "exerciseEntry", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<GymSet> set = new ArrayList<>();
+    private List<GymSet> sets = new ArrayList<>();
 }

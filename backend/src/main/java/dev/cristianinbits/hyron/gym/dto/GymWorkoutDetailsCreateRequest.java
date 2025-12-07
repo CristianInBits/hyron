@@ -3,7 +3,7 @@ package dev.cristianinbits.hyron.gym.dto;
 import java.util.List;
 
 import dev.cristianinbits.hyron.gym.domain.MuscleGroup;
-import edu.umd.cs.findbugs.annotations.NonNull;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +21,7 @@ public record GymWorkoutDetailsCreateRequest(
     @Size(max = 255)
     String goal,
 
-    @NonNull
+    @NotNull
     MuscleGroup mainMuscleGroup,
 
     @PositiveOrZero

@@ -25,6 +25,8 @@ public record GymExerciseEntryRequest(
     @NotNull
     MuscleGroup muscleGroup,
 
+    @NotNull
+    @Size(min = 1)
     List<@Valid GymSetRequest> sets
 
 ) {}
