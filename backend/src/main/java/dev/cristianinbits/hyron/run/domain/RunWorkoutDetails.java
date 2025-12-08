@@ -5,6 +5,7 @@ import java.util.List;
 
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,15 +35,18 @@ public class RunWorkoutDetails {
     private Long id;
 
     private Integer totalDistance; // meters
-
+    
     private Integer totalDurationSec; // seconds
 
+    @Column(length = 20)
     private String averagePace; // e.g. "5:00/km"
-
+    
     private Integer elevationGain; // meters
-
+    
+    @Column(length = 20)
     private String surfaceType; // e.g. "TREADMILL", "ROAD"
     
+    @Column(length = 20)
     private String sessionType; // e.g. "INTERVALS", "EASY", ...
 
     @OneToOne

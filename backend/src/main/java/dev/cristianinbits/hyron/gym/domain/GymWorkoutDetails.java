@@ -5,6 +5,7 @@ import java.util.List;
 
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -35,9 +36,11 @@ public class GymWorkoutDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 255)
     private String goal;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private MuscleGroup mainMuscleGroup;
 
     /**

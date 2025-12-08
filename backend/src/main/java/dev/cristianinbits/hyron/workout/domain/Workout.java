@@ -7,6 +7,7 @@ import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
 import dev.cristianinbits.hyron.run.domain.RunWorkoutDetails;
 import dev.cristianinbits.hyron.swim.domain.SwimWorkoutDetails;
 import dev.cristianinbits.hyron.user.domain.User;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

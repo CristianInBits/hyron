@@ -35,14 +35,17 @@ public class GymExerciseEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Integer orderIndex;
 
+    @Column(nullable = false, length = 255)
     private String exerciseName;
 
     @Column(length = 2000)
     private String notes;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private MuscleGroup muscleGroup;
 
     @ManyToOne(optional = false)

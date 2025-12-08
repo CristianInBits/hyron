@@ -40,6 +40,10 @@ ALTER TABLE workouts
     ADD CONSTRAINT chk_workouts_global_rpe_range
     CHECK (global_rpe BETWEEN 1 AND 10 OR global_rpe IS NULL);
 
+ALTER TABLE workouts
+    ADD CONSTRAINT chk_workouts_start_before_end
+    CHECK (end_date_time IS NULL OR end_date_time >= start_date_time);
+
 -- Index to speed up queries by user
 CREATE INDEX idx_workouts_user_id ON workouts (user_id);
 
@@ -87,6 +91,17 @@ ALTER TABLE hyrox_blocks
 
 CREATE INDEX idx_hyrox_blocks_details_id ON hyrox_blocks (hyrox_workout_details_id);
 
+-- CHECKs
+ALTER TABLE hyrox_blocks
+    ADD CONSTRAINT chk_hyrox_blocks_order_index_non_negative
+    CHECK (order_index >= 0);
+
+ALTER TABLE hyrox_blocks
+    ADD CONSTRAINT chk_hyrox_blocks_rest_non_negative
+    CHECK (
+        (rest_before_block_sec IS NULL OR rest_before_block_sec >= 0) AND
+        (rest_after_block_sec  IS NULL OR rest_after_block_sec  >= 0)
+    );
 
 -- Items inside a block (RUN or STATION)
 CREATE TABLE hyrox_block_items (
@@ -105,7 +120,15 @@ ALTER TABLE hyrox_block_items
     ON DELETE CASCADE;
 
 CREATE INDEX idx_hyrox_block_items_block_id ON hyrox_block_items (hyrox_block_id);
+CREATE INDEX idx_hyrox_block_items_block_order ON hyrox_block_items (hyrox_block_id, order_index);
 
+-- CHECKs
+ALTER TABLE hyrox_block_items
+    ADD CONSTRAINT chk_hyrox_block_items_rest_non_negative
+    CHECK (
+        (rest_before_item_sec IS NULL OR rest_before_item_sec >= 0) AND
+        (rest_after_item_sec  IS NULL OR rest_after_item_sec  >= 0)
+    );
 
 -- Running segments associated with a block item (when item_type = RUN)
 CREATE TABLE hyrox_run_segments (
@@ -129,6 +152,18 @@ ALTER TABLE hyrox_run_segments
 
 CREATE INDEX idx_hyrox_run_segments_block_item_id ON hyrox_run_segments (block_item_id);
 
+-- CHECKs
+ALTER TABLE hyrox_run_segments
+    ADD CONSTRAINT chk_hyrox_run_segments_distance_positive
+    CHECK (distance > 0);
+
+ALTER TABLE hyrox_run_segments
+    ADD CONSTRAINT chk_hyrox_run_segments_duration_positive
+    CHECK (duration_sec > 0);
+
+ALTER TABLE hyrox_run_segments
+    ADD CONSTRAINT chk_hyrox_run_segments_avg_hr_non_negative
+    CHECK (average_hr IS NULL OR average_hr >= 0);
 
 -- Station entries associated with a block item (when item_type = STATION)
 CREATE TABLE hyrox_station_entries (
@@ -156,6 +191,25 @@ ALTER TABLE hyrox_station_entries
 
 CREATE INDEX idx_hyrox_station_entries_block_item_id ON hyrox_station_entries (block_item_id);
 
+-- CHECKs
+ALTER TABLE hyrox_station_entries
+    ADD CONSTRAINT chk_hyrox_station_entries_duration_positive
+    CHECK (duration_sec > 0);
+
+ALTER TABLE hyrox_station_entries
+    ADD CONSTRAINT chk_hyrox_station_entries_rpe_range
+    CHECK (rpe BETWEEN 1 AND 10 OR rpe IS NULL);
+
+ALTER TABLE hyrox_station_entries
+    ADD CONSTRAINT chk_hyrox_station_entries_non_negative_values
+    CHECK (
+        (reps          IS NULL OR reps          >= 0) AND
+        (distance      IS NULL OR distance      >= 0) AND
+        (total_weight  IS NULL OR total_weight  >= 0) AND
+        (average_power IS NULL OR average_power >= 0) AND
+        (average_hr    IS NULL OR average_hr    >= 0)
+    );
+
 
 -- ============================
 --  Run domain
@@ -166,10 +220,10 @@ CREATE TABLE run_workout_details (
     id                 BIGSERIAL      PRIMARY KEY,
     total_distance     INTEGER,
     total_duration_sec INTEGER,
-    average_pace       VARCHAR(50),
+    average_pace       VARCHAR(20),
     elevation_gain     INTEGER,
-    surface_type       VARCHAR(50),
-    session_type       VARCHAR(50),
+    surface_type       VARCHAR(20),
+    session_type       VARCHAR(20),
     workout_id         BIGINT         NOT NULL
 );
 
@@ -184,6 +238,18 @@ ALTER TABLE run_workout_details
 
 CREATE INDEX idx_run_details_workout_id ON run_workout_details (workout_id);
 
+-- CHECKs
+ALTER TABLE run_workout_details
+    ADD CONSTRAINT chk_run_details_total_distance_non_negative
+    CHECK (total_distance IS NULL OR total_distance >= 0);
+
+ALTER TABLE run_workout_details
+    ADD CONSTRAINT chk_run_details_total_duration_positive
+    CHECK (total_duration_sec IS NULL OR total_duration_sec > 0);
+
+ALTER TABLE run_workout_details
+    ADD CONSTRAINT chk_run_details_elevation_gain_non_negative
+    CHECK (elevation_gain IS NULL OR elevation_gain >= 0);
 
 -- Intervals of a running session
 CREATE TABLE run_intervals (
@@ -209,6 +275,30 @@ ALTER TABLE run_intervals
 CREATE INDEX idx_run_intervals_run_workout_id ON run_intervals (run_workout_details_id);
 CREATE INDEX idx_run_intervals_run_workout_order ON run_intervals (run_workout_details_id, order_index);
 
+-- CHECKs
+ALTER TABLE run_intervals
+    ADD CONSTRAINT chk_run_intervals_order_index_non_negative
+    CHECK (order_index >= 0);
+
+ALTER TABLE run_intervals
+    ADD CONSTRAINT chk_run_intervals_distance_non_negative
+    CHECK (distance IS NULL OR distance >= 0);
+
+ALTER TABLE run_intervals
+    ADD CONSTRAINT chk_run_intervals_duration_positive
+    CHECK (duration_sec IS NULL OR duration_sec > 0);
+
+ALTER TABLE run_intervals
+    ADD CONSTRAINT chk_run_intervals_time_positive
+    CHECK (time_sec IS NULL OR time_sec > 0);
+
+ALTER TABLE run_intervals
+    ADD CONSTRAINT chk_run_intervals_avg_hr_non_negative
+    CHECK (average_hr IS NULL OR average_hr >= 0);
+
+ALTER TABLE run_intervals
+    ADD CONSTRAINT chk_run_intervals_rpe_range
+    CHECK (rpe BETWEEN 1 AND 10 OR rpe IS NULL);
 
 -- Kilometer splits (or another unit) of a running session
 CREATE TABLE run_splits (
@@ -229,6 +319,18 @@ ALTER TABLE run_splits
 CREATE INDEX idx_run_splits_run_workout_id ON run_splits (run_workout_details_id);
 CREATE INDEX idx_run_splits_run_workout_km ON run_splits (run_workout_details_id, kilometer);
 
+-- CHECKs
+ALTER TABLE run_splits
+    ADD CONSTRAINT chk_run_splits_kilometer_positive
+    CHECK (kilometer IS NULL OR kilometer > 0);
+
+ALTER TABLE run_splits
+    ADD CONSTRAINT chk_run_splits_time_positive
+    CHECK (time_sec IS NULL OR time_sec > 0);
+
+ALTER TABLE run_splits
+    ADD CONSTRAINT chk_run_splits_avg_hr_non_negative
+    CHECK (average_hr IS NULL OR average_hr >= 0);
 
 -- ============================
 --  Swim domain
@@ -239,9 +341,9 @@ CREATE TABLE swim_workout_details (
     id                 BIGSERIAL      PRIMARY KEY,
     total_distance     INTEGER,
     total_duration_sec INTEGER,
-    average_pace       VARCHAR(50),
+    average_pace       VARCHAR(20),
     main_stroke        VARCHAR(50),
-    session_type       VARCHAR(50),
+    session_type       VARCHAR(20),
     workout_id         BIGINT         NOT NULL
 );
 
@@ -256,6 +358,14 @@ ALTER TABLE swim_workout_details
 
 CREATE INDEX idx_swim_details_workout_id ON swim_workout_details (workout_id);
 
+-- CHECKs
+ALTER TABLE swim_workout_details
+    ADD CONSTRAINT chk_swim_details_total_distance_non_negative
+    CHECK (total_distance IS NULL OR total_distance >= 0);
+
+ALTER TABLE swim_workout_details
+    ADD CONSTRAINT chk_swim_details_total_duration_positive
+    CHECK (total_duration_sec IS NULL OR total_duration_sec > 0);
 
 -- Sets of a swimming session
 CREATE TABLE swim_sets (
@@ -263,7 +373,7 @@ CREATE TABLE swim_sets (
     order_index               INTEGER        NOT NULL,
     repetitions               INTEGER,
     distance_per_rep          INTEGER,        -- meters
-    target_pace               VARCHAR(50),    -- "1:45/100m"
+    target_pace               VARCHAR(20),    -- "1:45/100m"
     total_block_time_sec      INTEGER,        -- seconds
     rest_between_reps_sec     INTEGER,        -- seconds
     notes                     VARCHAR(2000),
@@ -280,6 +390,27 @@ ALTER TABLE swim_sets
 CREATE INDEX idx_swim_sets_swim_workout_id ON swim_sets (swim_workout_details_id);
 CREATE INDEX idx_swim_sets_swim_workout_order ON swim_sets (swim_workout_details_id, order_index);
 
+-- CHECKs
+ALTER TABLE swim_sets
+    ADD CONSTRAINT chk_swim_sets_order_index_non_negative
+    CHECK (order_index >= 0);
+
+ALTER TABLE swim_sets
+    ADD CONSTRAINT chk_swim_sets_repetitions_positive
+    CHECK (repetitions IS NULL OR repetitions > 0);
+
+ALTER TABLE swim_sets
+    ADD CONSTRAINT chk_swim_sets_distance_per_rep_positive
+    CHECK (distance_per_rep IS NULL OR distance_per_rep > 0);
+
+ALTER TABLE swim_sets
+    ADD CONSTRAINT chk_swim_sets_total_block_time_positive
+    CHECK (total_block_time_sec IS NULL OR total_block_time_sec > 0);
+
+ALTER TABLE swim_sets
+    ADD CONSTRAINT chk_swim_sets_rest_between_reps_non_negative
+    CHECK (rest_between_reps_sec IS NULL OR rest_between_reps_sec >= 0);
+
 
 -- ============================
 --  Gym domain
@@ -287,12 +418,13 @@ CREATE INDEX idx_swim_sets_swim_workout_order ON swim_sets (swim_workout_details
 
 -- Strength-training-specific details of a workout
 CREATE TABLE gym_workout_details (
-    id                BIGSERIAL      PRIMARY KEY,
-    goal              VARCHAR(255),
-    main_muscle_group VARCHAR(50),
-    total_volume      INTEGER,
-    workout_id        BIGINT         NOT NULL
+    id                 BIGSERIAL      PRIMARY KEY,
+    goal               VARCHAR(255),
+    main_muscle_group  VARCHAR(50),
+    total_volume       INTEGER,
+    workout_id         BIGINT         NOT NULL
 );
+
 
 ALTER TABLE gym_workout_details
     ADD CONSTRAINT fk_gym_details_workout
@@ -305,12 +437,17 @@ ALTER TABLE gym_workout_details
 
 CREATE INDEX idx_gym_details_workout_id ON gym_workout_details (workout_id);
 
+-- CHECKs
+ALTER TABLE gym_workout_details
+    ADD CONSTRAINT chk_gym_details_total_volume_non_negative
+    CHECK (total_volume IS NULL OR total_volume >= 0);
+
 
 -- Exercises within a gym session
 CREATE TABLE gym_exercise_entries (
     id                        BIGSERIAL      PRIMARY KEY,
-    order_index               INTEGER,
-    exercise_name             VARCHAR(255),
+    order_index               INTEGER        NOT NULL,
+    exercise_name             VARCHAR(255)   NOT NULL,
     notes                     VARCHAR(2000),
     muscle_group              VARCHAR(50),
     gym_workout_details_id    BIGINT         NOT NULL
@@ -325,11 +462,15 @@ ALTER TABLE gym_exercise_entries
 CREATE INDEX idx_gym_exercise_entries_workout_id ON gym_exercise_entries (gym_workout_details_id);
 CREATE INDEX idx_gym_exercise_entries_workout_order ON gym_exercise_entries (gym_workout_details_id, order_index);
 
+-- CHECKs
+ALTER TABLE gym_exercise_entries
+    ADD CONSTRAINT chk_gym_exercise_entries_order_index_non_negative
+    CHECK (order_index >= 0);
 
 -- Sets within each exercise
 CREATE TABLE gym_sets (
     id                      BIGSERIAL      PRIMARY KEY,
-    set_number              INTEGER,
+    set_number              INTEGER        NOT NULL,
     reps                    INTEGER,
     weight                  REAL,          -- kg
     rpe                     INTEGER,
@@ -346,3 +487,24 @@ ALTER TABLE gym_sets
 
 CREATE INDEX idx_gym_sets_exercise_entry_id ON gym_sets (gym_exercise_entry_id);
 CREATE INDEX idx_gym_sets_exercise_entry_set_number ON gym_sets (gym_exercise_entry_id, set_number);
+
+-- CHECKs
+ALTER TABLE gym_sets
+    ADD CONSTRAINT chk_gym_sets_set_number_positive
+    CHECK (set_number > 0);
+
+ALTER TABLE gym_sets
+    ADD CONSTRAINT chk_gym_sets_reps_positive
+    CHECK (reps IS NULL OR reps > 0);
+
+ALTER TABLE gym_sets
+    ADD CONSTRAINT chk_gym_sets_weight_non_negative
+    CHECK (weight IS NULL OR weight >= 0);
+
+ALTER TABLE gym_sets
+    ADD CONSTRAINT chk_gym_sets_rpe_range
+    CHECK (rpe BETWEEN 1 AND 10 OR rpe IS NULL);
+
+ALTER TABLE gym_sets
+    ADD CONSTRAINT chk_gym_sets_rest_after_set_non_negative
+    CHECK (rest_after_set_sec IS NULL OR rest_after_set_sec >= 0);

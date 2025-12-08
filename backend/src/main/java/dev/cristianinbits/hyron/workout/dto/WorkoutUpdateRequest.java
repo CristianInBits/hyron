@@ -27,4 +27,5 @@ public record WorkoutUpdateRequest(
 
     @Size(max = 255)
     String source
+    
 ) { }

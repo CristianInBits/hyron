@@ -5,6 +5,7 @@ import java.util.List;
 
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -36,14 +37,16 @@ public class SwimWorkoutDetails {
     private Long id;
 
     private Integer totalDistance; // meters
-
+    
     private Integer totalDurationSec; // seconds
     
+    @Column( length = 20)
     private String averagePace; // e.g. "1:50/100m"
-
+    
     @Enumerated(EnumType.STRING)
     private SwimStroke mainStroke;
-
+    
+    @Column( length = 20)
     private String sessionType; // e.g. "TECHNIQUE", "ENDURANCE"
 
     @OneToOne

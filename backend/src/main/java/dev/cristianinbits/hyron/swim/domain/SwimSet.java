@@ -37,6 +37,7 @@ public class SwimSet {
 
     private Integer distancePerRep; // meters
 
+    @Column(length = 20)
     private String targetPace; // e.g. "1:45/100m"
 
     private Integer totalBlockTimeSec; // seconds

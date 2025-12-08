@@ -6,6 +6,7 @@ import dev.cristianinbits.hyron.swim.domain.SwimStroke;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 public record SwimWorkoutDetailsCreateRequest(
@@ -14,7 +15,7 @@ public record SwimWorkoutDetailsCreateRequest(
     @Positive
     Long workoutId,
 
-    @Positive
+    @PositiveOrZero
     Integer totalDistance,
 
     @Positive
@@ -26,7 +27,7 @@ public record SwimWorkoutDetailsCreateRequest(
     @NotNull
     SwimStroke mainStroke,
 
-    @Size(max = 100)
+    @Size(max = 20)
     String sessionType,
 
     @NotNull
