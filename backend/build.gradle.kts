@@ -36,8 +36,9 @@ dependencies {
     // --- Observabilidad / Health ---
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-    // --- Migraciones ---
-    implementation("org.flywaydb:flyway-core")
+    // --- Migraciones (Flyway + integración con Spring Boot 4) ---
+    implementation("org.springframework.boot:spring-boot-flyway")
+    implementation("org.flywaydb:flyway-database-postgresql")
 
     // --- DB ---
     runtimeOnly("org.postgresql:postgresql")
