@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate   # usamos Flyway, así que aquí 'validate' o 'none'
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
@@ -31,3 +31,8 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+logging:
+  level:
+    org.flywaydb: DEBUG
+    org.springframework.boot.autoconfigure.flyway: DEBUG
