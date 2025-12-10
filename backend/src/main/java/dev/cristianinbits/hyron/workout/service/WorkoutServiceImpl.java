@@ -64,7 +64,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<WorkoutSummaryResponse> getWorkoutByUser(Long userId) {
+    public List<WorkoutSummaryResponse> getWorkoutsByUser(Long userId) {
 
         return workoutRepository.findByUserId(userId).stream()
                 .map(this::toSummaryResponse)
@@ -73,7 +73,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<WorkoutSummaryResponse> getWorkoutByUserAndType(Long userId, WorkoutType type) {
+    public List<WorkoutSummaryResponse> getWorkoutsByUserAndType(Long userId, WorkoutType type) {
 
         return workoutRepository.findByUserIdAndType(userId, type).stream()
                 .map(this::toSummaryResponse)
@@ -82,7 +82,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<WorkoutSummaryResponse> getWorkoutByUserAndDateRange(
+    public List<WorkoutSummaryResponse> getWorkoutsByUserAndDateRange(
             Long userId,
             LocalDateTime start,
             LocalDateTime end) {

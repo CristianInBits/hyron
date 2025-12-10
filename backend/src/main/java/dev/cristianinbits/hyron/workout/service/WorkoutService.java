@@ -15,11 +15,11 @@ public interface WorkoutService {
 
     WorkoutDetailResponse getWorkoutById(Long id);
 
-    List<WorkoutSummaryResponse> getWorkoutByUser(Long userId);
+    List<WorkoutSummaryResponse> getWorkoutsByUser(Long userId);
 
-    List<WorkoutSummaryResponse> getWorkoutByUserAndType(Long userId, WorkoutType type);
+    List<WorkoutSummaryResponse> getWorkoutsByUserAndType(Long userId, WorkoutType type);
 
-    List<WorkoutSummaryResponse> getWorkoutByUserAndDateRange(Long userId, LocalDateTime start, LocalDateTime end);
+    List<WorkoutSummaryResponse> getWorkoutsByUserAndDateRange(Long userId, LocalDateTime start, LocalDateTime end);
 
     WorkoutDetailResponse updateWorkout (Long id, WorkoutUpdateRequest request);
 
