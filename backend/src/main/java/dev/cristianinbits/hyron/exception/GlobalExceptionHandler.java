@@ -1,7 +1,5 @@
 package dev.cristianinbits.hyron.exception;
 
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
