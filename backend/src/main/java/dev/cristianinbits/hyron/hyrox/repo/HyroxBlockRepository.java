@@ -9,4 +9,6 @@ import dev.cristianinbits.hyron.hyrox.domain.HyroxBlock;
 public interface HyroxBlockRepository extends JpaRepository<HyroxBlock, Long> {
 
     List<HyroxBlock> findByWorkoutDetailsIdOrderByOrderIndex(Long hyroxWorkoutDetailsId);
+
+    void deleteByWorkoutDetailsId(Long hyroxWorkoutDetailsId);
 }

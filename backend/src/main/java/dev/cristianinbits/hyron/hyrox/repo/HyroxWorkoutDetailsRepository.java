@@ -9,4 +9,6 @@ import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
 public interface HyroxWorkoutDetailsRepository extends JpaRepository<HyroxWorkoutDetails, Long> {
 
     Optional<HyroxWorkoutDetails> findByWorkoutId(Long workoutId);
+
+    long deleteByWorkoutId(Long workoutId);
 }

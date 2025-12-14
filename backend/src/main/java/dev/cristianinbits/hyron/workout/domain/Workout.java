@@ -83,4 +83,27 @@ public class Workout {
 
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private GymWorkoutDetails gymDetails;
+
+    // ---------- Helpers ----------
+
+    public boolean hasAnyDetails() {
+        return hyroxDetails != null || runDetails != null || swimDetails != null || gymDetails != null;
+    }
+
+    public boolean hasAnyDetailsExceptHyrox() {
+        return runDetails != null || swimDetails != null || gymDetails != null;
+    }
+
+    public void setHyroxDetails(HyroxWorkoutDetails details) {
+
+        if (this.hyroxDetails != null) {
+            this.hyroxDetails.setWorkout(null);
+        }
+
+        this.hyroxDetails = details;
+
+        if (details != null) {
+            details.setWorkout(this);
+        }
+    }
 }

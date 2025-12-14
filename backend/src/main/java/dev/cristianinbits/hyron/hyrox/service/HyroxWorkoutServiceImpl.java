@@ -1,12 +1,16 @@
 package dev.cristianinbits.hyron.hyrox.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.cristianinbits.hyron.exception.BadRequestException;
+import dev.cristianinbits.hyron.exception.ConflictException;
 import dev.cristianinbits.hyron.exception.NotFoundException;
 
 import dev.cristianinbits.hyron.hyrox.domain.HyroxBlock;
@@ -20,16 +24,16 @@ import dev.cristianinbits.hyron.hyrox.dto.request.HyroxBlockItemRequest;
 import dev.cristianinbits.hyron.hyrox.dto.request.HyroxBlockRequest;
 import dev.cristianinbits.hyron.hyrox.dto.request.HyroxRunSegmentRequest;
 import dev.cristianinbits.hyron.hyrox.dto.request.HyroxStationEntryRequest;
-import dev.cristianinbits.hyron.hyrox.dto.request.HyroxWorkoutDetailsCreateRequest;
-
+import dev.cristianinbits.hyron.hyrox.dto.request.HyroxWorkoutDetailsUpsertRequest;
 import dev.cristianinbits.hyron.hyrox.dto.response.HyroxBlockItemResponse;
 import dev.cristianinbits.hyron.hyrox.dto.response.HyroxBlockResponse;
 import dev.cristianinbits.hyron.hyrox.dto.response.HyroxRunSegmentResponse;
 import dev.cristianinbits.hyron.hyrox.dto.response.HyroxStationEntryResponse;
 import dev.cristianinbits.hyron.hyrox.dto.response.HyroxWorkoutDetailsResponse;
-
+import dev.cristianinbits.hyron.hyrox.repo.HyroxBlockRepository;
 import dev.cristianinbits.hyron.hyrox.repo.HyroxWorkoutDetailsRepository;
 import dev.cristianinbits.hyron.workout.domain.Workout;
+import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import dev.cristianinbits.hyron.workout.repo.WorkoutRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -41,28 +45,54 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
 
     private final HyroxWorkoutDetailsRepository hyroxWorkoutDetailsRepository;
     private final WorkoutRepository workoutRepository;
+    private final HyroxBlockRepository hyroxBlockRepository;
 
     @Override
-    public HyroxWorkoutDetailsResponse createOrReplaceHyroxDetails(HyroxWorkoutDetailsCreateRequest request) {
-
-        Long workoutId = request.workoutId();
+    public HyroxWorkoutDetailsResponse createOrReplaceHyroxDetails(
+        Long workoutId,
+        HyroxWorkoutDetailsUpsertRequest request
+    ) {
 
         Workout workout = workoutRepository.findById(workoutId)
                 .orElseThrow(() -> new NotFoundException("Workout not found with id " + workoutId));
 
-        hyroxWorkoutDetailsRepository.findByWorkoutId(workoutId)
-                .ifPresent(existing -> hyroxWorkoutDetailsRepository.delete(existing));
+        if (workout.getType() != WorkoutType.HYROX) {
+            throw new ConflictException(
+                "Workout type must be HYROX to create Hyrox details"
+            );
+        }
 
-        HyroxWorkoutDetails details = new HyroxWorkoutDetails();
-        details.setWorkout(workout);
+        if (workout.hasAnyDetailsExceptHyrox()) {
+
+            throw new ConflictException(
+                "Cannot create Hyrox details while other workout details exist. Delete them first."
+            );
+        }
+
+        validateOrderIndexes(request);
+
+        HyroxWorkoutDetails details = hyroxWorkoutDetailsRepository
+                .findByWorkoutId(workoutId)
+                .orElseGet(() -> {
+                    HyroxWorkoutDetails d = new HyroxWorkoutDetails();
+                    workout.setHyroxDetails(d);
+                    return d;
+                });
+
         details.setFormat(request.format());
         details.setStrategyNotes(request.strategyNotes());
 
-        List<HyroxBlock> blocks = request.blocks().stream()
-                .map(blockRequest -> toBlockEntity(blockRequest, details))
-                .toList();
+        if (details.getId() != null) {
+            details.getBlocks().clear();
+            hyroxBlockRepository.deleteByWorkoutDetailsId(details.getId());
+            hyroxBlockRepository.flush();
+        }
 
-        details.setBlocks(blocks);
+        List<HyroxBlock> newBlocks = request.blocks().stream()
+                .map(blockRequest -> toBlockEntity(blockRequest, details))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        details.getBlocks().addAll(newBlocks);
 
         HyroxWorkoutDetails saved = hyroxWorkoutDetailsRepository.save(details);
 
@@ -80,13 +110,19 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
     }
 
     @Override
-    public void deleteHyroxDetailsWorkoutById(Long workoutId) {
+    public void deleteHyroxDetailsByWorkoutId(Long workoutId) {
 
-        HyroxWorkoutDetails details = hyroxWorkoutDetailsRepository.findByWorkoutId(workoutId)
-                .orElseThrow(() -> new NotFoundException("Hyrox details not found for workout id " + workoutId));
+        Workout workout = workoutRepository.findById(workoutId)
+                .orElseThrow(() -> new NotFoundException("Workout not found with id " + workoutId));
 
-        hyroxWorkoutDetailsRepository.delete(details);
+        if (workout.getHyroxDetails() == null) {
+            throw new NotFoundException("Hyrox details not found for workout id " + workoutId);
+        }
+
+        workout.setHyroxDetails(null);
+        workoutRepository.saveAndFlush(workout);
     }
+
 
     // --------------- mapping: DTO -> entidades ---------------
 
@@ -102,7 +138,7 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
 
         List<HyroxBlockItem> items = request.items().stream()
                 .map(itemRequest -> toBlockItemEntity(itemRequest, block))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         block.setItems(items);
 
@@ -146,7 +182,7 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
             HyroxStationEntry entry = toStationEntryEntity(request.stationEntry(), item);
 
             item.setStationEntry(entry);
-            
+
         } else {
             throw new BadRequestException("Unsupported itemType: " + request.itemType());
         }
@@ -270,4 +306,28 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
                 entry.getNotes()
         );
     }
+
+    private void validateOrderIndexes(HyroxWorkoutDetailsUpsertRequest request) {
+
+        var blockIndexes = request.blocks().stream()
+                .map(HyroxBlockRequest::orderIndex)
+                .toList();
+
+        if (blockIndexes.size() != new HashSet<>(blockIndexes).size()) {
+            throw new BadRequestException("Duplicate block orderIndex values are not allowed");
+        }
+
+        for (HyroxBlockRequest block : request.blocks()) {
+            var itemIndexes = block.items().stream()
+                    .map(HyroxBlockItemRequest::orderIndex)
+                    .toList();
+
+            if (itemIndexes.size() != new HashSet<>(itemIndexes).size()) {
+                throw new BadRequestException(
+                        "Duplicate item orderIndex values are not allowed within block " + block.orderIndex()
+                );
+            }
+        }
+    }
+
 }

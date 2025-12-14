@@ -22,22 +22,25 @@ public class GlobalExceptionHandler {
     // ==========
 
     @ExceptionHandler(ConflictException.class)
+    // ConflictException → 409
     public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
         return buildErrorResponse(HttpStatus.CONFLICT, "CONFLICT", ex.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
+    // NotFoundException → 404
     public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage());
     }
 
     @ExceptionHandler(BadRequestException.class)
+    // BadRequestException → 400
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage());
     }
 
     // ==========
-    // Validation errors (@Valid in @RequestBody)
+    // Validation errors (@Valid in @RequestBody) 400
     // ==========
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -54,7 +57,7 @@ public class GlobalExceptionHandler {
 
     // ==========
     // Validation errors in @PathVariable, @RequestParam, etc. (@Positive,
-    // @NotNull...)
+    // @NotNull...) 400
     // ==========
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -78,7 +81,7 @@ public class GlobalExceptionHandler {
     }
 
     // ==========
-    // Catch-all (optional but useful in development)
+    // Catch-all (optional but useful in development) 500
     // ==========
 
     @ExceptionHandler(Exception.class)

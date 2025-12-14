@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.cristianinbits.hyron.exception.BadRequestException;
+import dev.cristianinbits.hyron.exception.ConflictException;
 import dev.cristianinbits.hyron.exception.NotFoundException;
 
 import dev.cristianinbits.hyron.user.domain.User;
@@ -110,9 +111,21 @@ public class WorkoutServiceImpl implements WorkoutService {
             throw new BadRequestException("endDateTime must be after startDateTime");
         }
 
-        if (request.type() != null) {
+        if (request.type() != null && request.type() != workout.getType()) {
+
+            if (workout.getHyroxDetails() != null
+                    || workout.getRunDetails() != null
+                    || workout.getSwimDetails() != null
+                    || workout.getGymDetails() != null) {
+
+                throw new ConflictException(
+                    "Cannot change workout type while workout has details. Delete them first."
+                );
+            }
+
             workout.setType(request.type());
         }
+
         if (request.startDateTime() != null) {
             workout.setStartDateTime(request.startDateTime());
         }
