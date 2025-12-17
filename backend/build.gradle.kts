@@ -41,7 +41,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
 
     // --- DB ---
-    runtimeOnly("org.postgresql:postgresql")
+    implementation("org.postgresql:postgresql")
 
     // --- Calidad de vida en desarrollo ---
     compileOnly("org.projectlombok:lombok")

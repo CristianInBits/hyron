@@ -35,7 +35,8 @@ import dev.cristianinbits.hyron.hyrox.repo.HyroxWorkoutDetailsRepository;
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import dev.cristianinbits.hyron.workout.repo.WorkoutRepository;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -46,6 +47,9 @@ public class HyroxWorkoutServiceImpl implements HyroxWorkoutService {
     private final HyroxWorkoutDetailsRepository hyroxWorkoutDetailsRepository;
     private final WorkoutRepository workoutRepository;
     private final HyroxBlockRepository hyroxBlockRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public HyroxWorkoutDetailsResponse createOrReplaceHyroxDetails(
