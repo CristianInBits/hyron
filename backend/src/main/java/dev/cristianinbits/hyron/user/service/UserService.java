@@ -1,88 +1,71 @@
 package dev.cristianinbits.hyron.user.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import dev.cristianinbits.hyron.user.dto.UserCreateRequest;
 import dev.cristianinbits.hyron.user.dto.UserResponse;
 import dev.cristianinbits.hyron.user.dto.UserUpdateRequest;
 
 /**
- * Interfaz que define las operaciones de negocio para la gestión de usuarios.
- * 
- * ¿Por qué usar una interfaz?
- * 1. Desacoplamiento: El controller depende de la interfaz, no de la implementación
- * 2. Testabilidad: Facilita crear mocks para pruebas unitarias
- * 3. Flexibilidad: Permite cambiar la implementación sin afectar a los consumidores
- * 4. Documentación: Define el contrato que debe cumplir cualquier implementación
- * 
- * Principio de Inversión de Dependencias (DIP):
- * Las clases de alto nivel (Controller) no dependen de clases de bajo nivel (ServiceImpl),
- * ambas dependen de abstracciones (esta interfaz).
+ * Service contract for user management operations.
+ *
+ * Defines the main use cases related to users, including creation, retrieval,
+ * listing, update and deletion. Implementations are responsible for enforcing
+ * business rules (such as email uniqueness) and for returning API-facing DTOs.
  */
 public interface UserService {
 
     /**
-     * Crea un nuevo usuario en el sistema.
-     * 
-     * Operaciones que realiza:
-     * 1. Normaliza el email (minúsculas, sin espacios)
-     * 2. Normaliza el nombre (sin espacios al inicio/fin)
-     * 3. Verifica que el email no esté en uso
-     * 4. Persiste el usuario en la base de datos
-     * 5. Retorna los datos del usuario creado
-     * 
-     * @param request DTO con los datos del nuevo usuario (name, email)
-     * @return DTO con los datos del usuario creado, incluyendo id y registeredAt
-     * @throws ConflictException si el email ya está en uso por otro usuario
+     * Creates a new user.
+     *
+     * Implementations must enforce email uniqueness and apply any required
+     * normalization rules before persisting the user.
+     *
+     * @param request the user creation data
+     * @return the created user representation
+     * @throws ConflictException if the email address is already in use
      */
     UserResponse createUser(UserCreateRequest request);
 
     /**
-     * Obtiene un usuario por su identificador único.
-     * 
-     * @param id Identificador del usuario a buscar
-     * @return DTO con los datos del usuario encontrado
-     * @throws NotFoundException si no existe un usuario con el ID especificado
+     * Retrieves a user by its identifier.
+     *
+     * @param id the user identifier
+     * @return the user representation
+     * @throws NotFoundException if no user exists with the given id
      */
     UserResponse getUserById(Long id);
 
     /**
-     * Obtiene todos los usuarios registrados en el sistema.
-     * 
-     * NOTA: Este método retorna TODOS los usuarios sin paginación.
-     * Para aplicaciones con muchos usuarios, se recomienda implementar
-     * paginación usando Page<UserResponse> y Pageable.
-     * 
-     * @return Lista de DTOs con todos los usuarios
+     * Retrieves a paginated list of users.
+     *
+     * @param pageable pagination and sorting configuration
+     * @return a page of user representations
      */
-    List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(Pageable pageable);
 
     /**
-     * Actualiza parcialmente los datos de un usuario existente.
-     * 
-     * Solo se actualizan los campos que no son null en el request.
-     * Esto permite actualizaciones parciales (PATCH):
-     * - {"name": "Nuevo"} → Solo actualiza el nombre
-     * - {"email": "nuevo@mail.com"} → Solo actualiza el email
-     * - {"name": "Nuevo", "email": "nuevo@mail.com"} → Actualiza ambos
-     * 
-     * @param id      Identificador del usuario a actualizar
-     * @param request DTO con los campos a actualizar (campos null se ignoran)
-     * @return DTO con los datos actualizados del usuario
-     * @throws NotFoundException si no existe un usuario con el ID especificado
-     * @throws ConflictException si el nuevo email ya está en uso por otro usuario
+     * Updates an existing user.
+     *
+     * Fields are optional; at least one field must be provided.
+     * Implementations must enforce email uniqueness when the email is changed
+     * and apply any required normalization rules.
+     *
+     * @param id the user identifier
+     * @param request the update payload
+     * @return the updated user representation
+     * @throws NotFoundException if no user exists with the given id
+     * @throws BadRequestException if no fields are provided to update
+     * @throws ConflictException if the new email address is already in use
      */
     UserResponse updateUser(Long id, UserUpdateRequest request);
 
     /**
-     * Elimina un usuario del sistema.
-     * 
-     * La eliminación es permanente (hard delete).
-     * Si se requiere soft delete, se debería agregar un campo "deletedAt"
-     * a la entidad y modificar las consultas para excluir usuarios eliminados.
-     * 
-     * @param id Identificador del usuario a eliminar
-     * @throws NotFoundException si no existe un usuario con el ID especificado
+     * Deletes a user by its identifier.
+     *
+     * @param id the user identifier
+     * @throws NotFoundException if no user exists with the given id
      */
     void deleteUser(Long id);
 }
