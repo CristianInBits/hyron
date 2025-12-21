@@ -1,15 +1,15 @@
 package dev.cristianinbits.hyron.workout.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.cristianinbits.hyron.exception.BadRequestException;
-import dev.cristianinbits.hyron.exception.ConflictException;
-import dev.cristianinbits.hyron.exception.NotFoundException;
-
+import dev.cristianinbits.hyron.common.exception.BadRequestException;
+import dev.cristianinbits.hyron.common.exception.ConflictException;
+import dev.cristianinbits.hyron.common.exception.NotFoundException;
 import dev.cristianinbits.hyron.user.domain.User;
 import dev.cristianinbits.hyron.user.repo.UserRepository;
 
@@ -32,147 +32,105 @@ public class WorkoutServiceImpl implements WorkoutService {
     private final UserRepository userRepository;
 
     @Override
-    public WorkoutDetailResponse createWorkout(WorkoutCreateRequest request) {
-
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new NotFoundException("User not found with id " + request.userId()));
+    public WorkoutDetailResponse createWorkout(Long userId, WorkoutCreateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id " + userId));
 
         Workout workout = new Workout();
-
         workout.setUser(user);
         workout.setType(request.type());
         workout.setStartDateTime(request.startDateTime());
         workout.setEndDateTime(request.endDateTime());
         workout.setGlobalRpe(request.globalRpe());
-        workout.setNotes(request.notes());
-        workout.setLocation(request.location());
-        workout.setSource(request.source());
+        workout.setNotes(normalizeString(request.notes()));
+        workout.setLocation(normalizeString(request.location()));
+        workout.setSource(normalizeString(request.source()));
 
         Workout saved = workoutRepository.save(workout);
-
         return toDetailResponse(saved);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public WorkoutDetailResponse getWorkoutById(Long id) {
-
-        Workout workout = workoutRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Workout not found with id " + id));
-
+    public WorkoutDetailResponse getWorkoutById(Long userId, Long workoutId) {
+        Workout workout = workoutRepository.findByIdAndUserIdWithDetails(workoutId, userId)
+                .orElseThrow(() -> new NotFoundException("Workout not found"));
         return toDetailResponse(workout);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<WorkoutSummaryResponse> getWorkoutsByUser(Long userId) {
+    public Page<WorkoutSummaryResponse> getWorkouts(
+            Long userId, WorkoutType type, Instant start, Instant end, Pageable pageable) {
 
-        return workoutRepository.findByUserId(userId).stream()
-                .map(this::toSummaryResponse)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<WorkoutSummaryResponse> getWorkoutsByUserAndType(Long userId, WorkoutType type) {
-
-        return workoutRepository.findByUserIdAndType(userId, type).stream()
-                .map(this::toSummaryResponse)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<WorkoutSummaryResponse> getWorkoutsByUserAndDateRange(
-            Long userId,
-            LocalDateTime start,
-            LocalDateTime end) {
-
-        return workoutRepository.findByUserIdAndStartDateTimeBetween(userId, start, end).stream()
-                .map(this::toSummaryResponse)
-                .toList();
-    }
-
-    @Override
-    public WorkoutDetailResponse updateWorkout(Long id, WorkoutUpdateRequest request) {
-
-        Workout workout = workoutRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Workout not found with id " + id));
-
-        LocalDateTime newStart = request.startDateTime() != null
-                ? request.startDateTime()
-                : workout.getStartDateTime();
-
-        LocalDateTime newEnd = request.endDateTime() != null
-                ? request.endDateTime()
-                : workout.getEndDateTime();
-
-        if (newStart != null && newEnd != null && !newEnd.isAfter(newStart)) {
-            throw new BadRequestException("endDateTime must be after startDateTime");
+        if ((start != null && end == null) || (start == null && end != null)) {
+            throw new BadRequestException("Both 'start' and 'end' must be provided together");
+        }
+        if (start != null && !end.isAfter(start)) {
+            throw new BadRequestException("End date must be after start date");
         }
 
+        if (type != null && start != null) {
+            return workoutRepository.findByUserIdAndTypeAndStartDateTimeBetween(userId, type, start, end, pageable);
+        }
+        if (type != null) {
+            return workoutRepository.findByUserIdAndType(userId, type, pageable);
+        }
+        if (start != null) {
+            return workoutRepository.findByUserIdAndStartDateTimeBetween(userId, start, end, pageable);
+        }
+        return workoutRepository.findByUserId(userId, pageable);
+    }
+
+    @Override
+    public WorkoutDetailResponse updateWorkout(Long userId, Long workoutId, WorkoutUpdateRequest request) {
+        Workout workout = workoutRepository.findByIdAndUserId(workoutId, userId)
+                .orElseThrow(() -> new NotFoundException("Workout not found"));
+
         if (request.type() != null && request.type() != workout.getType()) {
-
-            if (workout.getHyroxDetails() != null
-                    || workout.getRunDetails() != null
-                    || workout.getSwimDetails() != null
-                    || workout.getGymDetails() != null) {
-
-                throw new ConflictException(
-                    "Cannot change workout type while workout has details. Delete them first."
-                );
+            if (workoutRepository.hasAnyDetails(workoutId)) {
+                throw new ConflictException("Cannot change workout type while details exist. Delete details first.");
             }
-
             workout.setType(request.type());
         }
 
-        if (request.startDateTime() != null) {
-            workout.setStartDateTime(request.startDateTime());
-        }
-        if (request.endDateTime() != null) {
-            workout.setEndDateTime(request.endDateTime());
-        }
-        if (request.globalRpe() != null) {
-            workout.setGlobalRpe(request.globalRpe());
-        }
-        if (request.notes() != null) {
-            workout.setNotes(request.notes());
-        }
-        if (request.location() != null) {
-            workout.setLocation(request.location());
-        }
-        if (request.source() != null) {
-            workout.setSource(request.source());
-        }
+        updateDates(workout, request.startDateTime(), request.endDateTime());
 
-        Workout saved = workoutRepository.save(workout);
+        if (request.globalRpe() != null) workout.setGlobalRpe(request.globalRpe());
+        if (request.notes() != null) workout.setNotes(normalizeString(request.notes()));
+        if (request.location() != null) workout.setLocation(normalizeString(request.location()));
+        if (request.source() != null) workout.setSource(normalizeString(request.source()));
 
-        return toDetailResponse(saved);
+        return toDetailResponse(workoutRepository.save(workout));
     }
 
     @Override
-    public void deleteWorkout(Long id) {
-
-        Workout workout = workoutRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Workout not found with id " + id));
-
-        workoutRepository.delete(workout);
+    public void deleteWorkout(Long userId, Long workoutId) {
+        if (!workoutRepository.existsByIdAndUserId(workoutId, userId)) {
+            throw new NotFoundException("Workout not found");
+        }
+        workoutRepository.deleteById(workoutId);
     }
 
-    private WorkoutSummaryResponse toSummaryResponse(Workout workout) {
+    // ==================== Helpers ====================
 
-        return new WorkoutSummaryResponse(
-                workout.getId(),
-                workout.getType(),
-                workout.getStartDateTime(),
-                workout.getEndDateTime(),
-                workout.getGlobalRpe(),
-                workout.getLocation()
-        );
+    private void updateDates(Workout workout, Instant newStart, Instant newEnd) {
+        Instant effectiveStart = newStart != null ? newStart : workout.getStartDateTime();
+        Instant effectiveEnd = newEnd != null ? newEnd : workout.getEndDateTime();
+
+        if (effectiveStart != null && effectiveEnd != null && !effectiveEnd.isAfter(effectiveStart)) {
+            throw new BadRequestException("End date must be after start date");
+        }
+
+        if (newStart != null) workout.setStartDateTime(newStart);
+        if (newEnd != null) workout.setEndDateTime(newEnd);
+    }
+
+    private String normalizeString(String value) {
+        return (value != null && !value.isBlank()) ? value.trim() : null;
     }
 
     private WorkoutDetailResponse toDetailResponse(Workout workout) {
-
         return new WorkoutDetailResponse(
                 workout.getId(),
                 workout.getUser().getId(),
@@ -183,10 +141,10 @@ public class WorkoutServiceImpl implements WorkoutService {
                 workout.getNotes(),
                 workout.getLocation(),
                 workout.getSource(),
-                workout.getHyroxDetails() != null,
-                workout.getRunDetails() != null,
-                workout.getSwimDetails() != null,
-                workout.getGymDetails() != null
+                workout.getHyroxDetails() != null ? workout.getHyroxDetails().getId() : null
+                //workout.getRunDetails() != null ? workout.getRunDetails().getId() : null,
+                //workout.getSwimDetails() != null ? workout.getSwimDetails().getId() : null,
+                //workout.getGymDetails() != null ? workout.getGymDetails().getId() : null
         );
     }
 }

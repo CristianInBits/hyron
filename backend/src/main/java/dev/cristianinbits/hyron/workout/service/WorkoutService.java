@@ -1,7 +1,6 @@
 package dev.cristianinbits.hyron.workout.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
 
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import dev.cristianinbits.hyron.workout.dto.WorkoutCreateRequest;
@@ -9,19 +8,27 @@ import dev.cristianinbits.hyron.workout.dto.WorkoutDetailResponse;
 import dev.cristianinbits.hyron.workout.dto.WorkoutSummaryResponse;
 import dev.cristianinbits.hyron.workout.dto.WorkoutUpdateRequest;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+/**
+ * Business operations for workout management.
+ */
 public interface WorkoutService {
-    
-    WorkoutDetailResponse createWorkout(WorkoutCreateRequest request);
 
-    WorkoutDetailResponse getWorkoutById(Long id);
+    WorkoutDetailResponse createWorkout(Long userId, WorkoutCreateRequest request);
 
-    List<WorkoutSummaryResponse> getWorkoutsByUser(Long userId);
+    WorkoutDetailResponse getWorkoutById(Long userId, Long workoutId);
 
-    List<WorkoutSummaryResponse> getWorkoutsByUserAndType(Long userId, WorkoutType type);
+    Page<WorkoutSummaryResponse> getWorkouts(
+            Long userId,
+            WorkoutType type,
+            Instant start,
+            Instant end,
+            Pageable pageable
+    );
 
-    List<WorkoutSummaryResponse> getWorkoutsByUserAndDateRange(Long userId, LocalDateTime start, LocalDateTime end);
+    WorkoutDetailResponse updateWorkout(Long userId, Long workoutId, WorkoutUpdateRequest request);
 
-    WorkoutDetailResponse updateWorkout (Long id, WorkoutUpdateRequest request);
-
-    void deleteWorkout(Long id);
+    void deleteWorkout(Long userId, Long workoutId);
 }

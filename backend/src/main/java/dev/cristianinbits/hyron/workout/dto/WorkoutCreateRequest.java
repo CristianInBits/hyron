@@ -1,28 +1,27 @@
 package dev.cristianinbits.hyron.workout.dto;
 
-import java.time.LocalDateTime;
-
-import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-public record WorkoutCreateRequest(
+import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 
-    @NotNull
-    @Positive
-    Long userId,
+import java.time.Instant;
+
+/**
+ * Request payload for creating a new workout.
+ */
+public record WorkoutCreateRequest(
 
     @NotNull
     WorkoutType type,
 
     @NotNull
-    LocalDateTime startDateTime,
+    Instant startDateTime,
 
-    LocalDateTime endDateTime,
+    Instant endDateTime,
 
     @Min(1)
     @Max(10)
@@ -36,15 +35,12 @@ public record WorkoutCreateRequest(
 
     @Size(max = 255)
     String source
+
 ) {
-    
     @AssertTrue(message = "endDateTime must be after startDateTime")
-    public boolean isStartBeforeEnd() {
-
-        if (startDateTime == null || endDateTime == null) {
+    public boolean isEndAfterStart() {
+        if (startDateTime == null || endDateTime == null) 
             return true;
-        }
-
         return endDateTime.isAfter(startDateTime);
     }
 }

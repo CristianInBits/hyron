@@ -1,21 +1,24 @@
 package dev.cristianinbits.hyron.workout.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 
+/**
+ * Complete workout representation including references to type-specific details.
+ */
 public record WorkoutDetailResponse(
         Long id,
         Long userId,
         WorkoutType type,
-        LocalDateTime startDateTime,
-        LocalDateTime endDateTime,
+        Instant startDateTime,
+        Instant endDateTime,
         Integer globalRpe,
         String notes,
         String location,
         String source,
-        boolean hasHyroxDetails,
-        boolean hasRunDetails,
-        boolean hasSwimDetails,
-        boolean hasGymDetails
+        Long hyroxDetailsId
+        //Long runDetailsId,
+        //Long swimDetailsId,
+        //Long gymDetailsId
 ) {
 }

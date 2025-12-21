@@ -8,7 +8,9 @@ import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
 @Repository
 public interface HyroxWorkoutDetailsRepository extends JpaRepository<HyroxWorkoutDetails, Long> {
 
-    Optional<HyroxWorkoutDetails> findByWorkoutId(Long workoutId);
+        Optional<HyroxWorkoutDetails> findByWorkoutId(Long workoutId);
 
-    long deleteByWorkoutId(Long workoutId);
+        boolean existsByWorkoutId(Long workoutId);
+
+        boolean existsByWorkout_IdAndWorkout_User_Id(Long workoutId, Long userId);
 }

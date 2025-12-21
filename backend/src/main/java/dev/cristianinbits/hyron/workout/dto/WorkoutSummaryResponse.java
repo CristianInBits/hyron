@@ -1,14 +1,16 @@
 package dev.cristianinbits.hyron.workout.dto;
 
-import java.time.LocalDateTime;
-
+import java.time.Instant;
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 
+/**
+ * Lightweight workout representation for list views.
+ */
 public record WorkoutSummaryResponse(
         Long id,
         WorkoutType type,
-        LocalDateTime startDateTime,
-        LocalDateTime endDateTime,
+        Instant startDateTime,
+        Instant endDateTime,
         Integer globalRpe,
         String location
-) {}
+) { }

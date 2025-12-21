@@ -1,12 +1,14 @@
 package dev.cristianinbits.hyron.hyrox.domain;
 
 public enum HyroxStation {
-    SKIERG,
+    RUN,
+    SKI_ERG,
     SLED_PUSH,
     SLED_PULL,
     BURPEE_BROAD_JUMP,
     ROW,
-    FARMER_CARRY,
+    FARMERS_CARRY,
     SANDBAG_LUNGES,
-    WALL_BALLS
+    WALL_BALLS,
+    OTHER
 }

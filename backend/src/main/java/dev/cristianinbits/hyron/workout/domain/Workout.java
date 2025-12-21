@@ -1,11 +1,6 @@
 package dev.cristianinbits.hyron.workout.domain;
 
-import java.time.LocalDateTime;
-
-import dev.cristianinbits.hyron.gym.domain.GymWorkoutDetails;
 import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
-import dev.cristianinbits.hyron.run.domain.RunWorkoutDetails;
-import dev.cristianinbits.hyron.swim.domain.SwimWorkoutDetails;
 import dev.cristianinbits.hyron.user.domain.User;
 
 import jakarta.persistence.CascadeType;
@@ -13,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,10 +19,18 @@ import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
+import java.time.Instant;
+
+/**
+ * Represents a training session performed by a user.
+ * Each workout has a type and can optionally have type-specific details attached.
+ */
 @Entity
 @Table(name = "workouts")
 @Getter
@@ -34,24 +38,26 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class Workout {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
+    @ToString.Include
     private WorkoutType type;
 
     @Column(nullable = false)
-    private LocalDateTime startDateTime;
+    private Instant startDateTime;
 
-    private LocalDateTime endDateTime;
+    private Instant endDateTime;
 
-    /**
-     * Global RPE of the sesion (1-10)
-     */
     private Integer globalRpe;
 
     @Column(length = 4000)
@@ -60,50 +66,64 @@ public class Workout {
     @Column(length = 255)
     private String location;
 
-    /**
-     * Source of the workout data (e.g. "MANUAL", "GARMIN", "STRAVA")
-     */
     @Column(length = 255)
     private String source;
 
-    // --- relationships ---
-
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private HyroxWorkoutDetails hyroxDetails;
 
-    @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
+    /*@OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private RunWorkoutDetails runDetails;
 
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private SwimWorkoutDetails swimDetails;
 
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
-    private GymWorkoutDetails gymDetails;
+    private GymWorkoutDetails gymDetails;*/
 
-    // ---------- Helpers ----------
-
-    public boolean hasAnyDetails() {
-        return hyroxDetails != null || runDetails != null || swimDetails != null || gymDetails != null;
-    }
-
-    public boolean hasAnyDetailsExceptHyrox() {
-        return runDetails != null || swimDetails != null || gymDetails != null;
-    }
+    // ==================== Bidirectional relationship helpers ====================
 
     public void setHyroxDetails(HyroxWorkoutDetails details) {
-
         if (this.hyroxDetails != null) {
             this.hyroxDetails.setWorkout(null);
         }
-
         this.hyroxDetails = details;
-
         if (details != null) {
             details.setWorkout(this);
         }
     }
+
+    /*public void setRunDetails(RunWorkoutDetails details) {
+        if (this.runDetails != null) {
+            this.runDetails.setWorkout(null);
+        }
+        this.runDetails = details;
+        if (details != null) {
+            details.setWorkout(this);
+        }
+    }
+
+    public void setSwimDetails(SwimWorkoutDetails details) {
+        if (this.swimDetails != null) {
+            this.swimDetails.setWorkout(null);
+        }
+        this.swimDetails = details;
+        if (details != null) {
+            details.setWorkout(this);
+        }
+    }
+
+    public void setGymDetails(GymWorkoutDetails details) {
+        if (this.gymDetails != null) {
+            this.gymDetails.setWorkout(null);
+        }
+        this.gymDetails = details;
+        if (details != null) {
+            details.setWorkout(this);
+        }
+    }*/
 }
