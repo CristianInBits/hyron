@@ -1,9 +1,10 @@
 package dev.cristianinbits.hyron.workout.api;
 
+import java.net.URI;
 import java.time.Instant;
 
 import org.springframework.http.HttpStatus;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -45,13 +46,21 @@ public class WorkoutController {
     private final WorkoutService workoutService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public WorkoutDetailResponse createWorkout(
+    public ResponseEntity<WorkoutDetailResponse> createWorkout(
             @PathVariable @Positive Long userId,
             @Valid @RequestBody WorkoutCreateRequest request
     ) {
-        return workoutService.createWorkout(userId, request);
+        WorkoutDetailResponse created = workoutService.createWorkout(userId, request);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(created);
     }
+
 
     @GetMapping("/{id}")
     public WorkoutDetailResponse getWorkoutById(

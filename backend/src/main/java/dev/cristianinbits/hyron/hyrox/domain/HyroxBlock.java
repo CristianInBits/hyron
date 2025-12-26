@@ -2,7 +2,9 @@ package dev.cristianinbits.hyron.hyrox.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.BatchSize;
 
 import jakarta.persistence.CascadeType;
@@ -19,7 +21,6 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
@@ -32,12 +33,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class HyroxBlock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,7 +46,8 @@ public class HyroxBlock {
     @Column(name = "order_index", nullable = false)
     private Integer orderIndex;
 
-    private Integer restDuration;
+    @Column(name = "rest_duration_seconds")
+    private Integer restDurationSeconds;
 
     @Column(length = 4000)
     private String notes;
@@ -61,5 +61,19 @@ public class HyroxBlock {
     public void addItem(HyroxItem item) {
         items.add(item);
         item.setBlock(this);
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        if (Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        HyroxBlock other = (HyroxBlock) o;
+        return getId() != null && Objects.equals(getId(), other.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return Hibernate.getClass(this).hashCode();
     }
 }

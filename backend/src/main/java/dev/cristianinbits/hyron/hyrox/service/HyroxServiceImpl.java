@@ -49,6 +49,7 @@ public class HyroxServiceImpl implements HyroxService {
 
         details.setNotes(normalizeString(request.notes()));
         details.getBlocks().clear();
+        hyroxRepository.flush();
 
         int blockIndex = 0;
         for (HyroxBlockRequest blockReq : request.blocks()) {
@@ -88,7 +89,7 @@ public class HyroxServiceImpl implements HyroxService {
     private HyroxBlock mapBlock(HyroxBlockRequest request, int index) {
         HyroxBlock block = HyroxBlock.builder()
                 .orderIndex(index)
-                .restDuration(request.restDuration())
+                .restDurationSeconds(request.restDurationSeconds())
                 .notes(normalizeString(request.notes()))
                 .build();
 
@@ -104,11 +105,11 @@ public class HyroxServiceImpl implements HyroxService {
         return HyroxItem.builder()
                 .orderIndex(index)
                 .station(request.station())
-                .duration(request.duration())
-                .recoveryDuration(request.recoveryDuration())
-                .distance(request.distance())
+                .durationSeconds(request.durationSeconds())
+                .recoveryDurationSeconds(request.recoveryDurationSeconds())
+                .distanceMeters(request.distanceMeters())
                 .reps(request.reps())
-                .weight(request.weight())
+                .weightKg(request.weightKg())
                 .averageHr(request.averageHr())
                 .rpe(request.rpe())
                 .notes(normalizeString(request.notes()))
@@ -132,7 +133,7 @@ public class HyroxServiceImpl implements HyroxService {
         return new HyroxBlockResponse(
                 block.getId(),
                 block.getOrderIndex(),
-                block.getRestDuration(),
+                block.getRestDurationSeconds(),
                 block.getNotes(),
                 block.getItems().stream()
                         .map(this::toItemResponse)
@@ -145,11 +146,11 @@ public class HyroxServiceImpl implements HyroxService {
                 item.getId(),
                 item.getOrderIndex(),
                 item.getStation(),
-                item.getDuration(),
-                item.getRecoveryDuration(),
-                item.getDistance(),
+                item.getDurationSeconds(),
+                item.getRecoveryDurationSeconds(),
+                item.getDistanceMeters(),
                 item.getReps(),
-                item.getWeight(),
+                item.getWeightKg(),
                 item.getAverageHr(),
                 item.getRpe(),
                 item.getNotes(),
@@ -161,10 +162,10 @@ public class HyroxServiceImpl implements HyroxService {
         if (item.getStation() != HyroxStation.RUN && item.getStation() != HyroxStation.ROW) {
             return null;
         }
-        if (item.getDistance() == null || item.getDistance() == 0 || item.getDuration() == null) {
+        if (item.getDistanceMeters() == null || item.getDistanceMeters() == 0 || item.getDurationSeconds() == null) {
             return null;
         }
-        return (item.getDuration() * 1000) / item.getDistance();
+        return (item.getDurationSeconds() * 1000) / item.getDistanceMeters();
     }
 
     private String normalizeString(String value) {

@@ -84,8 +84,21 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     public WorkoutDetailResponse updateWorkout(Long userId, Long workoutId, WorkoutUpdateRequest request) {
+        
+        if (request.type() == null
+            && request.startDateTime() == null
+            && request.endDateTime() == null
+            && request.globalRpe() == null
+            && request.notes() == null
+            && request.location() == null
+            && request.source() == null) {
+            throw new BadRequestException("No fields provided to update");
+        }
+        
         Workout workout = workoutRepository.findByIdAndUserId(workoutId, userId)
                 .orElseThrow(() -> new NotFoundException("Workout not found"));
+
+        
 
         if (request.type() != null && request.type() != workout.getType()) {
             if (workoutRepository.hasAnyDetails(workoutId)) {

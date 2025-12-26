@@ -5,7 +5,7 @@ import java.util.List;
 public record HyroxBlockResponse(
     Long id,
     Integer orderIndex,
-    Integer restDuration,
+    Integer restDurationSeconds,
     String notes,
     List<HyroxItemResponse> items
 ) { }

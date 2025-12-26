@@ -1,3 +1,4 @@
+-- Hyrox workout details
 CREATE TABLE hyrox_workout_details (
     id         BIGSERIAL PRIMARY KEY,
     workout_id BIGINT NOT NULL UNIQUE,
@@ -11,6 +12,7 @@ ALTER TABLE hyrox_workout_details
     ON DELETE CASCADE;
 
 
+-- Hyrox blocks
 CREATE TABLE hyrox_blocks (
     id                    BIGSERIAL PRIMARY KEY,
     hyrox_details_id      BIGINT NOT NULL,
@@ -38,6 +40,7 @@ ALTER TABLE hyrox_blocks
     CHECK (rest_duration_seconds IS NULL OR rest_duration_seconds >= 0);
 
 
+-- Hyrox items
 CREATE TABLE hyrox_items (
     id                        BIGSERIAL PRIMARY KEY,
     block_id                  BIGINT NOT NULL,
@@ -78,6 +81,22 @@ ALTER TABLE hyrox_items
 ALTER TABLE hyrox_items
     ADD CONSTRAINT chk_hyrox_items_recovery_not_negative
     CHECK (recovery_duration_seconds IS NULL OR recovery_duration_seconds >= 0);
+
+ALTER TABLE hyrox_items
+    ADD CONSTRAINT chk_hyrox_items_distance_positive
+    CHECK (distance_meters IS NULL OR distance_meters > 0);
+
+ALTER TABLE hyrox_items
+    ADD CONSTRAINT chk_hyrox_items_reps_positive
+    CHECK (reps IS NULL OR reps > 0);
+
+ALTER TABLE hyrox_items
+    ADD CONSTRAINT chk_hyrox_items_weight_positive
+    CHECK (weight_kg IS NULL OR weight_kg > 0);
+
+ALTER TABLE hyrox_items
+    ADD CONSTRAINT chk_hyrox_items_avg_hr_positive
+    CHECK (average_hr IS NULL OR average_hr > 0);
 
 ALTER TABLE hyrox_items
     ADD CONSTRAINT chk_hyrox_items_rpe_range

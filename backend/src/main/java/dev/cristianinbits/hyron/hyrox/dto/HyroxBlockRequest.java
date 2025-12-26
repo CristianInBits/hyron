@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 public record HyroxBlockRequest(
 
     @PositiveOrZero
-    Integer restDuration,
+    Integer restDurationSeconds,
 
     @Size(max = 4000)
     String notes,

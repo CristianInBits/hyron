@@ -19,19 +19,19 @@ public record HyroxItemRequest(
 
     @NotNull
     @Positive
-    Integer duration,
+    Integer durationSeconds,
 
     @PositiveOrZero
-    Integer recoveryDuration,
+    Integer recoveryDurationSeconds,
 
     @Positive
-    Integer distance,
+    Integer distanceMeters,
 
     @Positive
     Integer reps,
 
     @Positive
-    BigDecimal weight,
+    BigDecimal weightKg,
 
     @Positive
     Integer averageHr,
@@ -46,12 +46,12 @@ public record HyroxItemRequest(
 ) {
     @AssertTrue(message = "Distance is required for this station type")
     public boolean isDistanceValid() {
-        return !isDistanceStation() || distance != null;
+        return !isDistanceStation() || distanceMeters != null;
     }
 
     @AssertTrue(message = "Weight is required for this station type")
     public boolean isWeightValid() {
-        return !isWeightedStation() || weight != null;
+        return !isWeightedStation() || weightKg != null;
     }
 
     @AssertTrue(message = "Reps are required for WALL_BALLS")

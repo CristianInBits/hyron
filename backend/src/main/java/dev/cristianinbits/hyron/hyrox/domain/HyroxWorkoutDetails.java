@@ -2,7 +2,9 @@ package dev.cristianinbits.hyron.hyrox.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.BatchSize;
 
 import dev.cristianinbits.hyron.workout.domain.Workout;
@@ -22,7 +24,6 @@ import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,12 +35,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class HyroxWorkoutDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -58,5 +57,19 @@ public class HyroxWorkoutDetails {
     public void addBlock(HyroxBlock block) {
         blocks.add(block);
         block.setDetails(this);
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        if (Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        HyroxWorkoutDetails other = (HyroxWorkoutDetails) o;
+        return getId() != null && Objects.equals(getId(), other.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return Hibernate.getClass(this).hashCode();
     }
 }
