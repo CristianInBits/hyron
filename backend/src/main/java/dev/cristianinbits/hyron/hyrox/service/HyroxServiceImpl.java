@@ -51,7 +51,7 @@ public class HyroxServiceImpl implements HyroxService {
         details.getBlocks().clear();
         hyroxRepository.flush();
 
-        int blockIndex = 0;
+        int blockIndex = 1;
         for (HyroxBlockRequest blockReq : request.blocks()) {
             HyroxBlock block = mapBlock(blockReq, blockIndex++);
             details.addBlock(block);
@@ -93,7 +93,7 @@ public class HyroxServiceImpl implements HyroxService {
                 .notes(normalizeString(request.notes()))
                 .build();
 
-        int itemIndex = 0;
+        int itemIndex = 1;
         for (HyroxItemRequest itemReq : request.items()) {
             block.addItem(mapItem(itemReq, itemIndex++));
         }

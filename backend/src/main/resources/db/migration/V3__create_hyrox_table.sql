@@ -33,7 +33,7 @@ ALTER TABLE hyrox_blocks
 
 ALTER TABLE hyrox_blocks
     ADD CONSTRAINT chk_hyrox_blocks_order_not_negative
-    CHECK (order_index >= 0);
+    CHECK (order_index > 0);
 
 ALTER TABLE hyrox_blocks
     ADD CONSTRAINT chk_hyrox_blocks_rest_not_negative
@@ -72,7 +72,7 @@ ALTER TABLE hyrox_items
 
 ALTER TABLE hyrox_items
     ADD CONSTRAINT chk_hyrox_items_order_not_negative
-    CHECK (order_index >= 0);
+    CHECK (order_index > 0);
 
 ALTER TABLE hyrox_items
     ADD CONSTRAINT chk_hyrox_items_duration_positive

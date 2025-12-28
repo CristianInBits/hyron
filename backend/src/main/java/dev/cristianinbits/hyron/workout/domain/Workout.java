@@ -1,6 +1,7 @@
 package dev.cristianinbits.hyron.workout.domain;
 
 import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
+import dev.cristianinbits.hyron.run.domain.RunWorkoutDetails;
 import dev.cristianinbits.hyron.user.domain.User;
 
 import jakarta.persistence.CascadeType;
@@ -76,9 +77,10 @@ public class Workout {
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private HyroxWorkoutDetails hyroxDetails;
 
-    /*@OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private RunWorkoutDetails runDetails;
 
+    /*
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private SwimWorkoutDetails swimDetails;
 
@@ -97,7 +99,7 @@ public class Workout {
         }
     }
 
-    /*public void setRunDetails(RunWorkoutDetails details) {
+    public void setRunDetails(RunWorkoutDetails details) {
         if (this.runDetails != null) {
             this.runDetails.setWorkout(null);
         }
@@ -107,6 +109,7 @@ public class Workout {
         }
     }
 
+    /*
     public void setSwimDetails(SwimWorkoutDetails details) {
         if (this.swimDetails != null) {
             this.swimDetails.setWorkout(null);
