@@ -27,7 +27,6 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 
     // ==================== Eager fetch with details ====================
 
-    /*
     @Query("""
             SELECT w FROM Workout w
             LEFT JOIN FETCH w.hyroxDetails
@@ -40,22 +39,9 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
             @Param("id") Long id,
             @Param("userId") Long userId
     );
-     */
-    @Query("""
-            SELECT w FROM Workout w
-            LEFT JOIN FETCH w.hyroxDetails
-            LEFT JOIN FETCH w.runDetails
-            LEFT JOIN FETCH w.gymDetails
-            WHERE w.id = :id AND w.user.id = :userId
-            """)
-    Optional<Workout> findByIdAndUserIdWithDetails(
-            @Param("id") Long id,
-            @Param("userId") Long userId
-    );
 
     // ==================== Detail existence check ====================
 
-    /*
     @Query("""
             SELECT CASE WHEN COUNT(w) > 0 THEN true ELSE false END
             FROM Workout w
@@ -64,16 +50,6 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
                  OR w.runDetails IS NOT NULL
                  OR w.swimDetails IS NOT NULL
                  OR w.gymDetails IS NOT NULL)
-            """)
-    boolean hasAnyDetails(@Param("workoutId") Long workoutId);
-    */
-    @Query("""
-            SELECT CASE WHEN COUNT(w) > 0 THEN true ELSE false END
-            FROM Workout w
-            WHERE w.id = :workoutId
-            AND (w.hyroxDetails IS NOT NULL
-            OR w.runDetails IS NOT NULL
-            OR w.gymDetails IS NOT NULL)
             """)
     boolean hasAnyDetails(@Param("workoutId") Long workoutId);
 

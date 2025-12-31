@@ -156,7 +156,7 @@ public class WorkoutServiceImpl implements WorkoutService {
                 workout.getSource(),
                 workout.getHyroxDetails() != null ? workout.getHyroxDetails().getId() : null,
                 workout.getRunDetails() != null ? workout.getRunDetails().getId() : null,
-                //workout.getSwimDetails() != null ? workout.getSwimDetails().getId() : null,
+                workout.getSwimDetails() != null ? workout.getSwimDetails().getId() : null,
                 workout.getGymDetails() != null ? workout.getGymDetails().getId() : null
         );
     }
