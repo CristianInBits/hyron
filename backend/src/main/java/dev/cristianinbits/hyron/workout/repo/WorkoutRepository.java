@@ -45,6 +45,7 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
             SELECT w FROM Workout w
             LEFT JOIN FETCH w.hyroxDetails
             LEFT JOIN FETCH w.runDetails
+            LEFT JOIN FETCH w.gymDetails
             WHERE w.id = :id AND w.user.id = :userId
             """)
     Optional<Workout> findByIdAndUserIdWithDetails(
@@ -71,7 +72,8 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
             FROM Workout w
             WHERE w.id = :workoutId
             AND (w.hyroxDetails IS NOT NULL
-            OR w.runDetails IS NOT NULL)
+            OR w.runDetails IS NOT NULL
+            OR w.gymDetails IS NOT NULL)
             """)
     boolean hasAnyDetails(@Param("workoutId") Long workoutId);
 

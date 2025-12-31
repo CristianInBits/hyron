@@ -1,5 +1,6 @@
 package dev.cristianinbits.hyron.workout.domain;
 
+import dev.cristianinbits.hyron.gym.domain.GymWorkoutDetails;
 import dev.cristianinbits.hyron.hyrox.domain.HyroxWorkoutDetails;
 import dev.cristianinbits.hyron.run.domain.RunWorkoutDetails;
 import dev.cristianinbits.hyron.user.domain.User;
@@ -83,9 +84,9 @@ public class Workout {
     /*
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private SwimWorkoutDetails swimDetails;
-
+    */
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
-    private GymWorkoutDetails gymDetails;*/
+    private GymWorkoutDetails gymDetails;
 
     // ==================== Bidirectional relationship helpers ====================
 
@@ -118,7 +119,7 @@ public class Workout {
         if (details != null) {
             details.setWorkout(this);
         }
-    }
+    }*/
 
     public void setGymDetails(GymWorkoutDetails details) {
         if (this.gymDetails != null) {
@@ -128,7 +129,7 @@ public class Workout {
         if (details != null) {
             details.setWorkout(this);
         }
-    }*/
+    }
 
     @Override
     public final boolean equals(Object o) {

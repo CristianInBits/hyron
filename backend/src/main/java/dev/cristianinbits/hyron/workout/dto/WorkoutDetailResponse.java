@@ -17,8 +17,8 @@ public record WorkoutDetailResponse(
         String location,
         String source,
         Long hyroxDetailsId,
-        Long runDetailsId
+        Long runDetailsId,
         //Long swimDetailsId,
-        //Long gymDetailsId
+        Long gymDetailsId
 ) {
 }
