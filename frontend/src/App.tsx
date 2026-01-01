@@ -1,10 +1,10 @@
 import Layout from './components/layout/Layout'
+import NewRunPage from './pages/NewRunPage'
 
 function App() {
   return (
     <Layout>
-      <h1 className="text-2xl font-bold mb-4">Mis Entrenamientos</h1>
-      <p className="text-gray-600">Bienvenido a Hyron</p>
+      <NewRunPage />
     </Layout>
   )
 }
