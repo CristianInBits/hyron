@@ -8,7 +8,7 @@ function Layout({ children }: LayoutProps) {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Contenido principal */}
-            <main className="pb-20 p-4">
+            <main className="pb-24 p-4">
                 {children}
             </main>
 
