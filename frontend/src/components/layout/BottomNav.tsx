@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 function BottomNav() {
     const [showNewMenu, setShowNewMenu] = useState(false)
+    const navigate = useNavigate()
+    const location = useLocation()
 
     // Bloquear scroll cuando el menú está abierto
     useEffect(() => {
@@ -10,6 +13,17 @@ function BottomNav() {
             document.body.style.overflow = ''
         }
     }, [showNewMenu])
+
+    // Función para navegar y cerrar el menú
+    const goTo = (path: string) => {
+        navigate(path)
+        setShowNewMenu(false)
+    }
+
+    // Comprobar si una ruta está activa
+    const isActive = (path: string) => {
+        return location.pathname === path
+    }
 
     return (
         <>
@@ -25,22 +39,34 @@ function BottomNav() {
                         </h3>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <button className="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100">
+                            <button
+                                className="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100"
+                                onClick={() => goTo('/new/run')}
+                            >
                                 <span className="text-3xl mb-1">🐕</span>
                                 <span className="text-green-600 font-medium">Run</span>
                             </button>
 
-                            <button className="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
+                            <button
+                                className="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100"
+                                onClick={() => goTo('/new/swim')}
+                            >
                                 <span className="text-3xl mb-1">🦭</span>
                                 <span className="text-blue-600 font-medium">Swim</span>
                             </button>
 
-                            <button className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100">
+                            <button
+                                className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100"
+                                onClick={() => goTo('/new/gym')}
+                            >
                                 <span className="text-3xl mb-1">🦍</span>
                                 <span className="text-purple-600 font-medium">Gym</span>
                             </button>
 
-                            <button className="flex flex-col items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100">
+                            <button
+                                className="flex flex-col items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100"
+                                onClick={() => goTo('/new/hyrox')}
+                            >
                                 <span className="text-3xl mb-1">🐅</span>
                                 <span className="text-orange-600 font-medium">Hyrox</span>
                             </button>
@@ -53,25 +79,34 @@ function BottomNav() {
             <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
                 <div className="flex justify-around items-center h-16">
 
-                    <button className="flex flex-col items-center text-gray-600 hover:text-gray-800">
+                    <button
+                        className={`flex flex-col items-center ${isActive('/') ? 'text-gray-800' : 'text-gray-400'}`}
+                        onClick={() => goTo('/')}
+                    >
                         <span className="text-xl">🏠</span>
                         <span className="text-xs">Home</span>
                     </button>
 
-                    <button className="flex flex-col items-center text-gray-600 hover:text-gray-800">
+                    <button
+                        className={`flex flex-col items-center ${isActive('/workouts') ? 'text-gray-800' : 'text-gray-400'}`}
+                        onClick={() => goTo('/workouts')}
+                    >
                         <span className="text-xl">📋</span>
                         <span className="text-xs">Workouts</span>
                     </button>
 
                     <button
-                        className="flex flex-col items-center text-gray-600 hover:text-gray-800"
+                        className="flex flex-col items-center text-gray-400 hover:text-gray-600"
                         onClick={() => setShowNewMenu(!showNewMenu)}
                     >
                         <span className="text-xl">➕</span>
                         <span className="text-xs">Nuevo</span>
                     </button>
 
-                    <button className="flex flex-col items-center text-gray-600 hover:text-gray-800">
+                    <button
+                        className={`flex flex-col items-center ${isActive('/profile') ? 'text-gray-800' : 'text-gray-400'}`}
+                        onClick={() => goTo('/profile')}
+                    >
                         <span className="text-xl">👤</span>
                         <span className="text-xs">Perfil</span>
                     </button>
