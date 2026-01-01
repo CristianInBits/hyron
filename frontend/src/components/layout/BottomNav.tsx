@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { Home, ClipboardList, Plus, User, Dog, Fish, Dumbbell, Flame } from 'lucide-react'
 
 function BottomNav() {
     const [showNewMenu, setShowNewMenu] = useState(false)
@@ -43,7 +44,7 @@ function BottomNav() {
                                 className="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100"
                                 onClick={() => goTo('/new/run')}
                             >
-                                <span className="text-3xl mb-1">🐕</span>
+                                <Dog className="w-8 h-8 mb-1 text-green-500" />
                                 <span className="text-green-600 font-medium">Run</span>
                             </button>
 
@@ -51,7 +52,7 @@ function BottomNav() {
                                 className="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100"
                                 onClick={() => goTo('/new/swim')}
                             >
-                                <span className="text-3xl mb-1">🦭</span>
+                                <Fish className="w-8 h-8 mb-1 text-blue-500" />
                                 <span className="text-blue-600 font-medium">Swim</span>
                             </button>
 
@@ -59,7 +60,7 @@ function BottomNav() {
                                 className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100"
                                 onClick={() => goTo('/new/gym')}
                             >
-                                <span className="text-3xl mb-1">🦍</span>
+                                <Dumbbell className="w-8 h-8 mb-1 text-purple-500" />
                                 <span className="text-purple-600 font-medium">Gym</span>
                             </button>
 
@@ -67,7 +68,7 @@ function BottomNav() {
                                 className="flex flex-col items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100"
                                 onClick={() => goTo('/new/hyrox')}
                             >
-                                <span className="text-3xl mb-1">🐅</span>
+                                <Flame className="w-8 h-8 mb-1 text-orange-500" />
                                 <span className="text-orange-600 font-medium">Hyrox</span>
                             </button>
                         </div>
@@ -83,7 +84,7 @@ function BottomNav() {
                         className={`flex flex-col items-center ${isActive('/') ? 'text-gray-800' : 'text-gray-400'}`}
                         onClick={() => goTo('/')}
                     >
-                        <span className="text-xl">🏠</span>
+                        <Home className="w-6 h-6" />
                         <span className="text-xs">Home</span>
                     </button>
 
@@ -91,7 +92,7 @@ function BottomNav() {
                         className={`flex flex-col items-center ${isActive('/workouts') ? 'text-gray-800' : 'text-gray-400'}`}
                         onClick={() => goTo('/workouts')}
                     >
-                        <span className="text-xl">📋</span>
+                        <ClipboardList className="w-6 h-6" />
                         <span className="text-xs">Workouts</span>
                     </button>
 
@@ -99,7 +100,7 @@ function BottomNav() {
                         className="flex flex-col items-center text-gray-400 hover:text-gray-600"
                         onClick={() => setShowNewMenu(!showNewMenu)}
                     >
-                        <span className="text-xl">➕</span>
+                        <Plus className="w-6 h-6" />
                         <span className="text-xs">Nuevo</span>
                     </button>
 
@@ -107,7 +108,7 @@ function BottomNav() {
                         className={`flex flex-col items-center ${isActive('/profile') ? 'text-gray-800' : 'text-gray-400'}`}
                         onClick={() => goTo('/profile')}
                     >
-                        <span className="text-xl">👤</span>
+                        <User className="w-6 h-6" />
                         <span className="text-xs">Perfil</span>
                     </button>
 
