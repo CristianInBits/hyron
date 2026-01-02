@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Users, Plus, Pencil, Trash2 } from 'lucide-react'
 import { userService } from '../services/userService'
-import type { User } from '../types/user'
+import type { User, UserCreateRequest } from '../types/user'
+import Modal from '../components/ui/Modal'
+import UserForm from '../components/users/UserForm'
 
 function UsersPage() {
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editingUser, setEditingUser] = useState<User | null>(null)
 
     useEffect(() => {
         loadUsers()
@@ -26,6 +31,16 @@ function UsersPage() {
         }
     }
 
+    const handleCreate = () => {
+        setEditingUser(null)
+        setIsModalOpen(true)
+    }
+
+    const handleEdit = (user: User) => {
+        setEditingUser(user)
+        setIsModalOpen(true)
+    }
+
     const handleDelete = async (id: number) => {
         if (!confirm('¿Estás seguro de eliminar este usuario?')) return
 
@@ -38,6 +53,21 @@ function UsersPage() {
         }
     }
 
+    const handleSubmit = async (data: UserCreateRequest) => {
+        if (editingUser) {
+            await userService.update(editingUser.id, data)
+        } else {
+            await userService.create(data)
+        }
+        setIsModalOpen(false)
+        await loadUsers()
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setEditingUser(null)
+    }
+
     return (
         <div>
             <div className="flex items-center justify-between mb-4">
@@ -45,7 +75,10 @@ function UsersPage() {
                     <Users className="w-7 h-7 mr-2 text-gray-700" />
                     <h1 className="text-2xl font-bold text-gray-800">Usuarios</h1>
                 </div>
-                <button className="flex items-center bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700">
+                <button
+                    className="flex items-center bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700"
+                    onClick={handleCreate}
+                >
                     <Plus className="w-5 h-5 mr-1" />
                     <span>Nuevo</span>
                 </button>
@@ -72,7 +105,10 @@ function UsersPage() {
                                 <p className="text-sm text-gray-500">{user.email}</p>
                             </div>
                             <div className="flex space-x-2">
-                                <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded">
+                                <button
+                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                                    onClick={() => handleEdit(user)}
+                                >
                                     <Pencil className="w-5 h-5" />
                                 </button>
                                 <button
@@ -86,6 +122,18 @@ function UsersPage() {
                     ))}
                 </div>
             )}
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+            >
+                <UserForm
+                    user={editingUser}
+                    onSubmit={handleSubmit}
+                    onCancel={handleCloseModal}
+                />
+            </Modal>
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import api from './api'
-import type { User } from '../types/user'
+import type { User, UserCreateRequest, UserUpdateRequest } from '../types/user'
 
 export const userService = {
     getAll: async (): Promise<User[]> => {
@@ -12,12 +12,12 @@ export const userService = {
         return response.data
     },
 
-    create: async (data: { name: string; email: string }): Promise<User> => {
+    create: async (data: UserCreateRequest): Promise<User> => {
         const response = await api.post('/users', data)
         return response.data
     },
 
-    update: async (id: number, data: { name?: string; email?: string }): Promise<User> => {
+    update: async (id: number, data: UserUpdateRequest): Promise<User> => {
         const response = await api.patch(`/users/${id}`, data)
         return response.data
     },

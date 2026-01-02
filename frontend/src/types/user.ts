@@ -4,3 +4,13 @@ export type User = {
     email: string
     registeredAt: string
 }
+
+export type UserCreateRequest = {
+    name: string
+    email: string
+}
+
+export type UserUpdateRequest = {
+    name?: string
+    email?: string
+}
