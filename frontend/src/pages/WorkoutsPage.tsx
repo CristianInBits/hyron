@@ -6,10 +6,11 @@ import Modal from '../components/ui/Modal'
 import WorkoutCard from '../components/workouts/WorkoutCard'
 import WorkoutForm from '../components/workouts/WorkoutForm'
 
-// TODO: Esto debería venir de un contexto o selección de usuario
-const CURRENT_USER_ID = 1
+type WorkoutsPageProps = {
+    userId: number | null
+}
 
-function WorkoutsPage() {
+function WorkoutsPage({ userId }: WorkoutsPageProps) {
     const [workouts, setWorkouts] = useState<WorkoutSummaryResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -18,13 +19,17 @@ function WorkoutsPage() {
     const [editingWorkout, setEditingWorkout] = useState<WorkoutDetailResponse | null>(null)
 
     useEffect(() => {
-        loadWorkouts()
-    }, [])
+        if (userId) {
+            loadWorkouts()
+        }
+    }, [userId])
 
     const loadWorkouts = async () => {
+        if (!userId) return
+
         try {
             setLoading(true)
-            const data = await workoutService.getAll(CURRENT_USER_ID)
+            const data = await workoutService.getAll(userId)
             setWorkouts(data)
             setError(null)
         } catch (err) {
@@ -41,9 +46,10 @@ function WorkoutsPage() {
     }
 
     const handleEdit = async (workout: WorkoutSummaryResponse) => {
+        if (!userId) return
+
         try {
-            // Cargar el detalle completo para editar
-            const detail = await workoutService.getById(CURRENT_USER_ID, workout.id)
+            const detail = await workoutService.getById(userId, workout.id)
             setEditingWorkout(detail)
             setIsModalOpen(true)
         } catch (err) {
@@ -53,10 +59,11 @@ function WorkoutsPage() {
     }
 
     const handleDelete = async (id: number) => {
+        if (!userId) return
         if (!confirm('¿Estás seguro de eliminar este workout?')) return
 
         try {
-            await workoutService.delete(CURRENT_USER_ID, id)
+            await workoutService.delete(userId, id)
             await loadWorkouts()
         } catch (err) {
             setError('Error al eliminar workout')
@@ -65,10 +72,12 @@ function WorkoutsPage() {
     }
 
     const handleSubmit = async (data: WorkoutCreateRequest) => {
+        if (!userId) return
+
         if (editingWorkout) {
-            await workoutService.update(CURRENT_USER_ID, editingWorkout.id, data)
+            await workoutService.update(userId, editingWorkout.id, data)
         } else {
-            await workoutService.create(CURRENT_USER_ID, data)
+            await workoutService.create(userId, data)
         }
         setIsModalOpen(false)
         await loadWorkouts()
@@ -77,6 +86,19 @@ function WorkoutsPage() {
     const handleCloseModal = () => {
         setIsModalOpen(false)
         setEditingWorkout(null)
+    }
+
+    // Si no hay usuario seleccionado
+    if (!userId) {
+        return (
+            <div>
+                <div className="flex items-center mb-4">
+                    <ClipboardList className="w-7 h-7 mr-2 text-gray-700" />
+                    <h1 className="text-2xl font-bold text-gray-800">Workouts</h1>
+                </div>
+                <p className="text-gray-500">Selecciona un usuario para ver sus workouts</p>
+            </div>
+        )
     }
 
     return (

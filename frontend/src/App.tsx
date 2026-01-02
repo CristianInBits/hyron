@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import HomePage from './pages/HomePage'
@@ -10,17 +11,22 @@ import NewGymPage from './pages/NewGymPage'
 import NewHyroxPage from './pages/NewHyroxPage'
 
 function App() {
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
+
   return (
-    <Layout>
+    <Layout
+      selectedUserId={selectedUserId}
+      onUserChange={setSelectedUserId}
+    >
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/workouts" element={<WorkoutsPage />} />
+        <Route path="/" element={<HomePage userId={selectedUserId} />} />
+        <Route path="/workouts" element={<WorkoutsPage userId={selectedUserId} />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/users" element={<UsersPage />} />
-        <Route path="/new/run" element={<NewRunPage />} />
-        <Route path="/new/swim" element={<NewSwimPage />} />
-        <Route path="/new/gym" element={<NewGymPage />} />
-        <Route path="/new/hyrox" element={<NewHyroxPage />} />
+        <Route path="/new/run" element={<NewRunPage userId={selectedUserId} />} />
+        <Route path="/new/swim" element={<NewSwimPage userId={selectedUserId} />} />
+        <Route path="/new/gym" element={<NewGymPage userId={selectedUserId} />} />
+        <Route path="/new/hyrox" element={<NewHyroxPage userId={selectedUserId} />} />
       </Routes>
     </Layout>
   )
