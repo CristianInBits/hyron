@@ -28,8 +28,11 @@ function ProfilePage() {
                     <span className="text-gray-700">Mis Zapatillas</span>
                 </button>
 
-                <button className="w-full flex items-center p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50">
-                    <Dumbbell className="w-6 h-6 mr-3 text-gray-600" />
+                <button
+                    className="w-full flex items-center p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50"
+                    onClick={() => navigate('/exercises')}
+                >
+                    <Dumbbell className="w-6 h-6 mr-3 text-purple-600" />
                     <span className="text-gray-700">Mis Ejercicios</span>
                 </button>
 

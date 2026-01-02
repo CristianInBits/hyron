@@ -6,6 +6,7 @@ import WorkoutsPage from './pages/WorkoutsPage'
 import ProfilePage from './pages/ProfilePage'
 import UsersPage from './pages/UsersPage'
 import ShoesPage from './pages/ShoesPage'
+import ExercisesPage from './pages/ExercisesPage'
 import NewRunPage from './pages/NewRunPage'
 import NewSwimPage from './pages/NewSwimPage'
 import NewGymPage from './pages/NewGymPage'
@@ -25,6 +26,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/shoes" element={<ShoesPage userId={selectedUserId} />} />
+        <Route path="/exercises" element={<ExercisesPage userId={selectedUserId} />} />
         <Route path="/new/run" element={<NewRunPage userId={selectedUserId} />} />
         <Route path="/new/swim" element={<NewSwimPage userId={selectedUserId} />} />
         <Route path="/new/gym" element={<NewGymPage userId={selectedUserId} />} />
