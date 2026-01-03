@@ -7,6 +7,7 @@ export type RunDetailsResponse = {
     id: number
     workoutId: number
     totalDistanceMeters: number | null
+    totalDurationSeconds: number | null
     totalElevationGain: number | null
     averageHr: number | null
     shoe: ShoeSummaryResponse | null
