@@ -7,5 +7,6 @@ public record GymDetailsResponse(
     Long workoutId,
     String notes,
     List<GymExerciseResponse> exercises,
-    Double totalVolumeKg // Calculado al vuelo
+    Integer totalDurationSeconds,
+    Double totalVolumeKg
 ) {}

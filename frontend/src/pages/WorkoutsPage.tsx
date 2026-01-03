@@ -8,13 +8,15 @@ import WorkoutCard from '../components/workouts/WorkoutCard'
 import { useNavigate } from 'react-router-dom'
 import { swimService } from '../services/swimService'
 import type { SwimDetailsResponse } from '../types/swim'
+import { gymService } from '../services/gymService'
+import type { GymDetailsResponse } from '../types/gym'
 
 type WorkoutsPageProps = {
     userId: number | null
 }
 
 type ExpandedDetails = {
-    [workoutId: number]: RunDetailsResponse | SwimDetailsResponse | null
+    [workoutId: number]: RunDetailsResponse | SwimDetailsResponse | GymDetailsResponse | null
 }
 
 function WorkoutsPage({ userId }: WorkoutsPageProps) {
@@ -69,8 +71,11 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
                 } else if (workout.type === 'SWIM') {
                     const details = await swimService.getDetails(userId, workout.id)
                     setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
+                } else if (workout.type === 'GYM') {
+                    const details = await gymService.getDetails(userId, workout.id)
+                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
                 }
-                // TODO: Añadir otros tipos (GYM, HYROX)
+                // TODO: Añadir HYROX
             } catch (err) {
                 console.error('Error loading details:', err)
                 setExpandedDetails(prev => ({ ...prev, [workout.id]: null }))

@@ -5,11 +5,14 @@ import { runIntervalTypeLabels } from '../../types/run'
 import { useNavigate } from 'react-router-dom'
 import type { SwimDetailsResponse } from '../../types/swim'
 import { swimIntervalTypeLabels, swimStrokeLabels, poolTypeLabels, swimEquipmentLabels } from '../../types/swim'
+import type { GymDetailsResponse } from '../../types/gym'
+import { gymSetTypeLabels } from '../../types/gym'
+import { muscleGroupLabels } from '../../types/exercise'
 
 type WorkoutCardProps = {
     workout: WorkoutSummaryResponse
     isExpanded: boolean
-    details: RunDetailsResponse | SwimDetailsResponse | null
+    details: RunDetailsResponse | SwimDetailsResponse | GymDetailsResponse | null
     loadingDetails: boolean
     onToggleExpand: (workout: WorkoutSummaryResponse) => void
     onDelete: (id: number) => void
@@ -142,7 +145,11 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                         <SwimDetails details={details as SwimDetailsResponse} />
                     )}
 
-                    {/* TODO: Añadir componentes para GYM, HYROX */}
+                    {!loadingDetails && details && workout.type === 'GYM' && (
+                        <GymDetails details={details as GymDetailsResponse} />
+                    )}
+
+                    {/* TODO: Añadir componente para HYROX */}
                 </div>
             )}
         </div>
@@ -357,6 +364,97 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
                             </div>
                         ))}
                     </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+// Componente para mostrar detalles de Gym
+function GymDetails({ details }: { details: GymDetailsResponse }) {
+    const formatDuration = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600)
+        const mins = Math.floor((seconds % 3600) / 60)
+        const secs = seconds % 60
+
+        if (hours > 0) {
+            return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+        }
+        return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    return (
+        <div className="space-y-4">
+            {/* Resumen */}
+            <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">Ejercicios</p>
+                    <p className="font-semibold text-gray-800">{details.exercises.length}</p>
+                </div>
+                {details.totalDurationSeconds && (
+                    <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500">Duración</p>
+                        <p className="font-semibold text-gray-800">{formatDuration(details.totalDurationSeconds)}</p>
+                    </div>
+                )}
+                {details.totalVolumeKg && (
+                    <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500">Volumen</p>
+                        <p className="font-semibold text-gray-800">{details.totalVolumeKg.toFixed(0)} kg</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Notas */}
+            {details.notes && (
+                <p className="text-sm text-gray-600 italic">"{details.notes}"</p>
+            )}
+
+            {/* Ejercicios */}
+            {details.exercises.length > 0 && (
+                <div className="space-y-3">
+                    {details.exercises.map((exercise) => (
+                        <div key={exercise.id} className="bg-white p-3 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <span className="font-medium text-gray-800">{exercise.exerciseName}</span>
+                                    {exercise.isUnilateral && (
+                                        <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">U</span>
+                                    )}
+                                </div>
+                                <span className="text-xs text-purple-600">{muscleGroupLabels[exercise.muscleGroup]}</span>
+                            </div>
+
+                            {/* Series */}
+                            <div className="space-y-1">
+                                {exercise.sets.map((set, setIndex) => (
+                                    <div key={set.id} className="flex items-center text-sm text-gray-600">
+                                        <span className="w-6 text-xs text-gray-400">{setIndex + 1}</span>
+                                        <span className="w-20 text-xs text-purple-500">{gymSetTypeLabels[set.type]}</span>
+                                        {set.weightKg !== null && (
+                                            <span className="w-16">{set.weightKg} kg</span>
+                                        )}
+                                        {set.reps !== null && (
+                                            <span className="w-12">×{set.reps}</span>
+                                        )}
+                                        {set.executionSeconds !== null && (
+                                            <span className="w-14 text-xs text-gray-400">{set.executionSeconds}s</span>
+                                        )}
+                                        {set.rpe !== null && (
+                                            <span className="text-xs text-gray-400 mr-2">@{set.rpe}</span>
+                                        )}
+                                        {set.restSeconds !== null && (
+                                            <span className="text-xs text-blue-400">🔄{set.restSeconds}s</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {exercise.notes && (
+                                <p className="text-xs text-gray-400 mt-2 italic">{exercise.notes}</p>
+                            )}
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

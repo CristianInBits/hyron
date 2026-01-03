@@ -64,7 +64,8 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
         // Buscamos en BD solo esos IDs Y que pertenezcan al usuario
         List<Exercise> validExercises = exerciseRepository.findAllByIdInAndUserId(requestedExerciseIds, userId);
 
-        // Si la cantidad no coincide, alguien intenta usar un ejercicio que no es suyo o no existe
+        // Si la cantidad no coincide, alguien intenta usar un ejercicio que no es suyo
+        // o no existe
         if (validExercises.size() != requestedExerciseIds.size()) {
             throw new NotFoundException("One or more exercises not found in your catalog");
         }
@@ -72,7 +73,6 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
         // Convertimos la lista a un Map para acceso rápido O(1) en el bucle
         Map<Long, Exercise> exerciseMap = validExercises.stream()
                 .collect(Collectors.toMap(Exercise::getId, Function.identity()));
-
 
         // 4. Estrategia Full Replace + Flush (Limpia jerarquía de 3 niveles)
         details.getExercises().clear();
@@ -83,7 +83,7 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
         for (GymExerciseRequest exReq : request.exercises()) {
             // Obtenemos la entidad Exercise del mapa (ya validada)
             Exercise catalogExercise = exerciseMap.get(exReq.exerciseId());
-            
+
             GymExercise gymExercise = mapGymExercise(exReq, catalogExercise, exIndex++);
             details.addExercise(gymExercise);
         }
@@ -150,6 +150,19 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
     // --- Response Mappers ---
 
     private GymDetailsResponse toResponse(GymWorkoutDetails details) {
+
+        Integer totalDurationSeconds = details.getExercises().stream()
+                .flatMap(ex -> ex.getSets().stream())
+                .mapToInt(set -> {
+                    int execution = set.getExecutionSeconds() != null ? set.getExecutionSeconds() : 0;
+                    int rest = set.getRestSeconds() != null ? set.getRestSeconds() : 0;
+                    return execution + rest;
+                })
+                .sum();
+
+        // Si es 0, devolver null
+        totalDurationSeconds = totalDurationSeconds > 0 ? totalDurationSeconds : null;
+
         return new GymDetailsResponse(
                 details.getId(),
                 details.getWorkout().getId(),
@@ -157,8 +170,8 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 details.getExercises().stream() // @OrderBy garantiza el orden
                         .map(this::toExerciseResponse)
                         .toList(),
-                calculateTotalVolume(details)
-        );
+                totalDurationSeconds,
+                calculateTotalVolume(details));
     }
 
     private GymExerciseResponse toExerciseResponse(GymExercise ex) {
@@ -168,13 +181,12 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 ex.getSupersetId(),
                 ex.getNotes(),
                 ex.getExercise().getId(), // ID Catálogo
-                ex.getExercise().getName(),  // Nombre Catálogo
+                ex.getExercise().getName(), // Nombre Catálogo
                 ex.getExercise().getMuscleGroup(), // Grupo Catálogo
                 ex.getExercise().isUnilateral(),
                 ex.getSets().stream()
                         .map(this::toSetResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     private GymSetResponse toSetResponse(GymSet set) {
@@ -187,12 +199,11 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 set.getRpe(),
                 set.getRestSeconds(),
                 set.getExecutionSeconds(),
-                set.getNotes()
-        );
+                set.getNotes());
     }
 
     // --- Calculations ---
-    
+
     private Double calculateTotalVolume(GymWorkoutDetails details) {
         // Suma simple: Weight * Reps de todas las series efectivas (WORK)
         // Podríamos excluir WARMUP aquí si quisieras
