@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getErrorMessage } from '../../services/errorHandler'
 import type { User, UserCreateRequest } from '../../types/user'
 
 type UserFormProps = {
@@ -40,7 +41,7 @@ function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
             setError(null)
             await onSubmit({ name: name.trim(), email: email.trim() })
         } catch (err) {
-            setError('Error al guardar usuario')
+            setError(getErrorMessage(err))
             console.error(err)
         } finally {
             setLoading(false)

@@ -11,7 +11,7 @@ type ExerciseCardProps = {
 
 function ExerciseCard({ exercise, onEdit, onDelete, onToggleActive }: ExerciseCardProps) {
     return (
-        <div className={`bg-white p-4 rounded-lg shadow-sm ${!exercise.active ? 'opacity-60' : ''}`}>
+        <div className={`bg-white p-4 rounded-xl shadow-sm transition-all ${!exercise.active ? 'opacity-60 bg-gray-50' : 'border-l-4 border-purple-500'}`}>
             <div className="flex items-start justify-between">
                 {/* Info principal */}
                 <div className="flex items-start">

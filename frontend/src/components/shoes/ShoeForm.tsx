@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getErrorMessage } from '../../services/errorHandler'
 import type { ShoeResponse, ShoeCreateRequest } from '../../types/shoe'
 
 type ShoeFormProps = {
@@ -55,7 +56,7 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                 maxDistanceMeters: maxDistanceKm ? Math.round(parseFloat(maxDistanceKm) * 1000) : null,
             })
         } catch (err) {
-            setError('Error al guardar zapatilla')
+            setError(getErrorMessage(err))
             console.error(err)
         } finally {
             setLoading(false)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Dog, Fish, Dumbbell, Flame } from 'lucide-react'
 import type { WorkoutType, WorkoutCreateRequest, WorkoutDetailResponse } from '../../types/workout'
+import { getErrorMessage } from '../../services/errorHandler'
 
 type WorkoutFormProps = {
     workout?: WorkoutDetailResponse | null
@@ -68,7 +69,7 @@ function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutFormProps) {
                 location: location.trim() || null,
             })
         } catch (err) {
-            setError('Error al guardar workout')
+            setError(getErrorMessage(err))
             console.error(err)
         } finally {
             setLoading(false)

@@ -22,7 +22,7 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
     }
 
     return (
-        <div className={`bg-white p-4 rounded-lg shadow-sm ${!shoe.active ? 'opacity-60' : ''}`}>
+        <div className={`bg-white p-4 rounded-xl shadow-sm transition-all ${!shoe.active ? 'opacity-60 bg-gray-50' : 'border-l-4 border-green-500'}`}>
             <div className="flex items-start justify-between">
                 {/* Info principal */}
                 <div className="flex items-start">
@@ -53,8 +53,8 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                 <div className="flex space-x-1">
                     <button
                         className={`p-2 rounded ${shoe.active
-                                ? 'text-green-500 hover:text-green-700 hover:bg-green-50'
-                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                            ? 'text-green-500 hover:text-green-700 hover:bg-green-50'
+                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
                             }`}
                         onClick={() => onToggleActive(shoe)}
                         title={shoe.active ? 'Retirar zapatilla' : 'Reactivar zapatilla'}
