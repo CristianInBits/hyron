@@ -40,6 +40,7 @@ export type GymSetResponse = {
 
 // Request para crear/actualizar detalles
 export type GymDetailsCreateRequest = {
+    totalDurationSeconds?: number | null
     notes?: string | null
     exercises: GymExerciseRequest[]
 }

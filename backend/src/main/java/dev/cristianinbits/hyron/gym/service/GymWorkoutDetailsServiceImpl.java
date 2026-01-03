@@ -53,6 +53,7 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 .orElseGet(() -> GymWorkoutDetails.builder().workout(workout).build());
 
         details.setNotes(normalizeString(request.notes()));
+        details.setTotalDurationSeconds(request.totalDurationSeconds());
 
         // 3. 🔥 VALIDACIÓN DE PROPIEDAD DEL CATÁLOGO (Batch)
         // Extraemos todos los IDs de ejercicios solicitados
@@ -151,17 +152,21 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
 
     private GymDetailsResponse toResponse(GymWorkoutDetails details) {
 
-        Integer totalDurationSeconds = details.getExercises().stream()
-                .flatMap(ex -> ex.getSets().stream())
-                .mapToInt(set -> {
-                    int execution = set.getExecutionSeconds() != null ? set.getExecutionSeconds() : 0;
-                    int rest = set.getRestSeconds() != null ? set.getRestSeconds() : 0;
-                    return execution + rest;
-                })
-                .sum();
+        // Usar duración manual si existe, si no calcular de las series
+        Integer totalDurationSeconds = details.getTotalDurationSeconds();
 
-        // Si es 0, devolver null
-        totalDurationSeconds = totalDurationSeconds > 0 ? totalDurationSeconds : null;
+        if (totalDurationSeconds == null) {
+            totalDurationSeconds = details.getExercises().stream()
+                    .flatMap(ex -> ex.getSets().stream())
+                    .mapToInt(set -> {
+                        int execution = set.getExecutionSeconds() != null ? set.getExecutionSeconds() : 0;
+                        int rest = set.getRestSeconds() != null ? set.getRestSeconds() : 0;
+                        return execution + rest;
+                    })
+                    .sum();
+
+            totalDurationSeconds = totalDurationSeconds > 0 ? totalDurationSeconds : null;
+        }
 
         return new GymDetailsResponse(
                 details.getId(),

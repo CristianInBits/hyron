@@ -27,6 +27,9 @@ public class GymWorkoutDetails {
     @JoinColumn(name = "workout_id", nullable = false, unique = true)
     private Workout workout;
 
+    @Column(name = "total_duration_seconds")
+    private Integer totalDurationSeconds;
+
     @Column(length = 4000)
     private String notes;
 
@@ -45,9 +48,12 @@ public class GymWorkoutDetails {
     // Equals/HashCode Manual
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        if (Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (Hibernate.getClass(this) != Hibernate.getClass(o))
+            return false;
         GymWorkoutDetails that = (GymWorkoutDetails) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }

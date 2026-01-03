@@ -383,6 +383,20 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
+    // Calcular etiquetas de superseries
+    const getSupersetLabels = (): Map<string, string> => {
+        const labels = new Map<string, string>()
+        const supersetIds = [...new Set(details.exercises.filter(ex => ex.supersetId).map(ex => ex.supersetId!))]
+
+        supersetIds.forEach((id, index) => {
+            labels.set(id, String.fromCharCode(65 + index)) // A, B, C...
+        })
+
+        return labels
+    }
+
+    const supersetLabels = getSupersetLabels()
+
     return (
         <div className="space-y-4">
             {/* Resumen */}
@@ -413,48 +427,61 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
             {/* Ejercicios */}
             {details.exercises.length > 0 && (
                 <div className="space-y-3">
-                    {details.exercises.map((exercise) => (
-                        <div key={exercise.id} className="bg-white p-3 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                                <div>
-                                    <span className="font-medium text-gray-800">{exercise.exerciseName}</span>
-                                    {exercise.isUnilateral && (
-                                        <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">U</span>
-                                    )}
-                                </div>
-                                <span className="text-xs text-purple-600">{muscleGroupLabels[exercise.muscleGroup]}</span>
-                            </div>
+                    {details.exercises.map((exercise) => {
+                        const supersetLabel = exercise.supersetId ? supersetLabels.get(exercise.supersetId) : null
 
-                            {/* Series */}
-                            <div className="space-y-1">
-                                {exercise.sets.map((set, setIndex) => (
-                                    <div key={set.id} className="flex items-center text-sm text-gray-600">
-                                        <span className="w-6 text-xs text-gray-400">{setIndex + 1}</span>
-                                        <span className="w-20 text-xs text-purple-500">{gymSetTypeLabels[set.type]}</span>
-                                        {set.weightKg !== null && (
-                                            <span className="w-16">{set.weightKg} kg</span>
+                        return (
+                            <div
+                                key={exercise.id}
+                                className={`bg-white p-3 rounded-lg ${supersetLabel ? 'border-l-4 border-purple-400' : ''
+                                    }`}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center">
+                                        {supersetLabel && (
+                                            <span className="text-xs font-bold text-white bg-purple-500 px-1.5 py-0.5 rounded mr-2">
+                                                {supersetLabel}
+                                            </span>
                                         )}
-                                        {set.reps !== null && (
-                                            <span className="w-12">×{set.reps}</span>
-                                        )}
-                                        {set.executionSeconds !== null && (
-                                            <span className="w-14 text-xs text-gray-400">{set.executionSeconds}s</span>
-                                        )}
-                                        {set.rpe !== null && (
-                                            <span className="text-xs text-gray-400 mr-2">@{set.rpe}</span>
-                                        )}
-                                        {set.restSeconds !== null && (
-                                            <span className="text-xs text-blue-400">🔄{set.restSeconds}s</span>
+                                        <span className="font-medium text-gray-800">{exercise.exerciseName}</span>
+                                        {exercise.isUnilateral && (
+                                            <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">U</span>
                                         )}
                                     </div>
-                                ))}
-                            </div>
+                                    <span className="text-xs text-purple-600">{muscleGroupLabels[exercise.muscleGroup]}</span>
+                                </div>
 
-                            {exercise.notes && (
-                                <p className="text-xs text-gray-400 mt-2 italic">{exercise.notes}</p>
-                            )}
-                        </div>
-                    ))}
+                                {/* Series */}
+                                <div className="space-y-1">
+                                    {exercise.sets.map((set, setIndex) => (
+                                        <div key={set.id} className="flex items-center text-sm text-gray-600">
+                                            <span className="w-6 text-xs text-gray-400">{setIndex + 1}</span>
+                                            <span className="w-20 text-xs text-purple-500">{gymSetTypeLabels[set.type]}</span>
+                                            {set.weightKg !== null && (
+                                                <span className="w-16">{set.weightKg} kg</span>
+                                            )}
+                                            {set.reps !== null && (
+                                                <span className="w-12">×{set.reps}</span>
+                                            )}
+                                            {set.executionSeconds !== null && (
+                                                <span className="w-14 text-xs text-gray-400">{set.executionSeconds}s</span>
+                                            )}
+                                            {set.rpe !== null && (
+                                                <span className="text-xs text-gray-400 mr-2">@{set.rpe}</span>
+                                            )}
+                                            {set.restSeconds !== null && (
+                                                <span className="text-xs text-blue-400">🔄{set.restSeconds}s</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {exercise.notes && (
+                                    <p className="text-xs text-gray-400 mt-2 italic">{exercise.notes}</p>
+                                )}
+                            </div>
+                        )
+                    })}
                 </div>
             )}
         </div>

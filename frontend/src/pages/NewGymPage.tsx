@@ -10,6 +10,7 @@ import GymExerciseForm from '../components/gym/GymExerciseForm'
 import type { ExerciseFormData } from '../components/gym/GymExerciseForm'
 import type { SetFormData } from '../components/gym/GymSetForm'
 import { getErrorMessage } from '../services/errorHandler'
+import DurationInput from '../components/ui/DurationInput'
 
 type NewGymPageProps = {
     userId: number | null
@@ -27,6 +28,7 @@ const emptySet: SetFormData = {
 const emptyExercise: ExerciseFormData = {
     exerciseId: null,
     exerciseName: '',
+    supersetId: null,
     notes: '',
     sets: [{ ...emptySet }],
 }
@@ -43,6 +45,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
         return now.toISOString().slice(0, 16)
     })
     const [notes, setNotes] = useState('')
+    const [totalDuration, setTotalDuration] = useState<number>(0)
     const [exercisesList, setExercisesList] = useState<ExerciseFormData[]>([{ ...emptyExercise }])
 
     // Catálogo de ejercicios
@@ -85,11 +88,13 @@ function NewGymPage({ userId }: NewGymPageProps) {
                 try {
                     const details = await gymService.getDetails(userId, wId)
                     setNotes(details.notes ?? '')
+                    setTotalDuration(details.totalDurationSeconds ?? 0)
 
                     if (details.exercises.length > 0) {
                         setExercisesList(details.exercises.map(ex => ({
                             exerciseId: ex.exerciseId,
                             exerciseName: ex.exerciseName,
+                            supersetId: ex.supersetId,
                             notes: ex.notes ?? '',
                             sets: ex.sets.map(s => ({
                                 type: s.type,
@@ -112,6 +117,29 @@ function NewGymPage({ userId }: NewGymPageProps) {
         }
     }
 
+    // Generar UUID simple
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0
+            const v = c === 'x' ? r : (r & 0x3 | 0x8)
+            return v.toString(16)
+        })
+    }
+
+    // Calcular grupos de superseries con etiquetas (A, B, C...)
+    const getSupersetGroups = (): Map<string, string> => {
+        const groups = new Map<string, string>()
+        const supersetIds = [...new Set(exercisesList.filter(ex => ex.supersetId).map(ex => ex.supersetId!))]
+
+        supersetIds.forEach((id, index) => {
+            groups.set(id, String.fromCharCode(65 + index)) // A, B, C...
+        })
+
+        return groups
+    }
+
+    const supersetGroups = getSupersetGroups()
+
     const handleAddExercise = () => {
         setExercisesList([...exercisesList, { ...emptyExercise, sets: [{ ...emptySet }] }])
     }
@@ -124,6 +152,36 @@ function NewGymPage({ userId }: NewGymPageProps) {
 
     const handleRemoveExercise = (index: number) => {
         setExercisesList(exercisesList.filter((_, i) => i !== index))
+    }
+
+    const handleCreateSuperset = (exerciseIndex: number) => {
+        const newSupersetId = generateUUID()
+        const updated = [...exercisesList]
+        updated[exerciseIndex] = { ...updated[exerciseIndex], supersetId: newSupersetId }
+        setExercisesList(updated)
+    }
+
+    const handleJoinSuperset = (exerciseIndex: number, supersetId: string) => {
+        const updated = [...exercisesList]
+        updated[exerciseIndex] = { ...updated[exerciseIndex], supersetId }
+        setExercisesList(updated)
+    }
+
+    const handleLeaveSuperset = (exerciseIndex: number) => {
+        const updated = [...exercisesList]
+        const leavingSupersetId = updated[exerciseIndex].supersetId
+        updated[exerciseIndex] = { ...updated[exerciseIndex], supersetId: null }
+
+        // Si solo queda 1 ejercicio en esa superserie, quitarlo también
+        if (leavingSupersetId) {
+            const remainingInSuperset = updated.filter(ex => ex.supersetId === leavingSupersetId)
+            if (remainingInSuperset.length === 1) {
+                const lastExIndex = updated.findIndex(ex => ex.supersetId === leavingSupersetId)
+                updated[lastExIndex] = { ...updated[lastExIndex], supersetId: null }
+            }
+        }
+
+        setExercisesList(updated)
     }
 
     const handleSubmit = async () => {
@@ -166,9 +224,11 @@ function NewGymPage({ userId }: NewGymPageProps) {
 
             // Preparar request
             const request: GymDetailsCreateRequest = {
+                totalDurationSeconds: totalDuration > 0 ? totalDuration : null,
                 notes: notes.trim() || null,
                 exercises: validExercises.map(ex => ({
                     exerciseId: ex.exerciseId!,
+                    supersetId: ex.supersetId,
                     notes: ex.notes.trim() || null,
                     sets: ex.sets
                         .filter(s => s.reps !== null || s.executionSeconds !== null)
@@ -290,18 +350,33 @@ function NewGymPage({ userId }: NewGymPageProps) {
                 />
             </div>
 
-            {/* Notas generales */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notas del entrenamiento (opcional)
-                </label>
-                <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Día de pecho y tríceps..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
-                />
+            {/* Duración y Notas */}
+            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Duración total (opcional)
+                    </label>
+                    <DurationInput
+                        value={totalDuration}
+                        onChange={setTotalDuration}
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                        Si no lo indicas, se calculará de los tiempos de las series
+                    </p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Notas del entrenamiento (opcional)
+                    </label>
+                    <input
+                        type="text"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Día de pecho y tríceps..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    />
+                </div>
             </div>
 
             {/* Ejercicios */}
@@ -325,8 +400,12 @@ function NewGymPage({ userId }: NewGymPageProps) {
                             index={index}
                             exercise={exercise}
                             exercises={availableExercises}
+                            supersetGroups={supersetGroups}
                             onChange={handleUpdateExercise}
                             onRemove={handleRemoveExercise}
+                            onCreateSuperset={handleCreateSuperset}
+                            onJoinSuperset={handleJoinSuperset}
+                            onLeaveSuperset={handleLeaveSuperset}
                             canRemove={exercisesList.length > 1}
                         />
                     ))}
