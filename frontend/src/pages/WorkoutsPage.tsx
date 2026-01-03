@@ -1,22 +1,26 @@
 import { useEffect, useState } from 'react'
-import { ClipboardList, Plus } from 'lucide-react'
+import { ClipboardList } from 'lucide-react'
 import { workoutService } from '../services/workoutService'
-import type { WorkoutSummaryResponse, WorkoutDetailResponse, WorkoutCreateRequest } from '../types/workout'
-import Modal from '../components/ui/Modal'
+import { runService } from '../services/runService'
+import type { WorkoutSummaryResponse } from '../types/workout'
+import type { RunDetailsResponse } from '../types/run'
 import WorkoutCard from '../components/workouts/WorkoutCard'
-import WorkoutForm from '../components/workouts/WorkoutForm'
 
 type WorkoutsPageProps = {
     userId: number | null
+}
+
+type ExpandedDetails = {
+    [workoutId: number]: RunDetailsResponse | null // Añadiremos más tipos después
 }
 
 function WorkoutsPage({ userId }: WorkoutsPageProps) {
     const [workouts, setWorkouts] = useState<WorkoutSummaryResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [editingWorkout, setEditingWorkout] = useState<WorkoutDetailResponse | null>(null)
+    const [expandedId, setExpandedId] = useState<number | null>(null)
+    const [expandedDetails, setExpandedDetails] = useState<ExpandedDetails>({})
+    const [loadingDetails, setLoadingDetails] = useState(false)
 
     useEffect(() => {
         if (userId) {
@@ -40,21 +44,32 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
         }
     }
 
-    const handleCreate = () => {
-        setEditingWorkout(null)
-        setIsModalOpen(true)
-    }
-
-    const handleEdit = async (workout: WorkoutSummaryResponse) => {
+    const handleToggleExpand = async (workout: WorkoutSummaryResponse) => {
         if (!userId) return
 
-        try {
-            const detail = await workoutService.getById(userId, workout.id)
-            setEditingWorkout(detail)
-            setIsModalOpen(true)
-        } catch (err) {
-            setError('Error al cargar workout')
-            console.error(err)
+        // Si ya está expandido, colapsar
+        if (expandedId === workout.id) {
+            setExpandedId(null)
+            return
+        }
+
+        // Expandir y cargar detalles si no los tenemos
+        setExpandedId(workout.id)
+
+        if (!expandedDetails[workout.id]) {
+            setLoadingDetails(true)
+            try {
+                if (workout.type === 'RUN') {
+                    const details = await runService.getDetails(userId, workout.id)
+                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
+                }
+                // TODO: Añadir otros tipos (SWIM, GYM, HYROX)
+            } catch (err) {
+                console.error('Error loading details:', err)
+                setExpandedDetails(prev => ({ ...prev, [workout.id]: null }))
+            } finally {
+                setLoadingDetails(false)
+            }
         }
     }
 
@@ -65,30 +80,18 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
         try {
             await workoutService.delete(userId, id)
             await loadWorkouts()
+            // Limpiar detalles expandidos
+            setExpandedId(null)
+            setExpandedDetails(prev => {
+                const { [id]: _, ...rest } = prev
+                return rest
+            })
         } catch (err) {
             setError('Error al eliminar workout')
             console.error(err)
         }
     }
 
-    const handleSubmit = async (data: WorkoutCreateRequest) => {
-        if (!userId) return
-
-        if (editingWorkout) {
-            await workoutService.update(userId, editingWorkout.id, data)
-        } else {
-            await workoutService.create(userId, data)
-        }
-        setIsModalOpen(false)
-        await loadWorkouts()
-    }
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false)
-        setEditingWorkout(null)
-    }
-
-    // Si no hay usuario seleccionado
     if (!userId) {
         return (
             <div>
@@ -103,18 +106,9 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                    <ClipboardList className="w-7 h-7 mr-2 text-gray-700" />
-                    <h1 className="text-2xl font-bold text-gray-800">Workouts</h1>
-                </div>
-                <button
-                    className="flex items-center bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700"
-                    onClick={handleCreate}
-                >
-                    <Plus className="w-5 h-5 mr-1" />
-                    <span>Nuevo</span>
-                </button>
+            <div className="flex items-center mb-4">
+                <ClipboardList className="w-7 h-7 mr-2 text-gray-700" />
+                <h1 className="text-2xl font-bold text-gray-800">Workouts</h1>
             </div>
 
             {loading && <p className="text-gray-500">Cargando...</p>}
@@ -122,7 +116,7 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
             {!loading && !error && workouts.length === 0 && (
-                <p className="text-gray-500">No hay workouts</p>
+                <p className="text-gray-500">No hay workouts. Usa el botón + para crear uno.</p>
             )}
 
             {!loading && !error && workouts.length > 0 && (
@@ -131,24 +125,15 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
                         <WorkoutCard
                             key={workout.id}
                             workout={workout}
-                            onEdit={handleEdit}
+                            isExpanded={expandedId === workout.id}
+                            details={expandedDetails[workout.id]}
+                            loadingDetails={loadingDetails && expandedId === workout.id}
+                            onToggleExpand={handleToggleExpand}
                             onDelete={handleDelete}
                         />
                     ))}
                 </div>
             )}
-
-            <Modal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                title={editingWorkout ? 'Editar Workout' : 'Nuevo Workout'}
-            >
-                <WorkoutForm
-                    workout={editingWorkout}
-                    onSubmit={handleSubmit}
-                    onCancel={handleCloseModal}
-                />
-            </Modal>
         </div>
     )
 }

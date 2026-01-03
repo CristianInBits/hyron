@@ -9,6 +9,7 @@ import type { ShoeSummaryResponse } from '../types/shoe'
 import RunIntervalForm from '../components/run/RunIntervalForm'
 import type { IntervalFormData } from '../components/run/RunIntervalForm'
 import { getErrorMessage } from '../services/errorHandler'
+import DurationInput from '../components/ui/DurationInput'
 
 type NewRunPageProps = {
     userId: number | null
@@ -35,7 +36,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
     const [mode, setMode] = useState<RunMode | null>(null)
 
     // Estado para modo simple
-    const [simpleDuration, setSimpleDuration] = useState('')
+    const [simpleDuration, setSimpleDuration] = useState(0)
     const [simpleDistance, setSimpleDistance] = useState('')
     const [simpleHr, setSimpleHr] = useState('')
     const [simpleElevation, setSimpleElevation] = useState('')
@@ -85,7 +86,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                         // Modo simple
                         setMode('simple')
                         const interval = details.intervals[0]
-                        setSimpleDuration(formatDurationForInput(interval.durationSeconds))
+                        setSimpleDuration(interval.durationSeconds)
                         setSimpleDistance(interval.distanceMeters?.toString() ?? '')
                         setSimpleHr(interval.averageHr?.toString() ?? '')
                         setSimpleElevation(interval.elevationGain?.toString() ?? '')
@@ -111,12 +112,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
         } finally {
             setLoadingData(false)
         }
-    }
-
-    const formatDurationForInput = (seconds: number): string => {
-        const mins = Math.floor(seconds / 60)
-        const secs = seconds % 60
-        return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
     const parseDuration = (value: string): number => {
@@ -153,8 +148,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
             let requestIntervals: RunDetailsCreateRequest['intervals'] = []
 
             if (mode === 'simple') {
-                const duration = parseDuration(simpleDuration)
-                if (duration === 0) {
+                if (simpleDuration === 0) {
                     setError('La duración es obligatoria')
                     setLoading(false)
                     return
@@ -162,7 +156,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
 
                 requestIntervals = [{
                     type: 'WORK' as RunIntervalType,
-                    durationSeconds: duration,
+                    durationSeconds: simpleDuration,
                     distanceMeters: simpleDistance ? parseInt(simpleDistance) : null,
                     averageHr: simpleHr ? parseInt(simpleHr) : null,
                     elevationGain: simpleElevation ? parseInt(simpleElevation) : null,
@@ -344,14 +338,12 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Duración (mm:ss) *
+                                Duración *
                             </label>
-                            <input
-                                type="text"
+                            <DurationInput
                                 value={simpleDuration}
-                                onChange={(e) => setSimpleDuration(e.target.value)}
-                                placeholder="30:00"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                                onChange={setSimpleDuration}
+                                className="mt-1"
                             />
                         </div>
                         <div>
