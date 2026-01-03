@@ -47,6 +47,11 @@ function NewRunPage({ userId }: NewRunPageProps) {
     // Estado compartido
     const [shoeId, setShoeId] = useState<number | null>(null)
     const [notes, setNotes] = useState('')
+    const [workoutDate, setWorkoutDate] = useState<string>(() => {
+        // Por defecto, fecha y hora actual
+        const now = new Date()
+        return now.toISOString().slice(0, 16)
+    })
     const [workoutId, setWorkoutId] = useState<number | null>(workoutIdParam ? parseInt(workoutIdParam) : null)
 
     // Estado de UI
@@ -75,6 +80,14 @@ function NewRunPage({ userId }: NewRunPageProps) {
             if (workoutIdParam) {
                 const wId = parseInt(workoutIdParam)
                 setWorkoutId(wId)
+
+                // Cargar datos del workout base
+                try {
+                    const workoutData = await workoutService.getById(userId, wId)
+                    setWorkoutDate(workoutData.startDateTime.slice(0, 16))
+                } catch {
+                    // Si falla, usar fecha actual
+                }
 
                 try {
                     const details = await runService.getDetails(userId, wId)
@@ -186,10 +199,15 @@ function NewRunPage({ userId }: NewRunPageProps) {
             if (!wId) {
                 const workout = await workoutService.create(userId, {
                     type: 'RUN',
-                    startDateTime: new Date().toISOString(),
+                    startDateTime: new Date(workoutDate).toISOString(),
                 })
                 wId = workout.id
                 setWorkoutId(wId)
+            } else {
+                // Actualizar fecha si cambió
+                await workoutService.update(userId, wId, {
+                    startDateTime: new Date(workoutDate).toISOString(),
+                })
             }
 
             // Calcular totales para modo intervalos
@@ -326,6 +344,19 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     </button>
                 </div>
 
+                {/* Fecha del entrenamiento */}
+                <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fecha y hora del entrenamiento
+                    </label>
+                    <input
+                        type="datetime-local"
+                        value={workoutDate}
+                        onChange={(e) => setWorkoutDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    />
+                </div>
+
                 {error && (
                     <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
                         {error}
@@ -458,6 +489,19 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     {error}
                 </div>
             )}
+
+            {/* Fecha del entrenamiento */}
+            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha y hora del entrenamiento
+                </label>
+                <input
+                    type="datetime-local"
+                    value={workoutDate}
+                    onChange={(e) => setWorkoutDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+            </div>
 
             {/* Datos generales */}
             <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">

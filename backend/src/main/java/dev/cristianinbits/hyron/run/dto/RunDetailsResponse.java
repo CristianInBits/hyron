@@ -8,6 +8,7 @@ public record RunDetailsResponse(
         Long id,
         Long workoutId,
         Integer totalDistanceMeters,
+        Integer totalDurationSeconds,
         Integer totalElevationGain,
         Integer averageHr,
         ShoeSummaryResponse shoe,

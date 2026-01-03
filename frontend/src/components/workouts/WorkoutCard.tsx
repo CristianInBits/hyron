@@ -1,7 +1,8 @@
-import { Dog, Fish, Dumbbell, Flame, Trash2, ChevronDown, ChevronUp, Footprints } from 'lucide-react'
+import { Dog, Fish, Dumbbell, Flame, Trash2, ChevronDown, ChevronUp, Footprints, Pencil } from 'lucide-react'
 import type { WorkoutSummaryResponse } from '../../types/workout'
 import type { RunDetailsResponse } from '../../types/run'
 import { runIntervalTypeLabels } from '../../types/run'
+import { useNavigate } from 'react-router-dom'
 
 type WorkoutCardProps = {
     workout: WorkoutSummaryResponse
@@ -10,6 +11,7 @@ type WorkoutCardProps = {
     loadingDetails: boolean
     onToggleExpand: (workout: WorkoutSummaryResponse) => void
     onDelete: (id: number) => void
+    onEdit: (workout: WorkoutSummaryResponse) => void
 }
 
 const workoutConfig = {
@@ -19,7 +21,7 @@ const workoutConfig = {
     HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-50', label: 'Hyrox' },
 }
 
-function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExpand, onDelete }: WorkoutCardProps) {
+function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExpand, onDelete, onEdit }: WorkoutCardProps) {
     const config = workoutConfig[workout.type]
     const Icon = config.icon
 
@@ -91,7 +93,17 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                 )}
 
                 {/* Acciones */}
+                {/* Acciones */}
                 <div className="flex items-center space-x-2">
+                    <button
+                        className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit(workout)
+                        }}
+                    >
+                        <Pencil className="w-5 h-5" />
+                    </button>
                     <button
                         className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
                         onClick={(e) => {

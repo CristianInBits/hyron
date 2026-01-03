@@ -5,6 +5,7 @@ import { runService } from '../services/runService'
 import type { WorkoutSummaryResponse } from '../types/workout'
 import type { RunDetailsResponse } from '../types/run'
 import WorkoutCard from '../components/workouts/WorkoutCard'
+import { useNavigate } from 'react-router-dom'
 
 type WorkoutsPageProps = {
     userId: number | null
@@ -15,6 +16,7 @@ type ExpandedDetails = {
 }
 
 function WorkoutsPage({ userId }: WorkoutsPageProps) {
+    const navigate = useNavigate()
     const [workouts, setWorkouts] = useState<WorkoutSummaryResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -70,6 +72,23 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
             } finally {
                 setLoadingDetails(false)
             }
+        }
+    }
+
+    const handleEdit = (workout: WorkoutSummaryResponse) => {
+        switch (workout.type) {
+            case 'RUN':
+                navigate(`/new/run?workoutId=${workout.id}`)
+                break
+            case 'SWIM':
+                navigate(`/new/swim?workoutId=${workout.id}`)
+                break
+            case 'GYM':
+                navigate(`/new/gym?workoutId=${workout.id}`)
+                break
+            case 'HYROX':
+                navigate(`/new/hyrox?workoutId=${workout.id}`)
+                break
         }
     }
 
@@ -130,6 +149,7 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
                             loadingDetails={loadingDetails && expandedId === workout.id}
                             onToggleExpand={handleToggleExpand}
                             onDelete={handleDelete}
+                            onEdit={handleEdit}
                         />
                     ))}
                 </div>

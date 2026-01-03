@@ -117,18 +117,25 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
     }
 
     private RunDetailsResponse toResponse(RunWorkoutDetails details) {
+        List<RunIntervalResponse> intervalResponses = details.getIntervals().stream()
+                .map(this::toIntervalResponse)
+                .toList();
+
+        Integer totalDurationSeconds = details.getIntervals().stream()
+                .mapToInt(RunInterval::getDurationSeconds)
+                .sum();
+
         return new RunDetailsResponse(
                 details.getId(),
                 details.getWorkout().getId(),
                 details.getTotalDistanceMeters(),
+                totalDurationSeconds, // 👈 NUEVO
                 details.getTotalElevationGain(),
                 details.getAverageHr(),
                 toShoeSummary(details.getShoe()),
                 details.getNotes(),
                 calculateAveragePace(details),
-                details.getIntervals().stream()
-                        .map(this::toIntervalResponse)
-                        .toList());
+                intervalResponses);
     }
 
     private RunIntervalResponse toIntervalResponse(RunInterval interval) {
@@ -146,13 +153,13 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
     }
 
     private ShoeSummaryResponse toShoeSummary(Shoe shoe) {
-        if (shoe == null) return null;
+        if (shoe == null)
+            return null;
         return new ShoeSummaryResponse(
                 shoe.getId(),
                 shoe.getBrand(),
                 shoe.getModel(),
-                shoe.getNickname()
-        );
+                shoe.getNickname());
     }
 
     // ==================== Cálculos ====================
