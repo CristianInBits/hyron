@@ -3,11 +3,13 @@ import type { WorkoutSummaryResponse } from '../../types/workout'
 import type { RunDetailsResponse } from '../../types/run'
 import { runIntervalTypeLabels } from '../../types/run'
 import { useNavigate } from 'react-router-dom'
+import type { SwimDetailsResponse } from '../../types/swim'
+import { swimIntervalTypeLabels, swimStrokeLabels, poolTypeLabels, swimEquipmentLabels } from '../../types/swim'
 
 type WorkoutCardProps = {
     workout: WorkoutSummaryResponse
     isExpanded: boolean
-    details: RunDetailsResponse | null // Añadiremos más tipos después
+    details: RunDetailsResponse | SwimDetailsResponse | null
     loadingDetails: boolean
     onToggleExpand: (workout: WorkoutSummaryResponse) => void
     onDelete: (id: number) => void
@@ -136,7 +138,11 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                         <RunDetails details={details as RunDetailsResponse} />
                     )}
 
-                    {/* TODO: Añadir componentes para SWIM, GYM, HYROX */}
+                    {!loadingDetails && details && workout.type === 'SWIM' && (
+                        <SwimDetails details={details as SwimDetailsResponse} />
+                    )}
+
+                    {/* TODO: Añadir componentes para GYM, HYROX */}
                 </div>
             )}
         </div>
@@ -233,6 +239,121 @@ function RunDetails({ details }: { details: RunDetailsResponse }) {
                                         <span className="text-gray-400">{formatPace(interval.paceSecondsPerKm)}</span>
                                     )}
                                 </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+// Componente para mostrar detalles de Swim
+function SwimDetails({ details }: { details: SwimDetailsResponse }) {
+    const formatDuration = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600)
+        const mins = Math.floor((seconds % 3600) / 60)
+        const secs = seconds % 60
+
+        if (hours > 0) {
+            return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+        }
+        return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    const formatDistance = (meters: number | null) => {
+        if (meters === null) return '-'
+        return `${meters} m`
+    }
+
+    const formatPace = (secondsPer100m: number | null) => {
+        if (secondsPer100m === null) return '-'
+        const mins = Math.floor(secondsPer100m / 60)
+        const secs = secondsPer100m % 60
+        return `${mins}:${secs.toString().padStart(2, '0')} /100m`
+    }
+
+    return (
+        <div className="space-y-4">
+            {/* Resumen */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {details.totalTimeSeconds && (
+                    <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500">Duración</p>
+                        <p className="font-semibold text-gray-800">{formatDuration(details.totalTimeSeconds)}</p>
+                    </div>
+                )}
+                {details.totalDistanceMeters && (
+                    <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500">Distancia</p>
+                        <p className="font-semibold text-gray-800">{formatDistance(details.totalDistanceMeters)}</p>
+                    </div>
+                )}
+                {details.averagePaceSecondsPer100m && (
+                    <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500">Ritmo medio</p>
+                        <p className="font-semibold text-gray-800">{formatPace(details.averagePaceSecondsPer100m)}</p>
+                    </div>
+                )}
+                <div className="bg-white p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">Piscina</p>
+                    <p className="font-semibold text-gray-800">{poolTypeLabels[details.poolType]}</p>
+                </div>
+            </div>
+
+            {/* Notas */}
+            {details.notes && (
+                <p className="text-sm text-gray-600 italic">"{details.notes}"</p>
+            )}
+
+            {/* Intervalos */}
+            {details.intervals.length > 0 && (
+                <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-2">
+                        {details.intervals.length === 1 ? 'Resumen' : `Intervalos (${details.intervals.length})`}
+                    </p>
+                    <div className="space-y-2">
+                        {details.intervals.map((interval, index) => (
+                            <div key={interval.id} className="bg-white p-3 rounded-lg">
+                                <div className="flex items-center justify-between mb-1">
+                                    <div className="flex items-center">
+                                        <span className="text-xs font-medium text-gray-400 w-6">{index + 1}</span>
+                                        <span className="text-sm font-medium text-blue-600 mr-2">
+                                            {swimIntervalTypeLabels[interval.type]}
+                                        </span>
+                                        <span className="text-sm text-gray-600">
+                                            {swimStrokeLabels[interval.stroke]}
+                                        </span>
+                                    </div>
+                                    {interval.rpe && (
+                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                                            RPE {interval.rpe}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                    {interval.distanceMeters && (
+                                        <span>{formatDistance(interval.distanceMeters)}</span>
+                                    )}
+                                    {interval.durationSeconds && (
+                                        <span>{formatDuration(interval.durationSeconds)}</span>
+                                    )}
+                                    {interval.paceSecondsPer100m && (
+                                        <span className="text-gray-400">{formatPace(interval.paceSecondsPer100m)}</span>
+                                    )}
+                                    {interval.restSeconds && (
+                                        <span className="text-gray-400">🔄 {formatDuration(interval.restSeconds)}</span>
+                                    )}
+                                </div>
+                                {interval.equipment.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {interval.equipment.map(eq => (
+                                            <span key={eq} className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
+                                                {swimEquipmentLabels[eq]}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

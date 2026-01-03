@@ -6,13 +6,15 @@ import type { WorkoutSummaryResponse } from '../types/workout'
 import type { RunDetailsResponse } from '../types/run'
 import WorkoutCard from '../components/workouts/WorkoutCard'
 import { useNavigate } from 'react-router-dom'
+import { swimService } from '../services/swimService'
+import type { SwimDetailsResponse } from '../types/swim'
 
 type WorkoutsPageProps = {
     userId: number | null
 }
 
 type ExpandedDetails = {
-    [workoutId: number]: RunDetailsResponse | null // Añadiremos más tipos después
+    [workoutId: number]: RunDetailsResponse | SwimDetailsResponse | null
 }
 
 function WorkoutsPage({ userId }: WorkoutsPageProps) {
@@ -64,8 +66,11 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
                 if (workout.type === 'RUN') {
                     const details = await runService.getDetails(userId, workout.id)
                     setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
+                } else if (workout.type === 'SWIM') {
+                    const details = await swimService.getDetails(userId, workout.id)
+                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
                 }
-                // TODO: Añadir otros tipos (SWIM, GYM, HYROX)
+                // TODO: Añadir otros tipos (GYM, HYROX)
             } catch (err) {
                 console.error('Error loading details:', err)
                 setExpandedDetails(prev => ({ ...prev, [workout.id]: null }))
