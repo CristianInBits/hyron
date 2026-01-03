@@ -2,17 +2,18 @@ import { Dog, Fish, Dumbbell, Flame, Trash2, ChevronDown, ChevronUp, Footprints,
 import type { WorkoutSummaryResponse } from '../../types/workout'
 import type { RunDetailsResponse } from '../../types/run'
 import { runIntervalTypeLabels } from '../../types/run'
-import { useNavigate } from 'react-router-dom'
 import type { SwimDetailsResponse } from '../../types/swim'
 import { swimIntervalTypeLabels, swimStrokeLabels, poolTypeLabels, swimEquipmentLabels } from '../../types/swim'
 import type { GymDetailsResponse } from '../../types/gym'
 import { gymSetTypeLabels } from '../../types/gym'
 import { muscleGroupLabels } from '../../types/exercise'
+import type { HyroxDetailsResponse } from '../../types/hyrox'
+import { hyroxStationLabels, hyroxStationIcons } from '../../types/hyrox'
 
 type WorkoutCardProps = {
     workout: WorkoutSummaryResponse
     isExpanded: boolean
-    details: RunDetailsResponse | SwimDetailsResponse | GymDetailsResponse | null
+    details: RunDetailsResponse | SwimDetailsResponse | GymDetailsResponse | HyroxDetailsResponse | null
     loadingDetails: boolean
     onToggleExpand: (workout: WorkoutSummaryResponse) => void
     onDelete: (id: number) => void
@@ -148,8 +149,9 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                     {!loadingDetails && details && workout.type === 'GYM' && (
                         <GymDetails details={details as GymDetailsResponse} />
                     )}
-
-                    {/* TODO: Añadir componente para HYROX */}
+                    {!loadingDetails && details && workout.type === 'HYROX' && (
+                        <HyroxDetails details={details as HyroxDetailsResponse} />
+                    )}
                 </div>
             )}
         </div>
@@ -482,6 +484,117 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
                             </div>
                         )
                     })}
+                </div>
+            )}
+        </div>
+    )
+}
+
+// Componente para mostrar detalles de Hyrox
+function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
+    const formatDuration = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600)
+        const mins = Math.floor((seconds % 3600) / 60)
+        const secs = seconds % 60
+
+        if (hours > 0) {
+            return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+        }
+        return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    const formatPace = (secondsPerKm: number | null) => {
+        if (secondsPerKm === null) return null
+        const mins = Math.floor(secondsPerKm / 60)
+        const secs = secondsPerKm % 60
+        return `${mins}:${secs.toString().padStart(2, '0')} /km`
+    }
+
+    // Calcular tiempo total
+    const totalTime = details.blocks.reduce((sum, block) => {
+        const blockTime = block.items.reduce((s, item) => {
+            return s + item.durationSeconds + (item.recoveryDurationSeconds ?? 0)
+        }, 0)
+        return sum + blockTime + (block.restDurationSeconds ?? 0)
+    }, 0)
+
+    // Calcular distancia total
+    const totalDistance = details.blocks.reduce((sum, block) => {
+        return sum + block.items.reduce((s, item) => s + (item.distanceMeters ?? 0), 0)
+    }, 0)
+
+    return (
+        <div className="space-y-4">
+            {/* Resumen */}
+            <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">Rondas</p>
+                    <p className="font-semibold text-gray-800">{details.blocks.length}</p>
+                </div>
+                {totalTime > 0 && (
+                    <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500">Tiempo total</p>
+                        <p className="font-semibold text-gray-800">{formatDuration(totalTime)}</p>
+                    </div>
+                )}
+                {totalDistance > 0 && (
+                    <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500">Distancia</p>
+                        <p className="font-semibold text-gray-800">{(totalDistance / 1000).toFixed(1)} km</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Notas */}
+            {details.notes && (
+                <p className="text-sm text-gray-600 italic">"{details.notes}"</p>
+            )}
+
+            {/* Rondas */}
+            {details.blocks.length > 0 && (
+                <div className="space-y-3">
+                    {details.blocks.map((block) => (
+                        <div key={block.id} className="bg-white p-3 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="font-bold text-orange-600">Ronda {block.orderIndex}</span>
+                                {block.restDurationSeconds && (
+                                    <span className="text-xs text-gray-400">
+                                        🔄 {formatDuration(block.restDurationSeconds)} descanso
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Items/Estaciones */}
+                            <div className="space-y-2">
+                                {block.items.map((item) => (
+                                    <div key={item.id} className="flex items-center text-sm">
+                                        <span className="w-6 text-center">{hyroxStationIcons[item.station]}</span>
+                                        <span className="w-28 text-gray-700">{hyroxStationLabels[item.station]}</span>
+                                        <span className="w-16 text-gray-600">{formatDuration(item.durationSeconds)}</span>
+                                        {item.distanceMeters && (
+                                            <span className="w-16 text-gray-500">{item.distanceMeters}m</span>
+                                        )}
+                                        {item.paceSecondsPerKm && (
+                                            <span className="text-xs text-gray-400">{formatPace(item.paceSecondsPerKm)}</span>
+                                        )}
+                                        {item.weightKg && (
+                                            <span className="text-xs text-gray-400 ml-2">{item.weightKg}kg</span>
+                                        )}
+                                        {item.reps && (
+                                            <span className="text-xs text-gray-400 ml-2">×{item.reps}</span>
+                                        )}
+                                        {item.rpe && (
+                                            <span className="text-xs text-orange-400 ml-2">@{item.rpe}</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {block.notes && (
+                                <p className="text-xs text-gray-400 mt-2 italic">{block.notes}</p>
+                            )}
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

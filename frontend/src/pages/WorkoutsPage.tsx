@@ -10,13 +10,15 @@ import { swimService } from '../services/swimService'
 import type { SwimDetailsResponse } from '../types/swim'
 import { gymService } from '../services/gymService'
 import type { GymDetailsResponse } from '../types/gym'
+import { hyroxService } from '../services/hyroxService'
+import type { HyroxDetailsResponse } from '../types/hyrox'
 
 type WorkoutsPageProps = {
     userId: number | null
 }
 
 type ExpandedDetails = {
-    [workoutId: number]: RunDetailsResponse | SwimDetailsResponse | GymDetailsResponse | null
+    [workoutId: number]: RunDetailsResponse | SwimDetailsResponse | GymDetailsResponse | HyroxDetailsResponse | null
 }
 
 function WorkoutsPage({ userId }: WorkoutsPageProps) {
@@ -74,8 +76,10 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
                 } else if (workout.type === 'GYM') {
                     const details = await gymService.getDetails(userId, workout.id)
                     setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
+                } else if (workout.type === 'HYROX') {
+                    const details = await hyroxService.getDetails(userId, workout.id)
+                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
                 }
-                // TODO: Añadir HYROX
             } catch (err) {
                 console.error('Error loading details:', err)
                 setExpandedDetails(prev => ({ ...prev, [workout.id]: null }))
