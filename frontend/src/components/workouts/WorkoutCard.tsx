@@ -18,6 +18,7 @@ type WorkoutCardProps = {
     onToggleExpand: (workout: WorkoutSummaryResponse) => void
     onDelete: (id: number) => void
     onEdit: (workout: WorkoutSummaryResponse) => void
+    showActions?: boolean
 }
 
 const workoutConfig = {
@@ -27,7 +28,7 @@ const workoutConfig = {
     HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-50', label: 'Hyrox' },
 }
 
-function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExpand, onDelete, onEdit }: WorkoutCardProps) {
+function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExpand, onDelete, onEdit, showActions = true }: WorkoutCardProps) {
     const config = workoutConfig[workout.type]
     const Icon = config.icon
 
@@ -69,10 +70,10 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
             {/* Cabecera clickeable */}
             <div
-                className="p-4 flex items-center cursor-pointer hover:bg-gray-50"
+                className="p-4 flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => onToggleExpand(workout)}
             >
                 {/* Icono del tipo */}
@@ -98,60 +99,47 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                     </div>
                 )}
 
-                {/* Acciones */}
-                {/* Acciones */}
-                <div className="flex items-center space-x-2">
-                    <button
-                        className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            onEdit(workout)
-                        }}
-                    >
-                        <Pencil className="w-5 h-5" />
-                    </button>
-                    <button
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            onDelete(workout.id)
-                        }}
-                    >
-                        <Trash2 className="w-5 h-5" />
-                    </button>
-                    {isExpanded ? (
-                        <ChevronUp className="w-5 h-5 text-gray-400" />
-                    ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                    )}
-                </div>
+                {/* 3. ENVOLVER LAS ACCIONES CON LA CONDICIÓN */}
+                {showActions && (
+                    <div className="flex items-center space-x-2">
+                        <button
+                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onEdit(workout)
+                            }}
+                        >
+                            <Pencil className="w-5 h-5" />
+                        </button>
+                        <button
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onDelete(workout.id)
+                            }}
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </button>
+                        {isExpanded ? (
+                            <ChevronUp className="w-5 h-5 text-gray-400" />
+                        ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-400" />
+                        )}
+                    </div>
+                )}
             </div>
 
-            {/* Detalles expandidos */}
+            {/* Detalles expandidos (Solo se muestran si isExpanded es true, 
+                así que en Home no se verán nunca porque isExpanded siempre será false) */}
             {isExpanded && (
                 <div className="border-t border-gray-100 p-4 bg-gray-50">
-                    {loadingDetails && (
-                        <p className="text-sm text-gray-500">Cargando detalles...</p>
-                    )}
-
-                    {!loadingDetails && !details && (
-                        <p className="text-sm text-gray-500">No hay detalles disponibles</p>
-                    )}
-
-                    {!loadingDetails && details && workout.type === 'RUN' && (
-                        <RunDetails details={details as RunDetailsResponse} />
-                    )}
-
-                    {!loadingDetails && details && workout.type === 'SWIM' && (
-                        <SwimDetails details={details as SwimDetailsResponse} />
-                    )}
-
-                    {!loadingDetails && details && workout.type === 'GYM' && (
-                        <GymDetails details={details as GymDetailsResponse} />
-                    )}
-                    {!loadingDetails && details && workout.type === 'HYROX' && (
-                        <HyroxDetails details={details as HyroxDetailsResponse} />
-                    )}
+                    {/* ... contenido de los detalles ... */}
+                    {loadingDetails && <p className="text-sm text-gray-500">Cargando detalles...</p>}
+                    {!loadingDetails && !details && <p className="text-sm text-gray-500">No hay detalles disponibles</p>}
+                    {!loadingDetails && details && workout.type === 'RUN' && <RunDetails details={details as RunDetailsResponse} />}
+                    {!loadingDetails && details && workout.type === 'SWIM' && <SwimDetails details={details as SwimDetailsResponse} />}
+                    {!loadingDetails && details && workout.type === 'GYM' && <GymDetails details={details as GymDetailsResponse} />}
+                    {!loadingDetails && details && workout.type === 'HYROX' && <HyroxDetails details={details as HyroxDetailsResponse} />}
                 </div>
             )}
         </div>
