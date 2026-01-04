@@ -45,13 +45,10 @@ const createEmptyBlock = (): BlockFormData => ({
 
 // Crear estructura de competición oficial (8 rondas: Run + Ejercicio)
 const createOfficialStructure = (): BlockFormData[] => {
-    return officialStations.map((station, index) => ({
+    return officialStations.map((station) => ({
         restDurationSeconds: null,
         notes: '',
-        items: [
-            createEmptyItem('RUN'),
-            createEmptyItem(station),
-        ],
+        items: [createEmptyItem('RUN'), createEmptyItem(station)],
     }))
 }
 

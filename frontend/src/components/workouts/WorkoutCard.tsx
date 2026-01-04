@@ -43,32 +43,6 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
         })
     }
 
-    const formatDuration = (seconds: number) => {
-        const hours = Math.floor(seconds / 3600)
-        const mins = Math.floor((seconds % 3600) / 60)
-        const secs = seconds % 60
-
-        if (hours > 0) {
-            return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-        }
-        return `${mins}:${secs.toString().padStart(2, '0')}`
-    }
-
-    const formatDistance = (meters: number | null) => {
-        if (meters === null) return '-'
-        if (meters >= 1000) {
-            return `${(meters / 1000).toFixed(2)} km`
-        }
-        return `${meters} m`
-    }
-
-    const formatPace = (secondsPerKm: number | null) => {
-        if (secondsPerKm === null) return '-'
-        const mins = Math.floor(secondsPerKm / 60)
-        const secs = secondsPerKm % 60
-        return `${mins}:${secs.toString().padStart(2, '0')} /km`
-    }
-
     return (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
             {/* Cabecera clickeable */}

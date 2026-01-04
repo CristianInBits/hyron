@@ -127,16 +127,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
         }
     }
 
-    const parseDuration = (value: string): number => {
-        const parts = value.split(':')
-        if (parts.length === 2) {
-            const mins = parseInt(parts[0]) || 0
-            const secs = parseInt(parts[1]) || 0
-            return mins * 60 + secs
-        }
-        return parseInt(value) * 60 || 0
-    }
-
     const handleAddInterval = () => {
         setIntervals([...intervals, { ...emptyInterval }])
     }

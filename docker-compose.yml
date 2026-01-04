@@ -1,0 +1,42 @@
+services:
+  # 1. Base de Datos
+  db:
+    image: postgres:16-alpine
+    container_name: hyron-db
+    environment:
+      POSTGRES_DB: hyron_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  # 2. Backend (API)
+  backend:
+    build: ./backend
+    container_name: hyron-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/hyron_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update 
+    restart: always
+
+  # 3. Frontend (Web)
+  frontend:
+    build: ./frontend
+    container_name: hyron-web
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:

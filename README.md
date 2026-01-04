@@ -166,24 +166,54 @@ PostgreSQL with Flyway migrations.
 
 ---
 
-## ▶️ Run
+## ▶️ Ejecución con Docker (Modo Producción)
+
+Esta es la forma más sencilla de probar la aplicación completa (Backend + Frontend + Base de Datos) sin instalar Java ni Node.js en tu equipo.
+
+### 1. Primer arranque o tras actualizar código
+
+Si es la primera vez que lo lanzas o **has modificado el código** y quieres ver los cambios:
+
+```bash
+docker compose up --build -d
+```
+
+*Esto compilará el proyecto y arrancará los contenedores.*
+
+### 2. Arranque rápido (Uso diario)
+
+Si ya construiste la imagen anteriormente y **no has hecho cambios en el código**, usa este comando para arrancar en segundos:
 
 ```bash
 docker compose up -d
-./gradlew bootRun
 ```
 
-API available at `http://localhost:8080`
+### 3. Parar la aplicación
+
+Para detener y eliminar los contenedores (los datos de la base de datos se conservan):
+
+```bash
+docker compose down
+```
 
 ---
 
-## 🧪 Test
+### 🌐 Acceso
 
-Import Postman collection from `/docs/postman/` (if available).
+Una vez arrancado:
 
-```bash
-./gradlew test
-```
+- **Web App:** [http://localhost](https://www.google.com/search?q=http://localhost)
+- **API Swagger/Docs:** [http://localhost:8080/swagger-ui.html](https://www.google.com/search?q=http://localhost:8080/swagger-ui.html) (si tienes Swagger) o simplemente el root de la API.
+
+---
+
+### 💡 Nota para Desarrolladores (Hot-Reload)
+
+Si quieres programar y ver los cambios en tiempo real, no uses el comando de arriba. En su lugar:
+
+1. Arranca solo la base de datos: `docker compose up -d db`
+2. Backend: `./gradlew bootRun` (en carpeta `/backend`)
+3. Frontend: `npm run dev` (en carpeta `/frontend`)
 
 ---
 
