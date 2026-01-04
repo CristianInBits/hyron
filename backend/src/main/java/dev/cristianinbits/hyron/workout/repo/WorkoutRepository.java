@@ -1,6 +1,7 @@
 package dev.cristianinbits.hyron.workout.repo;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -64,4 +65,10 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 
     Page<WorkoutSummaryResponse> findByUserIdAndTypeAndStartDateTimeBetween(
             Long userId, WorkoutType type, Instant start, Instant end, Pageable pageable);
+
+        Integer countByUserId(Long userId);
+
+        List<Workout> findByUserIdAndStartDateTimeAfter(Long userId, Instant startDateTime);
+
+        Optional<Workout> findFirstByUserIdOrderByStartDateTimeDesc(Long userId);
 }

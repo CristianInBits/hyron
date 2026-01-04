@@ -36,4 +36,6 @@ public interface ShoeRepository extends JpaRepository<Shoe, Long> {
         GROUP BY s.id
     """)
     Long getTotalDistanceMeters(@Param("shoeId") Long shoeId);
+    
+    List<Shoe> findByUserIdAndActiveOrderByInitialDistanceMetersDesc(Long userId, Boolean active);
 }
