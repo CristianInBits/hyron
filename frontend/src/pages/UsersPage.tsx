@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Users, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Users, Plus } from 'lucide-react'
 import { userService } from '../services/userService'
 import type { User, UserCreateRequest } from '../types/user'
 import Modal from '../components/ui/Modal'
 import UserForm from '../components/users/UserForm'
+import UserCard from '../components/users/UserCard'
 
 function UsersPage() {
     const [users, setUsers] = useState<User[]>([])
@@ -97,28 +98,14 @@ function UsersPage() {
             )}
 
             {!loading && !error && users.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                     {users.map(user => (
-                        <div key={user.id} className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
-                            <div>
-                                <p className="font-medium text-gray-800">{user.name}</p>
-                                <p className="text-sm text-gray-500">{user.email}</p>
-                            </div>
-                            <div className="flex space-x-2">
-                                <button
-                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-                                    onClick={() => handleEdit(user)}
-                                >
-                                    <Pencil className="w-5 h-5" />
-                                </button>
-                                <button
-                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                                    onClick={() => handleDelete(user.id)}
-                                >
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </div>
+                        <UserCard
+                            key={user.id}
+                            user={user}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
                     ))}
                 </div>
             )}
