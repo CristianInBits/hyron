@@ -2,7 +2,6 @@ import type { ShoeSummaryResponse } from './shoe'
 
 export type RunIntervalType = 'WARMUP' | 'WORK' | 'REST' | 'COOLDOWN' | 'OTHER'
 
-// Response del detalle completo
 export type RunDetailsResponse = {
     id: number
     workoutId: number
@@ -16,7 +15,6 @@ export type RunDetailsResponse = {
     intervals: RunIntervalResponse[]
 }
 
-// Response de cada intervalo
 export type RunIntervalResponse = {
     id: number
     orderIndex: number
@@ -30,7 +28,6 @@ export type RunIntervalResponse = {
     paceSecondsPerKm: number | null
 }
 
-// Request para crear/actualizar detalles
 export type RunDetailsCreateRequest = {
     totalDistanceMeters?: number | null
     totalElevationGain?: number | null
@@ -40,7 +37,6 @@ export type RunDetailsCreateRequest = {
     intervals: RunIntervalRequest[]
 }
 
-// Request de cada intervalo
 export type RunIntervalRequest = {
     type: RunIntervalType
     durationSeconds: number
@@ -51,7 +47,6 @@ export type RunIntervalRequest = {
     notes?: string | null
 }
 
-// Labels en español
 export const runIntervalTypeLabels: Record<RunIntervalType, string> = {
     WARMUP: 'Calentamiento',
     WORK: 'Trabajo',

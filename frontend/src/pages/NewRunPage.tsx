@@ -73,7 +73,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
             setLoadingData(true)
 
             // Cargar zapatillas activas
-            const shoesData = await shoeService.getActive(userId)
+            const shoesData = await shoeService.getActiveSummary(userId)
             setShoes(shoesData)
 
             // Si hay workoutId, cargar los detalles existentes

@@ -1,4 +1,4 @@
-export type ShoeResponse = {
+export type Shoe = {
     id: number
     brand: string
     model: string
@@ -6,11 +6,10 @@ export type ShoeResponse = {
     active: boolean
     initialDistanceMeters: number
     maxDistanceMeters: number | null
-    totalDistanceMeters: number | null
+    totalDistanceMeters: number
     percentageUsed: number | null
 }
 
-// Respuesta resumida (GET /active)
 export type ShoeSummaryResponse = {
     id: number
     brand: string
@@ -18,7 +17,6 @@ export type ShoeSummaryResponse = {
     nickname: string | null
 }
 
-// Request para POST
 export type ShoeCreateRequest = {
     brand: string
     model: string
@@ -27,7 +25,6 @@ export type ShoeCreateRequest = {
     maxDistanceMeters?: number | null
 }
 
-// Request para PATCH
 export type ShoeUpdateRequest = {
     brand?: string
     model?: string

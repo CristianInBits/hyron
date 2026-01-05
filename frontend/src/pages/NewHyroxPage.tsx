@@ -8,6 +8,9 @@ import HyroxBlockForm from '../components/hyrox/HyroxBlockForm'
 import type { BlockFormData } from '../components/hyrox/HyroxBlockForm'
 import type { ItemFormData } from '../components/hyrox/HyroxItemForm'
 import { getErrorMessage } from '../services/errorHandler'
+import { shoeService } from '../services/shoeService'
+import type { ShoeSummaryResponse } from '../types/shoe'
+import { Footprints } from 'lucide-react'
 
 type NewHyroxPageProps = {
     userId: number | null
@@ -72,6 +75,9 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
     const [error, setError] = useState<string | null>(null)
     const [showTemplateChoice, setShowTemplateChoice] = useState(!workoutIdParam)
 
+    const [shoes, setShoes] = useState<ShoeSummaryResponse[]>([])
+    const [shoeId, setShoeId] = useState<number | null>(null)
+
     useEffect(() => {
         if (userId) {
             loadInitialData()
@@ -83,6 +89,9 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
 
         try {
             setLoadingData(true)
+
+            const shoesData = await shoeService.getActiveSummary(userId)
+            setShoes(shoesData)
 
             if (workoutIdParam) {
                 const wId = parseInt(workoutIdParam)
@@ -101,6 +110,10 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                 try {
                     const details = await hyroxService.getDetails(userId, wId)
                     setNotes(details.notes ?? '')
+
+                    if (details.shoe) {
+                        setShoeId(details.shoe.id)
+                    }
 
                     if (details.blocks.length > 0) {
                         setBlocks(details.blocks.map(block => ({
@@ -185,6 +198,7 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
 
             // Preparar request
             const request: HyroxDetailsCreateRequest = {
+                shoeId: shoeId,
                 notes: notes.trim() || null,
                 blocks: validBlocks.map(block => ({
                     restDurationSeconds: block.restDurationSeconds,
@@ -356,18 +370,43 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                 />
             </div>
 
-            {/* Notas generales */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notas del entrenamiento (opcional)
-                </label>
-                <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Simulacro de competición, entrenamiento parcial..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
+            {/* Zapatillas y Notas */}
+            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm space-y-4">
+                {/* Selector de zapatillas */}
+                {shoes.length > 0 && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <Footprints className="w-4 h-4 inline mr-1" />
+                            Zapatillas (opcional)
+                        </label>
+                        <select
+                            value={shoeId ?? ''}
+                            onChange={(e) => setShoeId(e.target.value ? parseInt(e.target.value) : null)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                            <option value="">Sin zapatillas</option>
+                            {shoes.map(shoe => (
+                                <option key={shoe.id} value={shoe.id}>
+                                    {shoe.nickname || `${shoe.brand} ${shoe.model}`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {/* Notas */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Notas del entrenamiento (opcional)
+                    </label>
+                    <input
+                        type="text"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Simulacro de competición, entrenamiento parcial..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    />
+                </div>
             </div>
 
             {/* Rondas/Bloques */}

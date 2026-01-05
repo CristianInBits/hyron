@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Footprints, Plus } from 'lucide-react'
 import { shoeService } from '../services/shoeService'
-import type { ShoeResponse, ShoeCreateRequest, ShoeUpdateRequest } from '../types/shoe'
+import type { Shoe, ShoeCreateRequest, ShoeUpdateRequest } from '../types/shoe'
 import Modal from '../components/ui/Modal'
 import ShoeCard from '../components/shoes/ShoeCard'
 import ShoeForm from '../components/shoes/ShoeForm'
@@ -11,12 +11,12 @@ type ShoesPageProps = {
 }
 
 function ShoesPage({ userId }: ShoesPageProps) {
-    const [shoes, setShoes] = useState<ShoeResponse[]>([])
+    const [shoes, setShoes] = useState<Shoe[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [editingShoe, setEditingShoe] = useState<ShoeResponse | null>(null)
+    const [editingShoe, setEditingShoe] = useState<Shoe | null>(null)
 
     useEffect(() => {
         if (userId) {
@@ -45,7 +45,7 @@ function ShoesPage({ userId }: ShoesPageProps) {
         setIsModalOpen(true)
     }
 
-    const handleEdit = (shoe: ShoeResponse) => {
+    const handleEdit = (shoe: Shoe) => {
         setEditingShoe(shoe)
         setIsModalOpen(true)
     }
@@ -63,7 +63,7 @@ function ShoesPage({ userId }: ShoesPageProps) {
         }
     }
 
-    const handleToggleActive = async (shoe: ShoeResponse) => {
+    const handleToggleActive = async (shoe: Shoe) => {
         if (!userId) return
 
         try {

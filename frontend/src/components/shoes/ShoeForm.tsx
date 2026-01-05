@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { getErrorMessage } from '../../services/errorHandler'
-import type { ShoeResponse, ShoeCreateRequest } from '../../types/shoe'
+import type { Shoe, ShoeCreateRequest } from '../../types/shoe'
 
 type ShoeFormProps = {
-    shoe?: ShoeResponse | null
+    shoe?: Shoe | null
     onSubmit: (data: ShoeCreateRequest) => Promise<void>
     onCancel: () => void
 }

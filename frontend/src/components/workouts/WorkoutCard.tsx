@@ -507,6 +507,14 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
                 )}
             </div>
 
+            {/* Zapatilla */}
+            {details.shoe && (
+                <div className="flex items-center text-sm text-gray-600">
+                    <Footprints className="w-4 h-4 mr-2 text-gray-400" />
+                    <span>{details.shoe.nickname || `${details.shoe.brand} ${details.shoe.model}`}</span>
+                </div>
+            )}
+
             {/* Notas */}
             {details.notes && (
                 <p className="text-sm text-gray-600 italic">"{details.notes}"</p>

@@ -1,3 +1,5 @@
+import type { ShoeSummaryResponse } from './shoe'
+
 export type HyroxStation =
     | 'RUN'
     | 'SKI_ERG'
@@ -10,15 +12,14 @@ export type HyroxStation =
     | 'WALL_BALLS'
     | 'OTHER'
 
-// Response del detalle completo
 export type HyroxDetailsResponse = {
     id: number
     workoutId: number
+    shoe: ShoeSummaryResponse | null
     notes: string | null
     blocks: HyroxBlockResponse[]
 }
 
-// Response de cada bloque
 export type HyroxBlockResponse = {
     id: number
     orderIndex: number
@@ -27,7 +28,6 @@ export type HyroxBlockResponse = {
     items: HyroxItemResponse[]
 }
 
-// Response de cada item/estación
 export type HyroxItemResponse = {
     id: number
     orderIndex: number
@@ -43,20 +43,18 @@ export type HyroxItemResponse = {
     paceSecondsPerKm: number | null
 }
 
-// Request para crear/actualizar detalles
 export type HyroxDetailsCreateRequest = {
+    shoeId?: number | null
     notes?: string | null
     blocks: HyroxBlockRequest[]
 }
 
-// Request de cada bloque
 export type HyroxBlockRequest = {
     restDurationSeconds?: number | null
     notes?: string | null
     items: HyroxItemRequest[]
 }
 
-// Request de cada item/estación
 export type HyroxItemRequest = {
     station: HyroxStation
     durationSeconds: number
@@ -69,7 +67,6 @@ export type HyroxItemRequest = {
     notes?: string | null
 }
 
-// Labels en español
 export const hyroxStationLabels: Record<HyroxStation, string> = {
     RUN: 'Carrera',
     SKI_ERG: 'Ski Erg',
@@ -83,7 +80,6 @@ export const hyroxStationLabels: Record<HyroxStation, string> = {
     OTHER: 'Otro',
 }
 
-// Iconos/emojis para cada estación
 export const hyroxStationIcons: Record<HyroxStation, string> = {
     RUN: '🏃',
     SKI_ERG: '⛷️',
@@ -97,25 +93,20 @@ export const hyroxStationIcons: Record<HyroxStation, string> = {
     OTHER: '❓',
 }
 
-// Estaciones que requieren distancia
 export const distanceStations: HyroxStation[] = [
     'RUN', 'SKI_ERG', 'ROW', 'SLED_PUSH', 'SLED_PULL',
     'FARMERS_CARRY', 'SANDBAG_LUNGES', 'BURPEE_BROAD_JUMP'
 ]
 
-// Estaciones que requieren peso
 export const weightedStations: HyroxStation[] = [
     'SLED_PUSH', 'SLED_PULL', 'FARMERS_CARRY', 'SANDBAG_LUNGES', 'WALL_BALLS'
 ]
 
-// Helper para saber si requiere distancia
 export const requiresDistance = (station: HyroxStation): boolean =>
     distanceStations.includes(station)
 
-// Helper para saber si requiere peso
 export const requiresWeight = (station: HyroxStation): boolean =>
     weightedStations.includes(station)
 
-// Helper para saber si requiere reps (solo WALL_BALLS)
 export const requiresReps = (station: HyroxStation): boolean =>
     station === 'WALL_BALLS'
