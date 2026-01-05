@@ -28,18 +28,29 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
         onChange(index, { ...interval, [field]: value })
     }
 
+    const labelCls = 'block text-xs font-medium text-gray-500 mb-1'
+    const controlCls =
+        'w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
+        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
+
+    const compactControlCls =
+        'px-2 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
+        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
+
     return (
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center">
                     <GripVertical className="w-5 h-5 text-gray-300 mr-2" />
-                    <span className="text-sm font-medium text-gray-600">Intervalo {index + 1}</span>
+                    <span className="text-sm font-semibold text-gray-700">Intervalo {index + 1}</span>
                 </div>
+
                 {canRemove && (
                     <button
                         type="button"
                         onClick={() => onRemove(index)}
-                        className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Eliminar intervalo"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -49,22 +60,27 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
             {/* Tipo y Duración */}
             <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Tipo</label>
+                    <label className={labelCls}>Tipo</label>
                     <select
                         value={interval.type}
                         onChange={(e) => updateField('type', e.target.value as RunIntervalType)}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-400"
+                        className={controlCls}
                     >
-                        {intervalTypes.map(t => (
-                            <option key={t} value={t}>{runIntervalTypeLabels[t]}</option>
+                        {intervalTypes.map((t) => (
+                            <option key={t} value={t}>
+                                {runIntervalTypeLabels[t]}
+                            </option>
                         ))}
                     </select>
                 </div>
+
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Duración *</label>
+                    <label className={labelCls}>Duración *</label>
+                    {/* Ideal: que DurationInput acepte className para aplicar el mismo controlCls */}
                     <DurationInput
                         value={interval.durationSeconds}
                         onChange={(secs) => updateField('durationSeconds', secs)}
+                        inputClassName={compactControlCls}
                     />
                 </div>
             </div>
@@ -72,23 +88,24 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
             {/* Distancia y FC */}
             <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Distancia (m)</label>
+                    <label className={labelCls}>Distancia (m)</label>
                     <input
                         type="number"
                         value={interval.distanceMeters ?? ''}
                         onChange={(e) => updateField('distanceMeters', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="1000"
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-400"
+                        className={controlCls}
                     />
                 </div>
+
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">FC Media</label>
+                    <label className={labelCls}>FC Media</label>
                     <input
                         type="number"
                         value={interval.averageHr ?? ''}
                         onChange={(e) => updateField('averageHr', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="150"
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-400"
+                        className={controlCls}
                     />
                 </div>
             </div>
@@ -96,23 +113,24 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
             {/* Cadencia y Desnivel */}
             <div className="grid grid-cols-2 gap-3">
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Cadencia (spm)</label>
+                    <label className={labelCls}>Cadencia (spm)</label>
                     <input
                         type="number"
                         value={interval.cadenceSpm ?? ''}
                         onChange={(e) => updateField('cadenceSpm', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="180"
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-400"
+                        className={controlCls}
                     />
                 </div>
+
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Desnivel (m)</label>
+                    <label className={labelCls}>Desnivel (m)</label>
                     <input
                         type="number"
                         value={interval.elevationGain ?? ''}
                         onChange={(e) => updateField('elevationGain', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="50"
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-400"
+                        className={controlCls}
                     />
                 </div>
             </div>

@@ -60,6 +60,17 @@ function NewRunPage({ userId }: NewRunPageProps) {
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
+    const cardCls = 'bg-white rounded-xl p-4 shadow-sm border border-gray-100'
+    const labelCls = 'block text-sm font-medium text-gray-700 mb-1'
+
+    const controlCls =
+        'w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
+        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
+
+    const compactControlCls =
+        'px-2 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
+        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
+
     useEffect(() => {
         if (userId) {
             loadInitialData()
@@ -335,15 +346,15 @@ function NewRunPage({ userId }: NewRunPageProps) {
                 </div>
 
                 {/* Fecha del entrenamiento */}
-                <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className={`${cardCls} mb-4`}>
+                    <label className={labelCls}>
                         Fecha y hora del entrenamiento
                     </label>
                     <input
                         type="datetime-local"
                         value={workoutDate}
                         onChange={(e) => setWorkoutDate(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                        className={controlCls}
                     />
                 </div>
 
@@ -354,21 +365,22 @@ function NewRunPage({ userId }: NewRunPageProps) {
                 )}
 
                 {/* Formulario simple */}
-                <div className="bg-white rounded-lg p-4 shadow-sm space-y-4">
+                <div className={`${cardCls} mb-4`}>
                     {/* Duración y Distancia */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className={labelCls}>
                                 Duración *
                             </label>
                             <DurationInput
                                 value={simpleDuration}
                                 onChange={setSimpleDuration}
                                 className="mt-1"
+                                inputClassName={compactControlCls}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className={labelCls}>
                                 Distancia (m)
                             </label>
                             <input
@@ -376,7 +388,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                                 value={simpleDistance}
                                 onChange={(e) => setSimpleDistance(e.target.value)}
                                 placeholder="6000"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                                className={controlCls}
                             />
                         </div>
                     </div>
@@ -384,7 +396,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     {/* FC y Desnivel */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className={labelCls}>
                                 FC Media
                             </label>
                             <input
@@ -392,11 +404,11 @@ function NewRunPage({ userId }: NewRunPageProps) {
                                 value={simpleHr}
                                 onChange={(e) => setSimpleHr(e.target.value)}
                                 placeholder="145"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                                className={controlCls}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className={labelCls}>
                                 Desnivel (m)
                             </label>
                             <input
@@ -404,20 +416,20 @@ function NewRunPage({ userId }: NewRunPageProps) {
                                 value={simpleElevation}
                                 onChange={(e) => setSimpleElevation(e.target.value)}
                                 placeholder="50"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                                className={controlCls}
                             />
                         </div>
                     </div>
 
                     {/* Zapatillas */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className={labelCls}>
                             Zapatillas
                         </label>
                         <select
                             value={shoeId ?? ''}
                             onChange={(e) => setShoeId(e.target.value ? parseInt(e.target.value) : null)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                            className={controlCls}
                         >
                             <option value="">Sin zapatillas</option>
                             {shoes.map(shoe => (
@@ -430,7 +442,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
 
                     {/* Notas */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className={labelCls}>
                             Notas
                         </label>
                         <textarea
@@ -481,29 +493,29 @@ function NewRunPage({ userId }: NewRunPageProps) {
             )}
 
             {/* Fecha del entrenamiento */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className={`${cardCls} mb-4`}>
+                <label className={labelCls}>
                     Fecha y hora del entrenamiento
                 </label>
                 <input
                     type="datetime-local"
                     value={workoutDate}
                     onChange={(e) => setWorkoutDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    className={controlCls}
                 />
             </div>
 
             {/* Datos generales */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+            <div className={`${cardCls} mb-4`}>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className={labelCls}>
                             Zapatillas
                         </label>
                         <select
                             value={shoeId ?? ''}
                             onChange={(e) => setShoeId(e.target.value ? parseInt(e.target.value) : null)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                            className={controlCls}
                         >
                             <option value="">Sin zapatillas</option>
                             {shoes.map(shoe => (
@@ -514,7 +526,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className={labelCls}>
                             Notas
                         </label>
                         <input
@@ -522,7 +534,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Serie de 400m..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                            className={controlCls}
                         />
                     </div>
                 </div>
