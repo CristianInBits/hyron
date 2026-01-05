@@ -37,8 +37,7 @@ public class ShoeController {
     @PostMapping
     public ResponseEntity<ShoeResponse> createShoe(
             @PathVariable @Positive Long userId,
-            @Valid @RequestBody ShoeCreateRequest request
-    ) {
+            @Valid @RequestBody ShoeCreateRequest request) {
         ShoeResponse created = shoeService.createShoe(userId, request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -51,31 +50,26 @@ public class ShoeController {
     @GetMapping("/{id}")
     public ShoeResponse getShoe(
             @PathVariable @Positive Long userId,
-            @PathVariable @Positive Long id
-    ) {
+            @PathVariable @Positive Long id) {
         return shoeService.getShoe(userId, id);
     }
 
     @GetMapping
     public List<ShoeResponse> getAllShoes(
-            @PathVariable @Positive Long userId
-    ) {
+            @PathVariable @Positive Long userId) {
         return shoeService.getAllShoes(userId);
     }
 
-    @GetMapping("/active")
-    public List<ShoeSummaryResponse> getActiveShoes(
-            @PathVariable @Positive Long userId
-    ) {
-        return shoeService.getActiveShoes(userId);
+    @GetMapping("/active/summary")
+    public List<ShoeSummaryResponse> getActiveShoesForSelect(@PathVariable @Positive Long userId) {
+        return shoeService.getActiveShoesForSelect(userId);
     }
 
     @PatchMapping("/{id}")
     public ShoeResponse updateShoe(
             @PathVariable @Positive Long userId,
             @PathVariable @Positive Long id,
-            @Valid @RequestBody ShoeUpdateRequest request
-    ) {
+            @Valid @RequestBody ShoeUpdateRequest request) {
         return shoeService.updateShoe(userId, id, request);
     }
 
@@ -83,8 +77,7 @@ public class ShoeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteShoe(
             @PathVariable @Positive Long userId,
-            @PathVariable @Positive Long id
-    ) {
+            @PathVariable @Positive Long id) {
         shoeService.deleteShoe(userId, id);
     }
 }

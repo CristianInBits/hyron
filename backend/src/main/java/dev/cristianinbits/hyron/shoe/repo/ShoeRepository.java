@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import dev.cristianinbits.hyron.hyrox.domain.HyroxStation;
 import dev.cristianinbits.hyron.shoe.domain.Shoe;
 
 @Repository
@@ -30,23 +31,46 @@ public interface ShoeRepository extends JpaRepository<Shoe, Long> {
     Long getAccumulatedDistanceMeters(@Param("shoeId") Long shoeId);
     
     @Query("""
-            SELECT s.initialDistanceMeters + COALESCE(SUM(r.totalDistanceMeters), 0)
+            SELECT s.initialDistanceMeters
+              + COALESCE((SELECT SUM(r.totalDistanceMeters) FROM RunWorkoutDetails r WHERE r.shoe = s), 0)
+              + COALESCE((SELECT SUM(i.distanceMeters)
+                          FROM HyroxItem i
+                          WHERE i.station = :station
+                            AND i.block.details.shoe = s), 0)
             FROM Shoe s
-            LEFT JOIN RunWorkoutDetails r ON r.shoe.id = s.id
             WHERE s.id = :shoeId
-            GROUP BY s.id
             """)
-    Long getTotalDistanceMeters(@Param("shoeId") Long shoeId);
+    Long getTotalDistanceMeters(@Param("shoeId") Long shoeId, @Param("station") HyroxStation station);
+
+    @Query("""
+            SELECT s,
+              (s.initialDistanceMeters
+               + COALESCE((SELECT SUM(r.totalDistanceMeters) FROM RunWorkoutDetails r WHERE r.shoe = s), 0)
+               + COALESCE((SELECT SUM(i.distanceMeters)
+                           FROM HyroxItem i
+                           WHERE i.station = :station
+                             AND i.block.details.shoe = s), 0)
+              ) as totalDist
+            FROM Shoe s
+            WHERE s.user.id = :userId
+            ORDER BY totalDist DESC
+            """)
+    List<Object[]> findAllWithTotalDistance(@Param("userId") Long userId, @Param("station") HyroxStation station);
     
     List<Shoe> findByUserIdAndActiveOrderByInitialDistanceMetersDesc(Long userId, Boolean active);
 
     @Query("""
-            SELECT s, (s.initialDistanceMeters + COALESCE(SUM(r.totalDistanceMeters), 0)) as totalDist
+            SELECT s,
+              (s.initialDistanceMeters
+               + COALESCE((SELECT SUM(r.totalDistanceMeters) FROM RunWorkoutDetails r WHERE r.shoe = s), 0)
+               + COALESCE((SELECT SUM(i.distanceMeters)
+                           FROM HyroxItem i
+                           WHERE i.station = :station
+                             AND i.block.details.shoe = s), 0)
+              ) as totalDist
             FROM Shoe s
-            LEFT JOIN RunWorkoutDetails r ON r.shoe = s
             WHERE s.user.id = :userId AND s.active = true
-            GROUP BY s
             ORDER BY totalDist DESC
             """)
-    List<Object[]> findTopActiveShoesByDistance(@Param("userId") Long userId, Pageable pageable);
+    List<Object[]> findTopActiveShoesByDistance(@Param("userId") Long userId, @Param("station") HyroxStation station, Pageable pageable);
 }

@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.BatchSize;
 
+import dev.cristianinbits.hyron.shoe.domain.Shoe;
 import dev.cristianinbits.hyron.workout.domain.Workout;
 
 import jakarta.persistence.CascadeType;
@@ -17,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
@@ -48,6 +50,10 @@ public class HyroxWorkoutDetails {
     @Column(length = 4000)
     private String notes;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shoe_id")
+    private Shoe shoe;
+
     @OneToMany(mappedBy = "details", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     @BatchSize(size = 20)
@@ -61,9 +67,12 @@ public class HyroxWorkoutDetails {
 
     @Override
     public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        if (Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (Hibernate.getClass(this) != Hibernate.getClass(o))
+            return false;
         HyroxWorkoutDetails other = (HyroxWorkoutDetails) o;
         return getId() != null && Objects.equals(getId(), other.getId());
     }

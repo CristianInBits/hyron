@@ -19,7 +19,9 @@ import dev.cristianinbits.hyron.hyrox.dto.HyroxItemRequest;
 import dev.cristianinbits.hyron.hyrox.dto.HyroxItemResponse;
 
 import dev.cristianinbits.hyron.hyrox.repo.HyroxWorkoutDetailsRepository;
-
+import dev.cristianinbits.hyron.shoe.domain.Shoe;
+import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
+import dev.cristianinbits.hyron.shoe.repo.ShoeRepository;
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import dev.cristianinbits.hyron.workout.repo.WorkoutRepository;
@@ -28,13 +30,15 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class HyroxServiceImpl implements HyroxService {
 
     private final HyroxWorkoutDetailsRepository hyroxRepository;
     private final WorkoutRepository workoutRepository;
+    private final ShoeRepository shoeRepository;
 
     @Override
+    @Transactional
     public HyroxDetailsResponse createOrUpdateDetails(Long userId, Long workoutId, HyroxDetailsCreateRequest request) {
 
         Workout workout = workoutRepository.findByIdAndUserId(workoutId, userId)
@@ -45,9 +49,18 @@ public class HyroxServiceImpl implements HyroxService {
         }
 
         HyroxWorkoutDetails details = hyroxRepository.findByWorkoutId(workoutId)
-            .orElseGet(() -> HyroxWorkoutDetails.builder().workout(workout).build());
+                .orElseGet(() -> HyroxWorkoutDetails.builder().workout(workout).build());
 
         details.setNotes(normalizeString(request.notes()));
+
+        if (request.shoeId() != null) {
+            Shoe shoe = shoeRepository.findByIdAndUserId(request.shoeId(), userId)
+                    .orElseThrow(() -> new NotFoundException("Shoe not found"));
+            details.setShoe(shoe);
+        } else {
+            details.setShoe(null);
+        }
+
         details.getBlocks().clear();
         hyroxRepository.flush();
 
@@ -62,7 +75,6 @@ public class HyroxServiceImpl implements HyroxService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public HyroxDetailsResponse getDetails(Long userId, Long workoutId) {
         if (!workoutRepository.existsByIdAndUserId(workoutId, userId)) {
             throw new NotFoundException("Workout not found");
@@ -75,6 +87,7 @@ public class HyroxServiceImpl implements HyroxService {
     }
 
     @Override
+    @Transactional
     public void deleteDetails(Long userId, Long workoutId) {
         if (!hyroxRepository.existsByWorkout_IdAndWorkout_User_Id(workoutId, userId)) {
             throw new NotFoundException("Hyrox details not found");
@@ -122,11 +135,11 @@ public class HyroxServiceImpl implements HyroxService {
         return new HyroxDetailsResponse(
                 details.getId(),
                 details.getWorkout().getId(),
+                details.getShoe() != null ? toSummaryResponse(details.getShoe()) : null,
                 details.getNotes(),
                 details.getBlocks().stream()
                         .map(this::toBlockResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     private HyroxBlockResponse toBlockResponse(HyroxBlock block) {
@@ -137,8 +150,7 @@ public class HyroxServiceImpl implements HyroxService {
                 block.getNotes(),
                 block.getItems().stream()
                         .map(this::toItemResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     private HyroxItemResponse toItemResponse(HyroxItem item) {
@@ -154,8 +166,7 @@ public class HyroxServiceImpl implements HyroxService {
                 item.getAverageHr(),
                 item.getRpe(),
                 item.getNotes(),
-                calculatePace(item)
-        );
+                calculatePace(item));
     }
 
     private Integer calculatePace(HyroxItem item) {
@@ -170,5 +181,13 @@ public class HyroxServiceImpl implements HyroxService {
 
     private String normalizeString(String value) {
         return (value != null && !value.isBlank()) ? value.trim() : null;
+    }
+
+    private ShoeSummaryResponse toSummaryResponse(Shoe shoe) {
+        return new ShoeSummaryResponse(
+                shoe.getId(),
+                shoe.getBrand(),
+                shoe.getModel(),
+                shoe.getNickname());
     }
 }

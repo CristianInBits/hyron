@@ -136,6 +136,7 @@ public class UserStatsServiceImpl implements UserStatsService {
     private List<ShoeStatsResponse> getTopShoes(Long userId) {
         List<Object[]> results = shoeRepository.findTopActiveShoesByDistance(
                 userId,
+                HyroxStation.RUN,
                 PageRequest.of(0, 3));
 
         return results.stream()

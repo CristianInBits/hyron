@@ -8,15 +8,16 @@ import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
 import dev.cristianinbits.hyron.shoe.dto.ShoeUpdateRequest;
 
 public interface ShoeService {
-    ShoeResponse createShoe(Long userId, ShoeCreateRequest request);
-
-    ShoeResponse getShoe(Long userId, Long shoeId);
-
+    
     List<ShoeResponse> getAllShoes(Long userId);
-
-    List<ShoeSummaryResponse> getActiveShoes(Long userId);
-
+    
+    List<ShoeSummaryResponse> getActiveShoesForSelect(Long userId);
+    
+    ShoeResponse getShoe(Long userId, Long shoeId);
+    
+    ShoeResponse createShoe(Long userId, ShoeCreateRequest request);
+    
     ShoeResponse updateShoe(Long userId, Long shoeId, ShoeUpdateRequest request);
-
+    
     void deleteShoe(Long userId, Long shoeId);
 }

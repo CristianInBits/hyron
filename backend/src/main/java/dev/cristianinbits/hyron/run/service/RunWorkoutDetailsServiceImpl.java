@@ -129,7 +129,7 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
                 details.getId(),
                 details.getWorkout().getId(),
                 details.getTotalDistanceMeters(),
-                totalDurationSeconds, // 👈 NUEVO
+                totalDurationSeconds,
                 details.getTotalElevationGain(),
                 details.getAverageHr(),
                 toShoeSummary(details.getShoe()),
