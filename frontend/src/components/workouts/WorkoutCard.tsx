@@ -44,10 +44,10 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md overflow-hidden">
             {/* Cabecera clickeable */}
             <div
-                className="p-4 flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                className="p-4 flex items-center cursor-pointer transition-colors hover:bg-gray-50"
                 onClick={() => onToggleExpand(workout)}
             >
                 {/* Icono del tipo */}
@@ -67,40 +67,47 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                 {/* RPE Badge */}
                 {workout.globalRpe && (
                     <div className="mr-4">
-                        <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">
                             RPE {workout.globalRpe}
                         </span>
                     </div>
                 )}
 
-                {/* 3. ENVOLVER LAS ACCIONES CON LA CONDICIÓN */}
-                {showActions && (
-                    <div className="flex items-center space-x-2">
-                        <button
-                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                onEdit(workout)
-                            }}
-                        >
-                            <Pencil className="w-5 h-5" />
-                        </button>
-                        <button
-                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                onDelete(workout.id)
-                            }}
-                        >
-                            <Trash2 className="w-5 h-5" />
-                        </button>
-                        {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-gray-400" />
-                        ) : (
-                            <ChevronDown className="w-5 h-5 text-gray-400" />
-                        )}
-                    </div>
-                )}
+                {/* Acciones + Chevron */}
+                <div className="flex items-center space-x-1">
+                    {showActions && (
+                        <>
+                            <button
+                                className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onEdit(workout)
+                                }}
+                                title="Editar"
+                            >
+                                <Pencil className="w-5 h-5" />
+                            </button>
+
+                            <button
+                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onDelete(workout.id)
+                                }}
+                                title="Eliminar"
+                            >
+                                <Trash2 className="w-5 h-5" />
+                            </button>
+                        </>
+                    )}
+
+                    {/* Chevron siempre visible */}
+                    {isExpanded ? (
+                        <ChevronUp className="w-5 h-5 text-gray-400 ml-1" />
+                    ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-400 ml-1" />
+                    )}
+                </div>
             </div>
 
             {/* Detalles expandidos (Solo se muestran si isExpanded es true, 

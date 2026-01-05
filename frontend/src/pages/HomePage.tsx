@@ -190,17 +190,22 @@ function HomePage({ userId }: HomePageProps) {
             {/* Accesos rápidos */}
             <div>
                 <h2 className="text-sm font-semibold text-gray-500 mb-3">Nuevo entrenamiento</h2>
-                <div className="grid grid-cols-4 gap-3">
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {Object.entries(workoutConfig).map(([type, config]) => {
                         const Icon = config.icon
                         return (
                             <button
                                 key={type}
                                 onClick={() => navigate(`/new/${type.toLowerCase()}`)}
-                                className={`flex flex-col items-center p-4 ${config.bg} rounded-xl hover:opacity-80 transition-opacity`}
+                                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md hover:bg-gray-50 flex flex-col items-center text-center"
                             >
-                                <Icon className={`w-8 h-8 ${config.color} mb-1`} />
-                                <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
+                                <div className={`p-2.5 rounded-lg ${config.bg} mb-2`}>
+                                    <Icon className={`w-7 h-7 ${config.color}`} />
+                                </div>
+
+                                <span className="text-sm font-medium text-gray-800">{config.label}</span>
+                                <span className="text-xs text-gray-500 mt-0.5">Nuevo</span>
                             </button>
                         )
                     })}
@@ -276,10 +281,10 @@ function HomePage({ userId }: HomePageProps) {
                                         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all ${shoe.percentageUsed >= 100
-                                                        ? 'bg-red-500'
-                                                        : shoe.percentageUsed >= 80
-                                                            ? 'bg-orange-500'
-                                                            : 'bg-green-500'
+                                                    ? 'bg-red-500'
+                                                    : shoe.percentageUsed >= 80
+                                                        ? 'bg-orange-500'
+                                                        : 'bg-green-500'
                                                     }`}
                                                 style={{ width: `${Math.min(shoe.percentageUsed, 100)}%` }}
                                             />

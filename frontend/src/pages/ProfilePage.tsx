@@ -4,6 +4,12 @@ import { User, Footprints, Dumbbell, Settings, Users } from 'lucide-react'
 function ProfilePage() {
     const navigate = useNavigate()
 
+    const itemBase =
+        'w-full flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md hover:bg-gray-50'
+
+    const leftBase = 'flex items-center'
+    const iconBase = 'p-2.5 rounded-lg mr-3'
+
     return (
         <div>
             <div className="flex items-center mb-4">
@@ -12,33 +18,44 @@ function ProfilePage() {
             </div>
 
             <div className="space-y-3">
-                <button
-                    className="w-full flex items-center p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50"
-                    onClick={() => navigate('/users')}
-                >
-                    <Users className="w-6 h-6 mr-3 text-gray-600" />
-                    <span className="text-gray-700">Usuarios</span>
+                <button className={itemBase} onClick={() => navigate('/users')}>
+                    <div className={leftBase}>
+                        <div className={`${iconBase} bg-gray-100 text-gray-800`}>
+                            <Users className="w-6 h-6" />
+                        </div>
+                        <span className="text-gray-800 font-medium">Usuarios</span>
+                    </div>
+                    <span className="text-gray-400">›</span>
                 </button>
 
-                <button
-                    className="w-full flex items-center p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50"
-                    onClick={() => navigate('/shoes')}
-                >
-                    <Footprints className="w-6 h-6 mr-3 text-gray-600" />
-                    <span className="text-gray-700">Mis Zapatillas</span>
+                <button className={itemBase} onClick={() => navigate('/shoes')}>
+                    <div className={leftBase}>
+                        <div className={`${iconBase} bg-gray-100 text-gray-800`}>
+                            <Footprints className="w-6 h-6" />
+                        </div>
+                        <span className="text-gray-800 font-medium">Mis Zapatillas</span>
+                    </div>
+                    <span className="text-gray-400">›</span>
                 </button>
 
-                <button
-                    className="w-full flex items-center p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50"
-                    onClick={() => navigate('/exercises')}
-                >
-                    <Dumbbell className="w-6 h-6 mr-3 text-purple-600" />
-                    <span className="text-gray-700">Mis Ejercicios</span>
+                <button className={itemBase} onClick={() => navigate('/exercises')}>
+                    <div className={leftBase}>
+                        <div className={`${iconBase} bg-gray-100 text-gray-800`}>
+                            <Dumbbell className="w-6 h-6" />
+                        </div>
+                        <span className="text-gray-800 font-medium">Mis Ejercicios</span>
+                    </div>
+                    <span className="text-gray-400">›</span>
                 </button>
 
-                <button className="w-full flex items-center p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50">
-                    <Settings className="w-6 h-6 mr-3 text-gray-600" />
-                    <span className="text-gray-700">Configuración</span>
+                <button className={itemBase}>
+                    <div className={leftBase}>
+                        <div className={`${iconBase} bg-gray-100 text-gray-600`}>
+                            <Settings className="w-6 h-6" />
+                        </div>
+                        <span className="text-gray-800 font-medium">Configuración</span>
+                    </div>
+                    <span className="text-gray-400">›</span>
                 </button>
             </div>
         </div>
