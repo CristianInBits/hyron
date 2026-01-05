@@ -137,6 +137,32 @@ User
 
 ---
 
+### User Stats
+
+|Method|Endpoint|Description|
+|---|---|---|
+|GET|`/api/users/{userId}/stats`|Get aggregated user statistics (all-time, weekly, monthly)|
+
+**Includes:**
+
+- Total workouts
+
+- Total duration (seconds)
+
+- Total run distance (RUN workouts + Hyrox RUN)
+
+- Total swim distance
+
+- Weekly & monthly breakdowns
+
+- Workouts by type (weekly)
+
+- Last workout summary
+
+- Top 3 active running shoes by distance
+
+---
+
 ## 🔑 Business Rules
 
 | Rule | Description |

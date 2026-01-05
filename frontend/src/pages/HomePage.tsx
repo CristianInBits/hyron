@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Dog, Fish, Dumbbell, Flame, TrendingUp, Calendar,
-    MapPin, Footprints, ChevronRight, Zap, Target
+    MapPin, Footprints, ChevronRight, Zap, Target, Award
 } from 'lucide-react'
 import { statsService } from '../services/statsService'
 import { userService } from '../services/userService'
@@ -59,7 +59,7 @@ function HomePage({ userId }: HomePageProps) {
     }
 
     const formatDuration = (seconds: number | null) => {
-        if (!seconds) return '-'
+        if (!seconds || seconds === 0) return '-'
         const hours = Math.floor(seconds / 3600)
         const mins = Math.floor((seconds % 3600) / 60)
 
@@ -70,7 +70,7 @@ function HomePage({ userId }: HomePageProps) {
     }
 
     const formatDistance = (meters: number | null) => {
-        if (!meters) return '-'
+        if (!meters || meters === 0) return '-'
         return `${(meters / 1000).toFixed(1)} km`
     }
 
@@ -123,7 +123,7 @@ function HomePage({ userId }: HomePageProps) {
                     ¡Hola, {user?.name?.split(' ')[0] || 'Atleta'}! 👋
                 </h1>
                 <p className="text-gray-500">
-                    {stats?.totalWorkouts
+                    {stats && stats.totalWorkouts > 0
                         ? `${stats.totalWorkouts} entrenamientos registrados`
                         : 'Comienza a registrar tus entrenamientos'
                     }
@@ -140,7 +140,7 @@ function HomePage({ userId }: HomePageProps) {
                     <TrendingUp className="w-5 h-5 opacity-75" />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <p className="text-3xl font-bold">{stats?.workoutsThisWeek || 0}</p>
                         <p className="text-sm text-white/75">Entrenos</p>
@@ -149,15 +149,29 @@ function HomePage({ userId }: HomePageProps) {
                         <p className="text-3xl font-bold">{formatDuration(stats?.totalDurationSecondsThisWeek ?? null)}</p>
                         <p className="text-sm text-white/75">Tiempo</p>
                     </div>
-                    <div>
-                        <p className="text-3xl font-bold">{formatDistance(stats?.totalDistanceMetersThisWeek ?? null)}</p>
-                        <p className="text-sm text-white/75">Distancia</p>
+                </div>
+
+                {/* Distancias separadas */}
+                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/20">
+                    <div className="flex items-center">
+                        <Dog className="w-4 h-4 mr-2 opacity-75" />
+                        <div>
+                            <p className="text-lg font-semibold">{formatDistance(stats?.totalRunDistanceMetersThisWeek ?? null)}</p>
+                            <p className="text-xs text-white/60">Corriendo</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center">
+                        <Fish className="w-4 h-4 mr-2 opacity-75" />
+                        <div>
+                            <p className="text-lg font-semibold">{formatDistance(stats?.totalSwimDistanceMetersThisWeek ?? null)}</p>
+                            <p className="text-xs text-white/60">Nadando</p>
+                        </div>
                     </div>
                 </div>
 
                 {/* Desglose por tipo */}
-                {stats?.workoutsThisWeek ? (
-                    <div className="flex items-center justify-center space-x-4 mt-4 pt-4 border-t border-white/20">
+                {stats && stats.workoutsThisWeek > 0 && (
+                    <div className="flex items-center justify-center space-x-3 mt-4 pt-3 border-t border-white/20">
                         {Object.entries(stats.workoutsByTypeThisWeek).map(([type, count]) => {
                             if (count === 0) return null
                             const config = workoutConfig[type as WorkoutType]
@@ -170,7 +184,7 @@ function HomePage({ userId }: HomePageProps) {
                             )
                         })}
                     </div>
-                ) : null}
+                )}
             </div>
 
             {/* Accesos rápidos */}
@@ -183,12 +197,7 @@ function HomePage({ userId }: HomePageProps) {
                             <button
                                 key={type}
                                 onClick={() => navigate(`/new/${type.toLowerCase()}`)}
-                                className={`flex flex-col items-center justify-center p-4 ${config.bg} rounded-xl
-                                shadow-sm hover:shadow-lg
-                                transition-all duration-200 ease-out
-                                transform hover:-translate-y-1 hover:scale-105
-                                active:scale-100
-                                `}
+                                className={`flex flex-col items-center p-4 ${config.bg} rounded-xl hover:opacity-80 transition-opacity`}
                             >
                                 <Icon className={`w-8 h-8 ${config.color} mb-1`} />
                                 <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
@@ -267,10 +276,10 @@ function HomePage({ userId }: HomePageProps) {
                                         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all ${shoe.percentageUsed >= 100
-                                                    ? 'bg-red-500'
-                                                    : shoe.percentageUsed >= 80
-                                                        ? 'bg-orange-500'
-                                                        : 'bg-green-500'
+                                                        ? 'bg-red-500'
+                                                        : shoe.percentageUsed >= 80
+                                                            ? 'bg-orange-500'
+                                                            : 'bg-green-500'
                                                     }`}
                                                 style={{ width: `${Math.min(shoe.percentageUsed, 100)}%` }}
                                             />
@@ -283,29 +292,83 @@ function HomePage({ userId }: HomePageProps) {
                 </div>
             )}
 
+            {/* Totales históricos */}
+            {stats && stats.totalWorkouts > 0 && (
+                <div>
+                    <div className="flex items-center mb-3">
+                        <Award className="w-5 h-5 text-gray-400 mr-2" />
+                        <h2 className="text-sm font-semibold text-gray-500">Total histórico</h2>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-4">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-gray-800">{stats.totalWorkouts}</p>
+                                <p className="text-xs text-gray-500">Entrenos</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-gray-800">
+                                    {formatDuration(stats.totalDurationSeconds)}
+                                </p>
+                                <p className="text-xs text-gray-500">Tiempo total</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
+                            <div className="flex items-center justify-center">
+                                <Dog className="w-4 h-4 text-green-500 mr-2" />
+                                <div className="text-center">
+                                    <p className="text-lg font-semibold text-gray-800">
+                                        {formatDistance(stats.totalRunDistanceMeters)}
+                                    </p>
+                                    <p className="text-xs text-gray-500">Corriendo</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-center">
+                                <Fish className="w-4 h-4 text-blue-500 mr-2" />
+                                <div className="text-center">
+                                    <p className="text-lg font-semibold text-gray-800">
+                                        {formatDistance(stats.totalSwimDistanceMeters)}
+                                    </p>
+                                    <p className="text-xs text-gray-500">Nadando</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Resumen mensual */}
             {stats && stats.workoutsThisMonth > 0 && (
-                <div className="bg-gray-50 rounded-xl p-4">
+                <div>
                     <div className="flex items-center mb-3">
                         <Target className="w-5 h-5 text-gray-400 mr-2" />
                         <h2 className="text-sm font-semibold text-gray-500">Este mes</h2>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                            <p className="text-2xl font-bold text-gray-800">{stats.workoutsThisMonth}</p>
-                            <p className="text-xs text-gray-500">Entrenos</p>
+                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                        <div className="grid grid-cols-2 gap-4 mb-3">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-gray-800">{stats.workoutsThisMonth}</p>
+                                <p className="text-xs text-gray-500">Entrenos</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-gray-800">
+                                    {formatDuration(stats.totalDurationSecondsThisMonth)}
+                                </p>
+                                <p className="text-xs text-gray-500">Tiempo</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-800">
-                                {formatDuration(stats.totalDurationSecondsThisMonth)}
-                            </p>
-                            <p className="text-xs text-gray-500">Tiempo</p>
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-800">
-                                {formatDistance(stats.totalDistanceMetersThisMonth)}
-                            </p>
-                            <p className="text-xs text-gray-500">Distancia</p>
+                        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
+                            <div className="flex items-center justify-center">
+                                <Dog className="w-4 h-4 text-green-500 mr-2" />
+                                <span className="text-sm text-gray-600">
+                                    {formatDistance(stats.totalRunDistanceMetersThisMonth)}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-center">
+                                <Fish className="w-4 h-4 text-blue-500 mr-2" />
+                                <span className="text-sm text-gray-600">
+                                    {formatDistance(stats.totalSwimDistanceMetersThisMonth)}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -8,21 +8,19 @@ import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import dev.cristianinbits.hyron.workout.dto.WorkoutSummaryResponse;
 
 public record UserStatsResponse(
-
-    Integer totalWorkouts,
-
-    Integer workoutsThisWeek,
-    Integer totalDurationSecondsThisWeek,
-    Integer totalDistanceMetersThisWeek,
-    
-    Integer workoutsThisMonth,
-    Integer totalDurationSecondsThisMonth,
-    Integer totalDistanceMetersThisMonth,
-    
-    Map<WorkoutType, Integer> workoutsByTypeThisWeek,
-
-    WorkoutSummaryResponse lastWorkout,
-
-    List<ShoeStatsResponse> topShoes
+        Long totalWorkouts,
+        Long totalDurationSeconds,
+        Long totalRunDistanceMeters,
+        Long totalSwimDistanceMeters,
+        Long workoutsThisWeek,
+        Long totalDurationSecondsThisWeek,
+        Long totalRunDistanceMetersThisWeek,
+        Long totalSwimDistanceMetersThisWeek,
+        Long workoutsThisMonth,
+        Long totalDurationSecondsThisMonth,
+        Long totalRunDistanceMetersThisMonth,
+        Long totalSwimDistanceMetersThisMonth,
+        Map<WorkoutType, Integer> workoutsByTypeThisWeek,
+        WorkoutSummaryResponse lastWorkout,
+        List<ShoeStatsResponse> topShoes
 ) {}
-

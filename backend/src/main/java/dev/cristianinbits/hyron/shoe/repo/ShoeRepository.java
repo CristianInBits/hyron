@@ -3,6 +3,7 @@ package dev.cristianinbits.hyron.shoe.repo;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,13 +30,23 @@ public interface ShoeRepository extends JpaRepository<Shoe, Long> {
     Long getAccumulatedDistanceMeters(@Param("shoeId") Long shoeId);
     
     @Query("""
-        SELECT s.initialDistanceMeters + COALESCE(SUM(r.totalDistanceMeters), 0)
-        FROM Shoe s
-        LEFT JOIN RunWorkoutDetails r ON r.shoe.id = s.id
-        WHERE s.id = :shoeId
-        GROUP BY s.id
-    """)
+            SELECT s.initialDistanceMeters + COALESCE(SUM(r.totalDistanceMeters), 0)
+            FROM Shoe s
+            LEFT JOIN RunWorkoutDetails r ON r.shoe.id = s.id
+            WHERE s.id = :shoeId
+            GROUP BY s.id
+            """)
     Long getTotalDistanceMeters(@Param("shoeId") Long shoeId);
     
     List<Shoe> findByUserIdAndActiveOrderByInitialDistanceMetersDesc(Long userId, Boolean active);
+
+    @Query("""
+            SELECT s, (s.initialDistanceMeters + COALESCE(SUM(r.totalDistanceMeters), 0)) as totalDist
+            FROM Shoe s
+            LEFT JOIN RunWorkoutDetails r ON r.shoe = s
+            WHERE s.user.id = :userId AND s.active = true
+            GROUP BY s
+            ORDER BY totalDist DESC
+            """)
+    List<Object[]> findTopActiveShoesByDistance(@Param("userId") Long userId, Pageable pageable);
 }

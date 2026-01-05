@@ -11,14 +11,25 @@ export type ShoeStatsResponse = {
 }
 
 export type UserStatsResponse = {
+
     totalWorkouts: number
+    totalDurationSeconds: number
+    totalRunDistanceMeters: number
+    totalSwimDistanceMeters: number
+
     workoutsThisWeek: number
-    totalDurationSecondsThisWeek: number | null
-    totalDistanceMetersThisWeek: number | null
+    totalDurationSecondsThisWeek: number
+    totalRunDistanceMetersThisWeek: number
+    totalSwimDistanceMetersThisWeek: number
+
     workoutsThisMonth: number
-    totalDurationSecondsThisMonth: number | null
-    totalDistanceMetersThisMonth: number | null
+    totalDurationSecondsThisMonth: number
+    totalRunDistanceMetersThisMonth: number
+    totalSwimDistanceMetersThisMonth: number
+
     workoutsByTypeThisWeek: Record<WorkoutType, number>
+
     lastWorkout: WorkoutSummaryResponse | null
+    
     topShoes: ShoeStatsResponse[]
 }
