@@ -11,9 +11,6 @@ import dev.cristianinbits.hyron.workout.dto.WorkoutUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Business operations for workout management.
- */
 public interface WorkoutService {
 
     WorkoutDetailResponse createWorkout(Long userId, WorkoutCreateRequest request);

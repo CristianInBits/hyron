@@ -32,7 +32,6 @@ function UserSelector({ selectedUserId, onUserChange }: UserSelectorProps) {
         loadUsers()
     }, [])
 
-    // Recargar cuando el dropdown se abre
     const handleOpen = async () => {
         if (!isOpen) {
             await loadUsers()

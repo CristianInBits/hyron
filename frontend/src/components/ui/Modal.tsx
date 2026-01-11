@@ -9,7 +9,6 @@ type ModalProps = {
 }
 
 function Modal({ isOpen, onClose, title, children }: ModalProps) {
-    // Bloquear scroll cuando el modal está abierto
     useEffect(() => {
         document.body.style.overflow = isOpen ? 'hidden' : ''
         return () => {

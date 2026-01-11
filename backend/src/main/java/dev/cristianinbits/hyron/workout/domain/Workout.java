@@ -32,10 +32,6 @@ import java.util.Objects;
 
 import org.hibernate.Hibernate;
 
-/**
- * Represents a training session performed by a user.
- * Each workout has a type and can optionally have type-specific details attached.
- */
 @Entity
 @Table(name = "workouts")
 @Getter
@@ -87,8 +83,6 @@ public class Workout {
     
     @OneToOne(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private GymWorkoutDetails gymDetails;
-
-    // ==================== Bidirectional relationship helpers ====================
 
     public void setHyroxDetails(HyroxWorkoutDetails details) {
         if (this.hyroxDetails != null) {

@@ -17,5 +17,5 @@ public record SwimIntervalResponse(
     Integer rpe,
     Set<SwimEquipment> equipment,
     String notes,
-    Integer paceSecondsPer100m // Calculado para el frontend
+    Integer paceSecondsPer100m
 ) {}

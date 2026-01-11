@@ -37,12 +37,11 @@ public class GymSet {
     private Integer reps;
 
     @Column(name = "rpe")
-    private Double rpe; // Double porque a veces es 8.5
+    private Double rpe;
 
     @Column(name = "rest_seconds")
     private Integer restSeconds;
     
-    // Opcional, por si quieres registrar duración de la serie (Time Under Tension)
     @Column(name = "execution_seconds")
     private Integer executionSeconds; 
 

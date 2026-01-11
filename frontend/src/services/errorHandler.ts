@@ -10,7 +10,6 @@ export function getErrorMessage(error: unknown): string {
     if (error instanceof AxiosError) {
         const data = error.response?.data as ApiErrorResponse | undefined
 
-        // Intentar obtener el mensaje del backend
         if (data?.message) {
             return data.message
         }
@@ -18,7 +17,6 @@ export function getErrorMessage(error: unknown): string {
             return data.error
         }
 
-        // Mensajes por código de estado
         switch (error.response?.status) {
             case 400:
                 return 'Datos inválidos'

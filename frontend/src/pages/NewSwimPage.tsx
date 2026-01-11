@@ -34,18 +34,14 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
     const [searchParams] = useSearchParams()
     const workoutIdParam = searchParams.get('workoutId')
 
-    // Modo del formulario
     const [mode, setMode] = useState<SwimMode | null>(null)
 
-    // Estado para modo simple
     const [simpleDistance, setSimpleDistance] = useState('')
     const [simpleDuration, setSimpleDuration] = useState(0)
     const [simpleStroke, setSimpleStroke] = useState<SwimStroke>('FREESTYLE')
 
-    // Estado para modo intervalos
     const [intervals, setIntervals] = useState<SwimIntervalFormData[]>([{ ...emptyInterval }])
 
-    // Estado compartido
     const [poolType, setPoolType] = useState<PoolType>('SHORT_COURSE')
     const [notes, setNotes] = useState('')
     const [workoutId, setWorkoutId] = useState<number | null>(workoutIdParam ? parseInt(workoutIdParam) : null)
@@ -54,7 +50,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         return now.toISOString().slice(0, 16)
     })
 
-    // Estado de UI
     const [loading, setLoading] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -75,12 +70,10 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
                 const wId = parseInt(workoutIdParam)
                 setWorkoutId(wId)
 
-                // Cargar datos del workout base
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
                 } catch {
-                    // Si falla, usar fecha actual
                 }
 
                 try {
@@ -108,7 +101,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
                         })))
                     }
                 } catch {
-                    // No hay detalles aún
                 }
             }
         } catch (err) {
@@ -174,7 +166,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
                 }))
             }
 
-            // Crear o actualizar workout
             let wId = workoutId
             if (!wId) {
                 const workout = await workoutService.create(userId, {
@@ -189,7 +180,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
                 })
             }
 
-            // Calcular totales
             let totalDistance: number | null = null
             let totalTime: number | null = null
 
@@ -220,7 +210,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         }
     }
 
-    // Pantalla sin usuario
     if (!userId) {
         return (
             <div className="bg-blue-50 min-h-screen -m-4 p-4">
@@ -233,7 +222,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         )
     }
 
-    // Pantalla de carga
     if (loadingData) {
         return (
             <div className="bg-blue-50 min-h-screen -m-4 p-4">
@@ -246,7 +234,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         )
     }
 
-    // Pantalla de selección de modo
     if (!mode) {
         return (
             <div className="bg-blue-50 min-h-screen -m-4 p-4">
@@ -290,7 +277,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         )
     }
 
-    // Formulario modo SIMPLE
     if (mode === 'simple') {
         return (
             <div className="bg-blue-50 min-h-screen -m-4 p-4">
@@ -418,7 +404,6 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         )
     }
 
-    // Formulario modo INTERVALOS
     return (
         <div className="bg-blue-50 min-h-screen -m-4 p-4">
             {/* Header */}

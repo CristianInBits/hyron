@@ -125,8 +125,6 @@ public class WorkoutServiceImpl implements WorkoutService {
         workoutRepository.deleteById(workoutId);
     }
 
-    // ==================== Helpers ====================
-
     private void updateDates(Workout workout, Instant newStart, Instant newEnd) {
         Instant effectiveStart = newStart != null ? newStart : workout.getStartDateTime();
         Instant effectiveEnd = newEnd != null ? newEnd : workout.getEndDateTime();

@@ -38,7 +38,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
     const [searchParams] = useSearchParams()
     const workoutIdParam = searchParams.get('workoutId')
 
-    // Estado del formulario
     const [workoutId, setWorkoutId] = useState<number | null>(workoutIdParam ? parseInt(workoutIdParam) : null)
     const [workoutDate, setWorkoutDate] = useState<string>(() => {
         const now = new Date()
@@ -48,10 +47,8 @@ function NewGymPage({ userId }: NewGymPageProps) {
     const [totalDuration, setTotalDuration] = useState<number>(0)
     const [exercisesList, setExercisesList] = useState<ExerciseFormData[]>([{ ...emptyExercise }])
 
-    // Catálogo de ejercicios
     const [availableExercises, setAvailableExercises] = useState<ExerciseSummaryResponse[]>([])
 
-    // Estado de UI
     const [loading, setLoading] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -68,7 +65,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
         try {
             setLoadingData(true)
 
-            // Cargar catálogo de ejercicios activos
             const exercises = await exerciseService.getActive(userId)
             setAvailableExercises(exercises)
 
@@ -76,15 +72,12 @@ function NewGymPage({ userId }: NewGymPageProps) {
                 const wId = parseInt(workoutIdParam)
                 setWorkoutId(wId)
 
-                // Cargar datos del workout base
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
                 } catch {
-                    // Si falla, usar fecha actual
                 }
 
-                // Cargar detalles del gym
                 try {
                     const details = await gymService.getDetails(userId, wId)
                     setNotes(details.notes ?? '')
@@ -107,7 +100,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
                         })))
                     }
                 } catch {
-                    // No hay detalles aún
                 }
             }
         } catch (err) {
@@ -117,7 +109,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
         }
     }
 
-    // Generar UUID simple
     const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
             const r = Math.random() * 16 | 0
@@ -126,7 +117,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
         })
     }
 
-    // Calcular grupos de superseries con etiquetas (A, B, C...)
     const getSupersetGroups = (): Map<string, string> => {
         const groups = new Map<string, string>()
         const supersetIds = [...new Set(exercisesList.filter(ex => ex.supersetId).map(ex => ex.supersetId!))]
@@ -172,7 +162,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
         const leavingSupersetId = updated[exerciseIndex].supersetId
         updated[exerciseIndex] = { ...updated[exerciseIndex], supersetId: null }
 
-        // Si solo queda 1 ejercicio en esa superserie, quitarlo también
         if (leavingSupersetId) {
             const remainingInSuperset = updated.filter(ex => ex.supersetId === leavingSupersetId)
             if (remainingInSuperset.length === 1) {
@@ -187,14 +176,12 @@ function NewGymPage({ userId }: NewGymPageProps) {
     const handleSubmit = async () => {
         if (!userId) return
 
-        // Validar que hay al menos un ejercicio con ejercicio seleccionado
         const validExercises = exercisesList.filter(ex => ex.exerciseId !== null)
         if (validExercises.length === 0) {
             setError('Añade al menos un ejercicio')
             return
         }
 
-        // Validar que cada ejercicio tiene al menos una serie con reps o tiempo
         for (const ex of validExercises) {
             const validSets = ex.sets.filter(s => s.reps !== null || s.executionSeconds !== null)
             if (validSets.length === 0) {
@@ -207,7 +194,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
             setLoading(true)
             setError(null)
 
-            // Crear o actualizar workout
             let wId = workoutId
             if (!wId) {
                 const workout = await workoutService.create(userId, {
@@ -222,7 +208,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
                 })
             }
 
-            // Preparar request
             const request: GymDetailsCreateRequest = {
                 totalDurationSeconds: totalDuration > 0 ? totalDuration : null,
                 notes: notes.trim() || null,
@@ -252,7 +237,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
         }
     }
 
-    // Pantalla sin usuario
     if (!userId) {
         return (
             <div className="bg-purple-50 min-h-screen -m-4 p-4">
@@ -265,7 +249,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
         )
     }
 
-    // Pantalla de carga
     if (loadingData) {
         return (
             <div className="bg-purple-50 min-h-screen -m-4 p-4">
@@ -278,7 +261,6 @@ function NewGymPage({ userId }: NewGymPageProps) {
         )
     }
 
-    // Sin ejercicios en el catálogo
     if (availableExercises.length === 0) {
         return (
             <div className="bg-purple-50 min-h-screen -m-4 p-4">

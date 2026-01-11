@@ -6,7 +6,6 @@ export type SwimStroke = 'FREESTYLE' | 'BACKSTROKE' | 'BREASTSTROKE' | 'BUTTERFL
 
 export type SwimEquipment = 'PADDLES' | 'PULL_BUOY' | 'FINS' | 'KICKBOARD' | 'SNORKEL' | 'BAND'
 
-// Response del detalle completo
 export type SwimDetailsResponse = {
     id: number
     workoutId: number
@@ -18,7 +17,6 @@ export type SwimDetailsResponse = {
     intervals: SwimIntervalResponse[]
 }
 
-// Response de cada intervalo
 export type SwimIntervalResponse = {
     id: number
     orderIndex: number
@@ -33,7 +31,6 @@ export type SwimIntervalResponse = {
     paceSecondsPer100m: number | null
 }
 
-// Request para crear/actualizar detalles
 export type SwimDetailsCreateRequest = {
     poolType: PoolType
     totalDistanceMeters?: number | null
@@ -42,7 +39,6 @@ export type SwimDetailsCreateRequest = {
     intervals: SwimIntervalRequest[]
 }
 
-// Request de cada intervalo
 export type SwimIntervalRequest = {
     type: SwimIntervalType
     stroke: SwimStroke
@@ -54,7 +50,6 @@ export type SwimIntervalRequest = {
     notes?: string | null
 }
 
-// Labels en español
 export const poolTypeLabels: Record<PoolType, string> = {
     SHORT_COURSE: 'Piscina 25m',
     LONG_COURSE: 'Piscina 50m',

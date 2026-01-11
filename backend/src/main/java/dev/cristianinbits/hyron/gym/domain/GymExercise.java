@@ -30,18 +30,17 @@ public class GymExercise {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id", nullable = false)
-    private Exercise exercise; // Referencia al Catálogo
+    private Exercise exercise;
 
     @Column(nullable = false)
     private Integer orderIndex;
 
     @Column(length = 36)
-    private String supersetId; // UUID String para agrupar visualmente
+    private String supersetId;
 
     @Column(length = 1000)
-    private String notes; // Notas específicas de hoy
+    private String notes;
 
-    // Jerarquía Nivel 2 -> Nivel 3
     @OneToMany(mappedBy = "gymExercise", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     @BatchSize(size = 50)

@@ -1,4 +1,3 @@
--- Hyrox workout details
 CREATE TABLE hyrox_workout_details (
     id         BIGSERIAL PRIMARY KEY,
     workout_id BIGINT NOT NULL UNIQUE,
@@ -11,8 +10,6 @@ ALTER TABLE hyrox_workout_details
     REFERENCES workouts (id)
     ON DELETE CASCADE;
 
-
--- Hyrox blocks
 CREATE TABLE hyrox_blocks (
     id                    BIGSERIAL PRIMARY KEY,
     hyrox_details_id      BIGINT NOT NULL,
@@ -39,8 +36,6 @@ ALTER TABLE hyrox_blocks
     ADD CONSTRAINT chk_hyrox_blocks_rest_not_negative
     CHECK (rest_duration_seconds IS NULL OR rest_duration_seconds >= 0);
 
-
--- Hyrox items
 CREATE TABLE hyrox_items (
     id                        BIGSERIAL PRIMARY KEY,
     block_id                  BIGINT NOT NULL,
@@ -102,7 +97,5 @@ ALTER TABLE hyrox_items
     ADD CONSTRAINT chk_hyrox_items_rpe_range
     CHECK (rpe IS NULL OR rpe BETWEEN 1 AND 10);
 
-
--- Indexes
 CREATE INDEX idx_hyrox_blocks_details ON hyrox_blocks (hyrox_details_id);
 CREATE INDEX idx_hyrox_items_block ON hyrox_items (block_id);

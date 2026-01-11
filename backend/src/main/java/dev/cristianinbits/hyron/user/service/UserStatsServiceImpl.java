@@ -104,7 +104,6 @@ public class UserStatsServiceImpl implements UserStatsService {
                 ? workoutRepository.sumRunDistanceByUserId(userId)
                 : workoutRepository.sumRunDistanceByUserIdSince(userId, since);
 
-        // Pasamos el Enum explícitamente
         long hyroxDist = (since == null)
                 ? workoutRepository.sumHyroxDistanceByUserIdAndStation(userId, HyroxStation.RUN)
                 : workoutRepository.sumHyroxDistanceByUserIdAndStationSince(userId, HyroxStation.RUN, since);

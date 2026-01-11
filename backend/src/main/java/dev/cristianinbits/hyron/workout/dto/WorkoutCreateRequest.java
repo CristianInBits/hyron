@@ -10,9 +10,6 @@ import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 
 import java.time.Instant;
 
-/**
- * Request payload for creating a new workout.
- */
 public record WorkoutCreateRequest(
 
     @NotNull

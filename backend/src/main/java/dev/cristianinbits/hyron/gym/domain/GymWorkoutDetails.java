@@ -33,7 +33,6 @@ public class GymWorkoutDetails {
     @Column(length = 4000)
     private String notes;
 
-    // Jerarquía Nivel 1 -> Nivel 2
     @OneToMany(mappedBy = "details", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     @BatchSize(size = 50)
@@ -45,7 +44,6 @@ public class GymWorkoutDetails {
         exercise.setDetails(this);
     }
 
-    // Equals/HashCode Manual
     @Override
     public final boolean equals(Object o) {
         if (this == o)

@@ -32,29 +32,23 @@ function NewRunPage({ userId }: NewRunPageProps) {
     const [searchParams] = useSearchParams()
     const workoutIdParam = searchParams.get('workoutId')
 
-    // Modo del formulario
     const [mode, setMode] = useState<RunMode | null>(null)
 
-    // Estado para modo simple
     const [simpleDuration, setSimpleDuration] = useState(0)
     const [simpleDistance, setSimpleDistance] = useState('')
     const [simpleHr, setSimpleHr] = useState('')
     const [simpleElevation, setSimpleElevation] = useState('')
 
-    // Estado para modo intervalos
     const [intervals, setIntervals] = useState<IntervalFormData[]>([{ ...emptyInterval }])
 
-    // Estado compartido
     const [shoeId, setShoeId] = useState<number | null>(null)
     const [notes, setNotes] = useState('')
     const [workoutDate, setWorkoutDate] = useState<string>(() => {
-        // Por defecto, fecha y hora actual
         const now = new Date()
         return now.toISOString().slice(0, 16)
     })
     const [workoutId, setWorkoutId] = useState<number | null>(workoutIdParam ? parseInt(workoutIdParam) : null)
 
-    // Estado de UI
     const [shoes, setShoes] = useState<ShoeSummaryResponse[]>([])
     const [loading, setLoading] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
@@ -83,21 +77,17 @@ function NewRunPage({ userId }: NewRunPageProps) {
         try {
             setLoadingData(true)
 
-            // Cargar zapatillas activas
             const shoesData = await shoeService.getActiveSummary(userId)
             setShoes(shoesData)
 
-            // Si hay workoutId, cargar los detalles existentes
             if (workoutIdParam) {
                 const wId = parseInt(workoutIdParam)
                 setWorkoutId(wId)
 
-                // Cargar datos del workout base
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
                 } catch {
-                    // Si falla, usar fecha actual
                 }
 
                 try {
@@ -105,9 +95,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     setShoeId(details.shoe?.id ?? null)
                     setNotes(details.notes ?? '')
 
-                    // Determinar el modo según los intervalos
                     if (details.intervals.length === 1) {
-                        // Modo simple
                         setMode('simple')
                         const interval = details.intervals[0]
                         setSimpleDuration(interval.durationSeconds)
@@ -115,7 +103,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
                         setSimpleHr(interval.averageHr?.toString() ?? '')
                         setSimpleElevation(interval.elevationGain?.toString() ?? '')
                     } else if (details.intervals.length > 1) {
-                        // Modo intervalos
                         setMode('intervals')
                         setIntervals(details.intervals.map(i => ({
                             type: i.type,
@@ -128,7 +115,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
                         })))
                     }
                 } catch {
-                    // No hay detalles aún
                 }
             }
         } catch (err) {
@@ -195,7 +181,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
                 }))
             }
 
-            // Si no hay workoutId, crear el workout primero
             let wId = workoutId
             if (!wId) {
                 const workout = await workoutService.create(userId, {
@@ -205,13 +190,11 @@ function NewRunPage({ userId }: NewRunPageProps) {
                 wId = workout.id
                 setWorkoutId(wId)
             } else {
-                // Actualizar fecha si cambió
                 await workoutService.update(userId, wId, {
                     startDateTime: new Date(workoutDate).toISOString(),
                 })
             }
 
-            // Calcular totales para modo intervalos
             let totalDistance: number | null = null
             let totalElevation: number | null = null
             let avgHr: number | null = null
@@ -221,7 +204,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
                 totalElevation = simpleElevation ? parseInt(simpleElevation) : null
                 avgHr = simpleHr ? parseInt(simpleHr) : null
             } else {
-                // Sumar distancias y desniveles de intervalos
                 const distances = requestIntervals.map(i => i.distanceMeters ?? 0)
                 const elevations = requestIntervals.map(i => i.elevationGain ?? 0)
                 totalDistance = distances.reduce((a, b) => a + b, 0) || null
@@ -246,7 +228,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
         }
     }
 
-    // Pantalla de selección de usuario
     if (!userId) {
         return (
             <div className="bg-green-50 min-h-screen -m-4 p-4">
@@ -259,7 +240,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
         )
     }
 
-    // Pantalla de carga
     if (loadingData) {
         return (
             <div className="bg-green-50 min-h-screen -m-4 p-4">
@@ -272,7 +252,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
         )
     }
 
-    // Pantalla de selección de modo
     if (!mode) {
         return (
             <div className="bg-green-50 min-h-screen -m-4 p-4">
@@ -316,7 +295,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
         )
     }
 
-    // Formulario modo SIMPLE
     if (mode === 'simple') {
         return (
             <div className="bg-green-50 min-h-screen -m-4 p-4">
@@ -458,7 +436,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
         )
     }
 
-    // Formulario modo INTERVALOS
     return (
         <div className="bg-green-50 min-h-screen -m-4 p-4">
             {/* Header */}

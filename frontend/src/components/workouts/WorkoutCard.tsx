@@ -127,7 +127,6 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
     )
 }
 
-// Componente para mostrar detalles de Run
 function RunDetails({ details }: { details: RunDetailsResponse }) {
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
@@ -226,7 +225,6 @@ function RunDetails({ details }: { details: RunDetailsResponse }) {
     )
 }
 
-// Componente para mostrar detalles de Swim
 function SwimDetails({ details }: { details: SwimDetailsResponse }) {
     const formatDuration = (seconds: number) => {
         const hours = Math.floor(seconds / 3600)
@@ -341,7 +339,6 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
     )
 }
 
-// Componente para mostrar detalles de Gym
 function GymDetails({ details }: { details: GymDetailsResponse }) {
     const formatDuration = (seconds: number) => {
         const hours = Math.floor(seconds / 3600)
@@ -354,7 +351,6 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    // Calcular etiquetas de superseries
     const getSupersetLabels = (): Map<string, string> => {
         const labels = new Map<string, string>()
         const supersetIds = [...new Set(details.exercises.filter(ex => ex.supersetId).map(ex => ex.supersetId!))]
@@ -459,7 +455,6 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
     )
 }
 
-// Componente para mostrar detalles de Hyrox
 function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
     const formatDuration = (seconds: number) => {
         const hours = Math.floor(seconds / 3600)
@@ -479,7 +474,6 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
         return `${mins}:${secs.toString().padStart(2, '0')} /km`
     }
 
-    // Calcular tiempo total
     const totalTime = details.blocks.reduce((sum, block) => {
         const blockTime = block.items.reduce((s, item) => {
             return s + item.durationSeconds + (item.recoveryDurationSeconds ?? 0)
@@ -487,7 +481,6 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
         return sum + blockTime + (block.restDurationSeconds ?? 0)
     }, 0)
 
-    // Calcular distancia total
     const totalDistance = details.blocks.reduce((sum, block) => {
         return sum + block.items.reduce((s, item) => s + (item.distanceMeters ?? 0), 0)
     }, 0)

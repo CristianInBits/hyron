@@ -94,7 +94,6 @@ function ShoesPage({ userId }: ShoesPageProps) {
         setEditingShoe(null)
     }
 
-    // Separar activas e inactivas
     const activeShoes = shoes.filter(s => s.active)
     const inactiveShoes = shoes.filter(s => !s.active)
 

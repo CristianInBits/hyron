@@ -17,17 +17,6 @@ import dev.cristianinbits.hyron.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import java.util.Locale;
 
-/**
- * Default implementation of {@link UserService}.
- *
- * Handles user-related business logic, including input normalization and
- * enforcement of email uniqueness. All operations return DTOs intended for
- * exposure through the API layer.
- *
- * Transaction management:
- * - Write operations run within a transactional context.
- * - Read operations are executed as read-only transactions.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -35,13 +24,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    /**
-     * Creates a new user after normalizing input and verifying email uniqueness.
-     *
-     * @param request the user creation data
-     * @return the created user representation
-     * @throws ConflictException if the email address is already in use
-     */
     @Override
     public UserResponse createUser(UserCreateRequest request) {
         String normalizedEmail = normalizeEmail(request.email());
@@ -58,13 +40,6 @@ public class UserServiceImpl implements UserService {
         return toResponse(saved);
     }
 
-    /**
-     * Retrieves a user by id.
-     *
-     * @param id the user identifier
-     * @return the user representation
-     * @throws NotFoundException if no user exists with the given id
-     */
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
@@ -73,12 +48,6 @@ public class UserServiceImpl implements UserService {
         return toResponse(user);
     }
 
-    /**
-     * Retrieves a paginated list of users.
-     *
-     * @param pageable pagination and sorting configuration
-     * @return a page of user representations
-     */
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Pageable pageable) {
@@ -86,20 +55,6 @@ public class UserServiceImpl implements UserService {
                 .map(this::toResponse);
     }
 
-    /**
-     * Updates an existing user.
-     *
-     * Performs a partial update based on non-null fields in the request.
-     * If an email change is requested, email uniqueness is validated excluding
-     * the current user.
-     *
-     * @param id the user identifier
-     * @param request the update payload
-     * @return the updated user representation
-     * @throws NotFoundException if no user exists with the given id
-     * @throws BadRequestException if no fields are provided to update
-     * @throws ConflictException if the new email address is already in use
-     */
     @Override
     public UserResponse updateUser(Long id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
@@ -127,12 +82,6 @@ public class UserServiceImpl implements UserService {
         return toResponse(userRepository.save(user));
     }
 
-    /**
-     * Deletes an existing user.
-     *
-     * @param id the user identifier
-     * @throws NotFoundException if no user exists with the given id
-     */
     @Override
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
@@ -140,32 +89,14 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-    /**
-     * Normalizes an email address for consistent storage and comparison.
-     *
-     * @param email the raw email value
-     * @return the normalized email
-     */
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
-    /**
-     * Normalizes a user name for consistent storage.
-     *
-     * @param name the raw name value
-     * @return the normalized name
-     */
     private String normalizeName(String name) {
         return name.trim();
     }
-
-    /**
-     * Maps a {@link User} entity to a {@link UserResponse} DTO.
-     *
-     * @param user the source entity
-     * @return the API-facing representation
-     */
+    
     private UserResponse toResponse(User user) {
         return new UserResponse(
                 user.getId(),

@@ -55,13 +55,11 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
     const handleToggleExpand = async (workout: WorkoutSummaryResponse) => {
         if (!userId) return
 
-        // Si ya está expandido, colapsar
         if (expandedId === workout.id) {
             setExpandedId(null)
             return
         }
 
-        // Expandir y cargar detalles si no los tenemos
         setExpandedId(workout.id)
 
         if (!expandedDetails[workout.id]) {
@@ -113,7 +111,6 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
         try {
             await workoutService.delete(userId, id)
             await loadWorkouts()
-            // Limpiar detalles expandidos
             setExpandedId(null)
             setExpandedDetails(prev => {
                 const { [id]: _, ...rest } = prev

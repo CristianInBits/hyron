@@ -28,7 +28,6 @@ ALTER TABLE workouts
     ADD CONSTRAINT chk_workouts_end_after_start
     CHECK (end_date_time IS NULL OR end_date_time > start_date_time);
 
--- Índices (sin el redundante)
 CREATE INDEX idx_workouts_user_id ON workouts (user_id);
 CREATE INDEX idx_workouts_user_start_date ON workouts (user_id, start_date_time DESC);
 CREATE INDEX idx_workouts_user_type ON workouts (user_id, type);

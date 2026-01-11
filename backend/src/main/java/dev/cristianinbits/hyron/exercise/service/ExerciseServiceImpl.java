@@ -29,28 +29,23 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     @Override
     public ExerciseResponse createExercise(Long userId, ExerciseCreateRequest request) {
-        // 1. Buscamos si ya existe algún ejercicio con ese nombre (Activo o Inactivo)
         Optional<Exercise> existingOpt = exerciseRepository.findByUserIdAndNameIgnoreCase(userId, request.name());
 
         if (existingOpt.isPresent()) {
             Exercise existing = existingOpt.get();
-            
-            // Caso A: Ya existe y está activo -> Error 409
+
             if (existing.isActive()) {
                 throw new ConflictException("Exercise '" + request.name() + "' already exists");
             }
             
-            // Caso B: Existe pero estaba borrado (Inactivo) -> REACTIVAR (Lázaro) 🧟‍♂️
-            // Esto es genial porque recuperas el historial de estadísticas de ese ejercicio
             existing.setActive(true);
-            existing.setMuscleGroup(request.muscleGroup()); // Actualizamos con los nuevos datos
+            existing.setMuscleGroup(request.muscleGroup());
             existing.setNotes(normalizeString(request.notes()));
             existing.setUnilateral(request.isUnilateral());
             
             return toResponse(exerciseRepository.save(existing));
         }
 
-        // Caso C: No existe -> Crear nuevo
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -103,9 +98,6 @@ public class ExerciseServiceImpl implements ExerciseService {
         Exercise exercise = exerciseRepository.findByIdAndUserId(exerciseId, userId)
                 .orElseThrow(() -> new NotFoundException("Exercise not found"));
 
-        // Validar nombre único SOLO contra ejercicios ACTIVOS
-        // Si cambio el nombre a "Sentadilla" y hay una "Sentadilla" inactiva antigua,
-        // no pasa nada (el índice SQL único parcial lo permite), así que solo validamos contra activos.
         if (request.name() != null && !request.name().equalsIgnoreCase(exercise.getName())) {
             if (exerciseRepository.existsByUserIdAndNameIgnoreCaseAndActiveTrueAndIdNot(userId, request.name(), exerciseId)) {
                 throw new ConflictException("Active exercise with name '" + request.name() + "' already exists");
@@ -127,12 +119,9 @@ public class ExerciseServiceImpl implements ExerciseService {
         Exercise exercise = exerciseRepository.findByIdAndUserId(exerciseId, userId)
                 .orElseThrow(() -> new NotFoundException("Exercise not found"));
 
-        // Soft delete: marcar como inactivo
         exercise.setActive(false);
         exerciseRepository.save(exercise);
     }
-
-    // ==================== Mappers ====================
 
     private ExerciseResponse toResponse(Exercise exercise) {
         return new ExerciseResponse(

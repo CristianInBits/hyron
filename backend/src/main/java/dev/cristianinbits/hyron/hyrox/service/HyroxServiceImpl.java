@@ -97,8 +97,6 @@ public class HyroxServiceImpl implements HyroxService {
                 .ifPresent(hyroxRepository::delete);
     }
 
-    // ==================== Helpers ====================
-
     private HyroxBlock mapBlock(HyroxBlockRequest request, int index) {
         HyroxBlock block = HyroxBlock.builder()
                 .orderIndex(index)
@@ -128,8 +126,6 @@ public class HyroxServiceImpl implements HyroxService {
                 .notes(normalizeString(request.notes()))
                 .build();
     }
-
-    // ==================== Mappers ====================
 
     private HyroxDetailsResponse toResponse(HyroxWorkoutDetails details) {
         return new HyroxDetailsResponse(

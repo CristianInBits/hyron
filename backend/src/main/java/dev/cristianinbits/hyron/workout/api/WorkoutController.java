@@ -33,10 +33,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
-/**
- * REST API for workout management.
- * All operations are scoped to a specific user via userId parameter.
- */
 @RestController
 @RequestMapping("/api/users/{userId}/workouts")
 @RequiredArgsConstructor

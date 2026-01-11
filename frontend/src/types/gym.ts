@@ -2,7 +2,6 @@ import type { MuscleGroup } from './exercise'
 
 export type GymSetType = 'WARMUP' | 'WORK' | 'FAILURE' | 'DROP_SET' | 'MYO_REP'
 
-// Response del detalle completo
 export type GymDetailsResponse = {
     id: number
     workoutId: number
@@ -12,7 +11,6 @@ export type GymDetailsResponse = {
     totalVolumeKg: number | null
 }
 
-// Response de cada ejercicio en el workout
 export type GymExerciseResponse = {
     id: number
     orderIndex: number
@@ -25,7 +23,6 @@ export type GymExerciseResponse = {
     sets: GymSetResponse[]
 }
 
-// Response de cada serie
 export type GymSetResponse = {
     id: number
     orderIndex: number
@@ -38,14 +35,12 @@ export type GymSetResponse = {
     notes: string | null
 }
 
-// Request para crear/actualizar detalles
 export type GymDetailsCreateRequest = {
     totalDurationSeconds?: number | null
     notes?: string | null
     exercises: GymExerciseRequest[]
 }
 
-// Request de cada ejercicio
 export type GymExerciseRequest = {
     exerciseId: number
     supersetId?: string | null
@@ -53,7 +48,6 @@ export type GymExerciseRequest = {
     sets: GymSetRequest[]
 }
 
-// Request de cada serie
 export type GymSetRequest = {
     type: GymSetType
     weightKg?: number | null
@@ -64,7 +58,6 @@ export type GymSetRequest = {
     notes?: string | null
 }
 
-// Labels en español
 export const gymSetTypeLabels: Record<GymSetType, string> = {
     WARMUP: 'Calentamiento',
     WORK: 'Trabajo',

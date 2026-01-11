@@ -1,4 +1,3 @@
--- Swim workout details
 CREATE TABLE swim_workout_details (
     id                    BIGSERIAL PRIMARY KEY,
     workout_id            BIGINT NOT NULL UNIQUE,
@@ -24,8 +23,6 @@ ALTER TABLE swim_workout_details
     ADD CONSTRAINT chk_swim_details_time_positive
     CHECK (total_time_seconds IS NULL OR total_time_seconds > 0);
 
-
--- Swim intervals
 CREATE TABLE swim_intervals (
     id               BIGSERIAL PRIMARY KEY,
     swim_details_id  BIGINT NOT NULL,

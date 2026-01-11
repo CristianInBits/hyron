@@ -1,6 +1,5 @@
 export type WorkoutType = 'RUN' | 'SWIM' | 'GYM' | 'HYROX'
 
-// Respuesta del GET /{id} - Detalle completo
 export type WorkoutDetailResponse = {
     id: number
     userId: number
@@ -17,7 +16,6 @@ export type WorkoutDetailResponse = {
     gymDetailsId: number | null
 }
 
-// Respuesta del GET (listado) - Resumen
 export type WorkoutSummaryResponse = {
     id: number
     type: WorkoutType
@@ -27,7 +25,6 @@ export type WorkoutSummaryResponse = {
     location: string | null
 }
 
-// Request para POST
 export type WorkoutCreateRequest = {
     type: WorkoutType
     startDateTime: string
@@ -38,7 +35,6 @@ export type WorkoutCreateRequest = {
     source?: string | null
 }
 
-// Request para PATCH
 export type WorkoutUpdateRequest = {
     type?: WorkoutType
     startDateTime?: string

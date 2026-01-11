@@ -1,4 +1,3 @@
--- Añadir campo de duración manual a gym_workout_details
 ALTER TABLE gym_workout_details
     ADD COLUMN total_duration_seconds INTEGER;
 

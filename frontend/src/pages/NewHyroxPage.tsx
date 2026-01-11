@@ -16,7 +16,6 @@ type NewHyroxPageProps = {
     userId: number | null
 }
 
-// Orden oficial de estaciones HYROX
 const officialStations: HyroxStation[] = [
     'SKI_ERG',
     'SLED_PUSH',
@@ -46,7 +45,6 @@ const createEmptyBlock = (): BlockFormData => ({
     items: [createEmptyItem('RUN')],
 })
 
-// Crear estructura de competición oficial (8 rondas: Run + Ejercicio)
 const createOfficialStructure = (): BlockFormData[] => {
     return officialStations.map((station) => ({
         restDurationSeconds: null,
@@ -60,7 +58,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
     const [searchParams] = useSearchParams()
     const workoutIdParam = searchParams.get('workoutId')
 
-    // Estado del formulario
     const [workoutId, setWorkoutId] = useState<number | null>(workoutIdParam ? parseInt(workoutIdParam) : null)
     const [workoutDate, setWorkoutDate] = useState<string>(() => {
         const now = new Date()
@@ -69,7 +66,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
     const [notes, setNotes] = useState('')
     const [blocks, setBlocks] = useState<BlockFormData[]>([createEmptyBlock()])
 
-    // Estado de UI
     const [loading, setLoading] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -98,15 +94,12 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                 setWorkoutId(wId)
                 setShowTemplateChoice(false)
 
-                // Cargar datos del workout base
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
                 } catch {
-                    // Si falla, usar fecha actual
                 }
 
-                // Cargar detalles del hyrox
                 try {
                     const details = await hyroxService.getDetails(userId, wId)
                     setNotes(details.notes ?? '')
@@ -133,7 +126,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                         })))
                     }
                 } catch {
-                    // No hay detalles aún
                 }
             }
         } catch (err) {
@@ -170,7 +162,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
     const handleSubmit = async () => {
         if (!userId) return
 
-        // Validar que hay al menos un bloque con items válidos
         const validBlocks = blocks.filter(b => b.items.some(i => i.durationSeconds > 0))
         if (validBlocks.length === 0) {
             setError('Añade al menos una ronda con estaciones')
@@ -181,7 +172,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
             setLoading(true)
             setError(null)
 
-            // Crear o actualizar workout
             let wId = workoutId
             if (!wId) {
                 const workout = await workoutService.create(userId, {
@@ -196,7 +186,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                 })
             }
 
-            // Preparar request
             const request: HyroxDetailsCreateRequest = {
                 shoeId: shoeId,
                 notes: notes.trim() || null,
@@ -228,7 +217,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         }
     }
 
-    // Calcular tiempo total
     const totalTime = blocks.reduce((sum, block) => {
         const blockTime = block.items.reduce((s, item) => {
             return s + item.durationSeconds + (item.recoveryDurationSeconds ?? 0)
@@ -246,7 +234,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    // Pantalla sin usuario
     if (!userId) {
         return (
             <div className="bg-orange-50 min-h-screen -m-4 p-4">
@@ -259,7 +246,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         )
     }
 
-    // Pantalla de carga
     if (loadingData) {
         return (
             <div className="bg-orange-50 min-h-screen -m-4 p-4">
@@ -272,7 +258,6 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         )
     }
 
-    // Pantalla de selección de plantilla
     if (showTemplateChoice) {
         return (
             <div className="bg-orange-50 min-h-screen -m-4 p-4">

@@ -86,7 +86,6 @@ function HomePage({ userId }: HomePageProps) {
         return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
     }
 
-    // Sin usuario seleccionado
     if (!userId) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -106,7 +105,6 @@ function HomePage({ userId }: HomePageProps) {
         )
     }
 
-    // Error
     if (error) {
         return (
             <div className="p-4 bg-red-50 text-red-600 rounded-lg">

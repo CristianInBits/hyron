@@ -36,11 +36,11 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
 
     private final GymWorkoutDetailsRepository gymRepository;
     private final WorkoutRepository workoutRepository;
-    private final ExerciseRepository exerciseRepository; // Catálogo
+    private final ExerciseRepository exerciseRepository;
 
     @Override
     public GymDetailsResponse saveDetails(Long userId, Long workoutId, GymDetailsCreateRequest request) {
-        // 1. Validar Workout Padre
+
         Workout workout = workoutRepository.findByIdAndUserId(workoutId, userId)
                 .orElseThrow(() -> new NotFoundException("Workout not found"));
 
@@ -48,48 +48,37 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
             throw new BadRequestException("Workout type must be GYM");
         }
 
-        // 2. Obtener o Crear Details
         GymWorkoutDetails details = gymRepository.findByWorkoutId(workoutId)
                 .orElseGet(() -> GymWorkoutDetails.builder().workout(workout).build());
 
         details.setNotes(normalizeString(request.notes()));
         details.setTotalDurationSeconds(request.totalDurationSeconds());
 
-        // 3. 🔥 VALIDACIÓN DE PROPIEDAD DEL CATÁLOGO (Batch)
-        // Extraemos todos los IDs de ejercicios solicitados
         List<Long> requestedExerciseIds = request.exercises().stream()
                 .map(GymExerciseRequest::exerciseId)
                 .distinct()
                 .toList();
 
-        // Buscamos en BD solo esos IDs Y que pertenezcan al usuario
         List<Exercise> validExercises = exerciseRepository.findAllByIdInAndUserId(requestedExerciseIds, userId);
 
-        // Si la cantidad no coincide, alguien intenta usar un ejercicio que no es suyo
-        // o no existe
         if (validExercises.size() != requestedExerciseIds.size()) {
             throw new NotFoundException("One or more exercises not found in your catalog");
         }
 
-        // Convertimos la lista a un Map para acceso rápido O(1) en el bucle
         Map<Long, Exercise> exerciseMap = validExercises.stream()
                 .collect(Collectors.toMap(Exercise::getId, Function.identity()));
 
-        // 4. Estrategia Full Replace + Flush (Limpia jerarquía de 3 niveles)
         details.getExercises().clear();
-        gymRepository.flush(); // Vital para evitar conflictos de orden
+        gymRepository.flush();
 
-        // 5. Reconstrucción del Grafo de Objetos
         int exIndex = 1;
         for (GymExerciseRequest exReq : request.exercises()) {
-            // Obtenemos la entidad Exercise del mapa (ya validada)
             Exercise catalogExercise = exerciseMap.get(exReq.exerciseId());
 
             GymExercise gymExercise = mapGymExercise(exReq, catalogExercise, exIndex++);
             details.addExercise(gymExercise);
         }
 
-        // 6. Guardar y Responder
         GymWorkoutDetails saved = gymRepository.save(details);
         return toResponse(saved);
     }
@@ -109,24 +98,20 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
 
     @Override
     public void deleteDetails(Long userId, Long workoutId) {
-        // Validación de seguridad optimizada
         if (!gymRepository.existsByWorkout_IdAndWorkout_User_Id(workoutId, userId)) {
             throw new NotFoundException("Gym details not found");
         }
         gymRepository.deleteByWorkoutId(workoutId);
     }
 
-    // ==================== Mappers & Helpers ====================
-
     private GymExercise mapGymExercise(GymExerciseRequest req, Exercise catalogExercise, int index) {
         GymExercise gymExercise = GymExercise.builder()
-                .exercise(catalogExercise) // Asignamos la entidad del catálogo
+                .exercise(catalogExercise)
                 .orderIndex(index)
                 .supersetId(normalizeString(req.supersetId()))
                 .notes(normalizeString(req.notes()))
                 .build();
 
-        // Mapear Sets hijos
         int setIndex = 1;
         for (GymSetRequest setReq : req.sets()) {
             gymExercise.addSet(mapGymSet(setReq, setIndex++));
@@ -139,7 +124,7 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
         return GymSet.builder()
                 .orderIndex(index)
                 .type(req.type())
-                .weightKg(req.weightKg() != null ? req.weightKg() : 0.0) // Default 0.0
+                .weightKg(req.weightKg() != null ? req.weightKg() : 0.0)
                 .reps(req.reps())
                 .executionSeconds(req.executionSeconds())
                 .rpe(req.rpe())
@@ -148,11 +133,8 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 .build();
     }
 
-    // --- Response Mappers ---
-
     private GymDetailsResponse toResponse(GymWorkoutDetails details) {
 
-        // Usar duración manual si existe, si no calcular de las series
         Integer totalDurationSeconds = details.getTotalDurationSeconds();
 
         if (totalDurationSeconds == null) {
@@ -172,7 +154,7 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 details.getId(),
                 details.getWorkout().getId(),
                 details.getNotes(),
-                details.getExercises().stream() // @OrderBy garantiza el orden
+                details.getExercises().stream()
                         .map(this::toExerciseResponse)
                         .toList(),
                 totalDurationSeconds,
@@ -185,9 +167,9 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 ex.getOrderIndex(),
                 ex.getSupersetId(),
                 ex.getNotes(),
-                ex.getExercise().getId(), // ID Catálogo
-                ex.getExercise().getName(), // Nombre Catálogo
-                ex.getExercise().getMuscleGroup(), // Grupo Catálogo
+                ex.getExercise().getId(),
+                ex.getExercise().getName(),
+                ex.getExercise().getMuscleGroup(),
                 ex.getExercise().isUnilateral(),
                 ex.getSets().stream()
                         .map(this::toSetResponse)
@@ -207,15 +189,11 @@ public class GymWorkoutDetailsServiceImpl implements GymWorkoutDetailsService {
                 set.getNotes());
     }
 
-    // --- Calculations ---
-
     private Double calculateTotalVolume(GymWorkoutDetails details) {
-        // Suma simple: Weight * Reps de todas las series efectivas (WORK)
-        // Podríamos excluir WARMUP aquí si quisieras
         return details.getExercises().stream()
                 .flatMap(ex -> ex.getSets().stream())
                 .filter(set -> set.getType() == GymSetType.WORK || set.getType() == GymSetType.FAILURE)
-                .filter(set -> set.getReps() != null) // Solo si hay reps
+                .filter(set -> set.getReps() != null)
                 .mapToDouble(set -> set.getWeightKg() * set.getReps())
                 .sum();
     }

@@ -17,7 +17,7 @@ type GymExerciseFormProps = {
     index: number
     exercise: ExerciseFormData
     exercises: ExerciseSummaryResponse[]
-    supersetGroups: Map<string, string> // supersetId -> label (A, B, C...)
+    supersetGroups: Map<string, string>
     onChange: (index: number, exercise: ExerciseFormData) => void
     onRemove: (index: number) => void
     onCreateSuperset: (exerciseIndex: number) => void
@@ -77,7 +77,6 @@ function GymExerciseForm({
         updateField('sets', exercise.sets.filter((_, i) => i !== setIndex))
     }
 
-    // Obtener etiqueta de superserie (A, B, C...) y número dentro del grupo
     const getSupersetLabel = (): string | null => {
         if (!exercise.supersetId) return null
         return supersetGroups.get(exercise.supersetId) ?? null
@@ -85,7 +84,6 @@ function GymExerciseForm({
 
     const supersetLabel = getSupersetLabel()
 
-    // Agrupar ejercicios por grupo muscular
     const groupedExercises = exercises.reduce((acc, ex) => {
         if (!acc[ex.muscleGroup]) {
             acc[ex.muscleGroup] = []
@@ -94,7 +92,6 @@ function GymExerciseForm({
         return acc
     }, {} as Record<string, ExerciseSummaryResponse[]>)
 
-    // Obtener otras superseries disponibles para unirse
     const availableSupersets = Array.from(supersetGroups.entries())
         .filter(([id]) => id !== exercise.supersetId)
 

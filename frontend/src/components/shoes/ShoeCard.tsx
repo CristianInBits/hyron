@@ -15,7 +15,6 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
         return `${(meters / 1000).toFixed(1)} km`
     }
 
-    // Calculamos el porcentaje nosotros si viene nulo, por seguridad
     const percentage = shoe.percentageUsed ??
         (shoe.maxDistanceMeters ? (shoe.totalDistanceMeters * 100) / shoe.maxDistanceMeters : 0)
 

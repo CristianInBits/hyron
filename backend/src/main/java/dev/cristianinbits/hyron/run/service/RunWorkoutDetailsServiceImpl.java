@@ -67,7 +67,6 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
             details.setShoe(null);
         }
 
-        // Full replace + flush
         details.getIntervals().clear();
         runRepository.flush();
 
@@ -100,8 +99,6 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
         }
         runRepository.deleteByWorkoutId(workoutId);
     }
-
-    // ==================== Mappers ====================
 
     private RunInterval mapInterval(RunIntervalRequest request, int index) {
         return RunInterval.builder()
@@ -161,8 +158,6 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
                 shoe.getModel(),
                 shoe.getNickname());
     }
-
-    // ==================== Cálculos ====================
 
     private Integer calculateTotalDistance(List<RunIntervalRequest> intervals) {
         if (intervals == null || intervals.isEmpty())

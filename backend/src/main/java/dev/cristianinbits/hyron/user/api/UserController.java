@@ -28,13 +28,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
-/**
- * REST controller responsible for user-related HTTP endpoints.
- *
- * Exposes CRUD operations for users and delegates business logic
- * to the {@link UserService}. Request validation is enforced at
- * the controller level using Bean Validation.
- */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -43,12 +36,6 @@ public class UserController {
 
     private final UserService userService;
 
-    /**
-     * Creates a new user.
-     *
-     * @param request the user creation payload
-     * @return the created user representation
-     */
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
         UserResponse created = userService.createUser(request);
@@ -62,15 +49,6 @@ public class UserController {
         return ResponseEntity.created(location).body(created);
     }
 
-    /**
-     * Retrieves a paginated list of users.
-     *
-     * By default, results are sorted by registration timestamp
-     * in descending order.
-     *
-     * @param pageable pagination and sorting configuration
-     * @return a page of user representations
-     */
     @GetMapping
     public Page<UserResponse> getAllUsers(
             @PageableDefault(
@@ -83,26 +61,11 @@ public class UserController {
         return userService.getAllUsers(pageable);
     }
 
-    /**
-     * Retrieves a user by its identifier.
-     *
-     * @param id the user identifier
-     * @return the user representation
-     */
     @GetMapping("/{id}")
     public UserResponse getUserById(@PathVariable @Positive Long id) {
         return userService.getUserById(id);
     }
 
-    /**
-     * Partially updates an existing user.
-     *
-     * Only the fields provided in the request will be updated.
-     *
-     * @param id the user identifier
-     * @param request the update payload
-     * @return the updated user representation
-     */
     @PatchMapping("/{id}")
     public UserResponse updateUser(
             @PathVariable @Positive Long id,
@@ -111,11 +74,6 @@ public class UserController {
         return userService.updateUser(id, request);
     }
 
-    /**
-     * Deletes a user by its identifier.
-     *
-     * @param id the user identifier
-     */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable @Positive Long id) {

@@ -7,7 +7,6 @@ function BottomNav() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    // Bloquear scroll cuando el menú está abierto
     useEffect(() => {
         document.body.style.overflow = showNewMenu ? 'hidden' : ''
         return () => {
@@ -15,13 +14,11 @@ function BottomNav() {
         }
     }, [showNewMenu])
 
-    // Función para navegar y cerrar el menú
     const goTo = (path: string) => {
         navigate(path)
         setShowNewMenu(false)
     }
 
-    // Comprobar si una ruta está activa
     const isActive = (path: string) => {
         return location.pathname === path
     }

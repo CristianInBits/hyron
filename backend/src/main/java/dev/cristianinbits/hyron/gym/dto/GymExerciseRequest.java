@@ -12,10 +12,10 @@ public record GymExerciseRequest(
     
     @Positive
     @NotNull(message = "Exercise ID is required")
-    Long exerciseId, // Referencia al Catálogo
+    Long exerciseId,
 
     @Size(max = 36)
-    String supersetId, // UUID opcional
+    String supersetId,
 
     @Size(max = 1000)
     String notes,

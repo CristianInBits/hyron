@@ -16,11 +16,9 @@ function ExercisesPage({ userId }: ExercisesPageProps) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    // Estado del Modal
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingExercise, setEditingExercise] = useState<ExerciseResponse | null>(null)
 
-    // Estado del Filtro
     const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<MuscleGroup | 'ALL'>('ALL')
 
     useEffect(() => {
@@ -41,8 +39,6 @@ function ExercisesPage({ userId }: ExercisesPageProps) {
             setLoading(false)
         }
     }
-
-    // --- MANEJADORES ---
 
     const handleCreate = () => {
         setEditingExercise(null)
@@ -89,22 +85,16 @@ function ExercisesPage({ userId }: ExercisesPageProps) {
             await loadExercises()
         } catch (err) {
             console.error(err)
-            // Aquí podrías setear un error específico si el form no lo maneja
         }
     }
 
-    // --- FILTRADO ---
-
-    // 1. Primero filtramos por Grupo Muscular (si hay filtro seleccionado)
     const filteredExercises = selectedMuscleGroup === 'ALL'
         ? exercises
         : exercises.filter(ex => ex.muscleGroup === selectedMuscleGroup)
 
-    // 2. Luego separamos Activos e Inactivos para la vista
     const activeExercises = filteredExercises.filter(ex => ex.active)
     const inactiveExercises = filteredExercises.filter(ex => !ex.active)
 
-    // Lista de grupos musculares para el select de filtro
     const muscleGroups = Object.keys(muscleGroupLabels) as MuscleGroup[]
 
     if (!userId) return <div className="p-4 text-gray-500">Selecciona un usuario</div>

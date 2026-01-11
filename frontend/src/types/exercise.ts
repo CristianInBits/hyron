@@ -9,7 +9,6 @@ export type MuscleGroup =
     | 'FULL_BODY'
     | 'OTHER'
 
-// Respuesta completa
 export type ExerciseResponse = {
     id: number
     name: string
@@ -19,7 +18,6 @@ export type ExerciseResponse = {
     active: boolean
 }
 
-// Respuesta resumida (GET /active)
 export type ExerciseSummaryResponse = {
     id: number
     name: string
@@ -27,7 +25,6 @@ export type ExerciseSummaryResponse = {
     isUnilateral: boolean
 }
 
-// Request para POST
 export type ExerciseCreateRequest = {
     name: string
     muscleGroup: MuscleGroup
@@ -35,7 +32,6 @@ export type ExerciseCreateRequest = {
     isUnilateral?: boolean
 }
 
-// Request para PATCH
 export type ExerciseUpdateRequest = {
     name?: string
     muscleGroup?: MuscleGroup
@@ -44,7 +40,6 @@ export type ExerciseUpdateRequest = {
     active?: boolean
 }
 
-// Helper para mostrar nombres en español
 export const muscleGroupLabels: Record<MuscleGroup, string> = {
     CHEST: 'Pecho',
     BACK: 'Espalda',

@@ -30,8 +30,6 @@ ALTER TABLE run_workout_details
 
 CREATE INDEX idx_run_details_shoe ON run_workout_details (shoe_id);
 
-
--- Run intervals
 CREATE TABLE run_intervals (
     id               BIGSERIAL PRIMARY KEY,
     run_details_id   BIGINT NOT NULL,

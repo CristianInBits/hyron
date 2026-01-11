@@ -30,7 +30,6 @@ public class SwimWorkoutDetailsServiceImpl implements SwimWorkoutDetailsService 
 
     @Override
     public SwimDetailsResponse saveDetails(Long userId, Long workoutId, SwimDetailsCreateRequest request) {
-        // 1. Validar Workout Padre
         Workout workout = workoutRepository.findByIdAndUserId(workoutId, userId)
                 .orElseThrow(() -> new NotFoundException("Workout not found"));
 
@@ -38,26 +37,20 @@ public class SwimWorkoutDetailsServiceImpl implements SwimWorkoutDetailsService 
             throw new BadRequestException("Workout type must be SWIM");
         }
 
-        // 2. Obtener o Crear
         SwimWorkoutDetails details = swimRepository.findByWorkoutId(workoutId)
                 .orElseGet(() -> SwimWorkoutDetails.builder().workout(workout).build());
 
-        // 3. Actualizar Datos Básicos
         details.setPoolType(request.poolType());
         details.setNotes(normalizeString(request.notes()));
 
-        // 4. Estrategia Full Replace (Anti-Bug de índices únicos)
         details.getIntervals().clear();
         swimRepository.flush(); 
 
-        // 5. Mapear Intervalos
         int index = 1;
         for (SwimIntervalRequest intervalReq : request.intervals()) {
             details.addInterval(mapInterval(intervalReq, index++));
         }
 
-        // 6. Lógica de Totales (Manual > Calculado)
-        // Usamos details.getIntervals() que ya contiene los nuevos items
         if (request.totalDistanceMeters() != null) {
             details.setTotalDistanceMeters(request.totalDistanceMeters());
         } else {
@@ -89,15 +82,11 @@ public class SwimWorkoutDetailsServiceImpl implements SwimWorkoutDetailsService 
 
     @Override
     public void deleteDetails(Long userId, Long workoutId) {
-        // Validación de seguridad (1 query ligera)
         if (!swimRepository.existsByWorkout_IdAndWorkout_User_Id(workoutId, userId)) {
             throw new NotFoundException("Swim details not found");
         }
-        // Borrado eficiente
         swimRepository.deleteByWorkoutId(workoutId);
     }
-
-    // ==================== Mappers ====================
 
     private SwimInterval mapInterval(SwimIntervalRequest request, int index) {
         return SwimInterval.builder()
@@ -108,8 +97,6 @@ public class SwimWorkoutDetailsServiceImpl implements SwimWorkoutDetailsService 
                 .durationSeconds(request.durationSeconds())
                 .restSeconds(request.restSeconds())
                 .rpe(request.rpe())
-                // OPTIMIZACIÓN: Tu DTO ya garantiza que equipment no es null (Set.of()), 
-                // pero creamos un HashSet nuevo para garantizar mutabilidad por si acaso.
                 .equipment(new HashSet<>(request.equipment())) 
                 .notes(normalizeString(request.notes()))
                 .build();
@@ -123,8 +110,7 @@ public class SwimWorkoutDetailsServiceImpl implements SwimWorkoutDetailsService 
                 details.getTotalDistanceMeters(),
                 details.getTotalTimeSeconds(),
                 details.getNotes(),
-                calculateAveragePace(details), // Pace Global
-                // Confiamos en @OrderBy("orderIndex ASC") de la entidad
+                calculateAveragePace(details),
                 details.getIntervals().stream()
                         .map(this::toIntervalResponse)
                         .toList()
@@ -141,13 +127,11 @@ public class SwimWorkoutDetailsServiceImpl implements SwimWorkoutDetailsService 
                 interval.getDurationSeconds(),
                 interval.getRestSeconds(),
                 interval.getRpe(),
-                interval.getEquipment(), // El Converter lo transformó de String a Set automáticamente
+                interval.getEquipment(),
                 interval.getNotes(),
                 calculatePace(interval.getDistanceMeters(), interval.getDurationSeconds())
         );
     }
-
-    // ==================== Cálculos ====================
 
     private Integer calculateTotalDistance(List<SwimInterval> intervals) {
         if (intervals == null || intervals.isEmpty()) return null;
@@ -166,11 +150,9 @@ public class SwimWorkoutDetailsServiceImpl implements SwimWorkoutDetailsService 
     }
 
     private Integer calculateAveragePace(SwimWorkoutDetails details) {
-        // Evitar división por cero
         if (details.getTotalDistanceMeters() == null || details.getTotalDistanceMeters() == 0) return null;
         if (details.getTotalTimeSeconds() == null || details.getTotalTimeSeconds() == 0) return null;
 
-        // Fórmula Natación: (Segundos * 100) / Metros
         return (details.getTotalTimeSeconds() * 100) / details.getTotalDistanceMeters();
     }
 

@@ -11,9 +11,7 @@ import dev.cristianinbits.hyron.gym.domain.GymWorkoutDetails;
 public interface GymWorkoutDetailsRepository extends JpaRepository<GymWorkoutDetails, Long> {
     Optional<GymWorkoutDetails> findByWorkoutId(Long workoutId);
     
-    // Método eficiente para borrado
     void deleteByWorkoutId(Long workoutId);
     
-    // Check de seguridad
     boolean existsByWorkout_IdAndWorkout_User_Id(Long workoutId, Long userId);
 }

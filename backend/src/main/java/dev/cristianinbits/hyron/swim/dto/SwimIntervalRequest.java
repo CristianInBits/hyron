@@ -36,7 +36,7 @@ public record SwimIntervalRequest(
     @Max(10)
     Integer rpe,
 
-    Set<SwimEquipment> equipment, // Puede ser null o vacío
+    Set<SwimEquipment> equipment,
 
     @Size(max = 4000)
     String notes
@@ -46,7 +46,6 @@ public record SwimIntervalRequest(
         if (equipment == null) equipment = Set.of();
     }
 
-    // 🔥 Validación lógica: O nadas distancia, O nadas tiempo
     @AssertTrue(message = "Interval must have either distance or duration")
     @JsonIgnore
     public boolean isContentValid() {

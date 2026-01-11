@@ -7,7 +7,6 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import java.util.Objects;
 
-/* Esta es la entidad que gestionará "librería" de ejercicios. */
 @Entity
 @Table(name = "exercises")
 @Getter
@@ -33,15 +32,15 @@ public class Exercise {
     private MuscleGroup muscleGroup;
 
     @Column(length = 255)
-    private String notes; // Notas de setup (ej: "Asiento en posición 4")
+    private String notes;
 
     @Builder.Default
     @Column(name = "is_unilateral", nullable = false)
-    private boolean isUnilateral = false; // Flag para indicar ejercicios a una mano/pierna
+    private boolean isUnilateral = false;
 
     @Builder.Default
     @Column(nullable = false)
-    private boolean active = true; // Soft Delete
+    private boolean active = true;
 
     @Override
     public final boolean equals(Object o) {

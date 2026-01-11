@@ -39,7 +39,6 @@ function HyroxBlockForm({ index, block, onChange, onRemove, canRemove }: HyroxBl
     }
 
     const handleAddItem = () => {
-        // Alternar entre RUN y el ejercicio típico del bloque
         const nextStation: HyroxStation = block.items.length % 2 === 0 ? 'RUN' : 'SKI_ERG'
         updateField('items', [...block.items, { ...emptyItem, station: nextStation }])
     }
@@ -54,7 +53,6 @@ function HyroxBlockForm({ index, block, onChange, onRemove, canRemove }: HyroxBl
         updateField('items', block.items.filter((_, i) => i !== itemIndex))
     }
 
-    // Calcular tiempo total del bloque
     const totalBlockTime = block.items.reduce((sum, item) => {
         return sum + item.durationSeconds + (item.recoveryDurationSeconds ?? 0)
     }, 0) + (block.restDurationSeconds ?? 0)

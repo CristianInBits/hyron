@@ -9,10 +9,6 @@ import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
 
-/**
- * Request payload for partial workout updates (PATCH).
- * All fields are optional; only non-null values will be applied.
- */
 public record WorkoutUpdateRequest(
 
         WorkoutType type,
@@ -35,10 +31,6 @@ public record WorkoutUpdateRequest(
         String source
 
 ) {
-    /**
-     * Cross-field validation when both dates are provided in the same request.
-     * Validation against existing values is handled in the service layer.
-     */
     @AssertTrue(message = "endDateTime must be after startDateTime when both are provided")
     public boolean isEndAfterStartWhenBothProvided() {
         if (startDateTime == null || endDateTime == null) return true;

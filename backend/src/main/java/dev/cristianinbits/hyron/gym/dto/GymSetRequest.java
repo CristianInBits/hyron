@@ -24,7 +24,6 @@ public record GymSetRequest(
     @Positive
     Integer executionSeconds,
 
-    // Usar @DecimalMin/Max para Double es lo correcto
     @DecimalMin(value = "0.0", message = "RPE must be at least 0")
     @DecimalMax(value = "10.0", message = "RPE must be at most 10")
     Double rpe,
@@ -39,10 +38,8 @@ public record GymSetRequest(
         if (notes != null) notes = notes.trim();
     }
 
-    // Integración con Bean Validation
-    // El nombre del método suele empezar por 'is' para que Jackson/Hibernate lo detecten
     @AssertTrue(message = "Set must have either reps or execution time")
-    @JsonIgnore // Para que no aparezca en el Swagger/Docs como un campo extra
+    @JsonIgnore
     public boolean isContentValid() {
         return reps != null || executionSeconds != null;
     }

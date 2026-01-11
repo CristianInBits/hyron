@@ -22,10 +22,6 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ==========
-    // Custom domain exceptions
-    // ==========
-
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
         return buildErrorResponse(HttpStatus.CONFLICT, "CONFLICT", ex.getMessage());
@@ -41,24 +37,17 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage());
     }
 
-    // ==========
-    // Database constraint violations (unique keys, FK, etc.) → 409
-    // ==========
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
 
-        // Intentar obtener información específica de Postgres
         String constraintName = extractConstraintName(ex);
         String sqlState = extractSqlState(ex);
 
-        // SQLSTATE 23505 = unique_violation en Postgres
         if ("23505".equals(sqlState)) {
             String userMessage = mapUniqueConstraintToMessage(constraintName);
             return buildErrorResponse(HttpStatus.CONFLICT, "CONFLICT", userMessage);
         }
 
-        // SQLSTATE 23503 = foreign_key_violation
         if ("23503".equals(sqlState)) {
             return buildErrorResponse(
                     HttpStatus.CONFLICT,
@@ -66,7 +55,6 @@ public class GlobalExceptionHandler {
                     "Referenced entity does not exist or is in use");
         }
 
-        // SQLSTATE 23502 = not_null_violation
         if ("23502".equals(sqlState)) {
             return buildErrorResponse(
                     HttpStatus.BAD_REQUEST,
@@ -74,17 +62,12 @@ public class GlobalExceptionHandler {
                     "Required field is missing");
         }
 
-        // Otros casos de integridad no identificados → 500 para investigar
-        // En producción podrías loguear ex para debug
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "INTERNAL_SERVER_ERROR",
                 "Data integrity error");
     }
 
-    /**
-     * Extrae el nombre del constraint desde la excepción de Postgres.
-     */
     private String extractConstraintName(DataIntegrityViolationException ex) {
         Throwable cause = ex.getMostSpecificCause();
 
@@ -98,9 +81,6 @@ public class GlobalExceptionHandler {
         return null;
     }
 
-    /**
-     * Extrae el SQLSTATE desde la excepción de Postgres.
-     */
     private String extractSqlState(DataIntegrityViolationException ex) {
         Throwable cause = ex.getMostSpecificCause();
 
@@ -108,7 +88,6 @@ public class GlobalExceptionHandler {
             return psqlEx.getSQLState();
         }
 
-        // Fallback para SQLException genérica
         if (cause instanceof SQLException sqlEx) {
             return sqlEx.getSQLState();
         }
@@ -116,9 +95,6 @@ public class GlobalExceptionHandler {
         return null;
     }
 
-    /**
-     * Mapea constraint names conocidos a mensajes de usuario.
-     */
     private String mapUniqueConstraintToMessage(String constraintName) {
         if (constraintName == null) {
             return "Duplicate entry detected";
@@ -132,11 +108,7 @@ public class GlobalExceptionHandler {
             default -> "Duplicate entry detected";
         };
     }
-
-    // ==========
-    // Validation errors (@Valid in @RequestBody) → 400
-    // ==========
-
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
@@ -149,10 +121,6 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", message);
     }
 
-    // ==========
-    // Validation errors in @PathVariable, @RequestParam, etc. → 400
-    // ==========
-
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
 
@@ -164,18 +132,10 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", message);
     }
 
-    // ==========
-    // Malformed JSON, incorrect types, etc. → 400
-    // ==========
-
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "Malformed JSON request");
     }
-
-    // ==========
-    // Catch-all → 500
-    // ==========
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
@@ -186,10 +146,6 @@ public class GlobalExceptionHandler {
                 "INTERNAL_SERVER_ERROR",
                 "Unexpected error occurred");
     }
-
-    // ==========
-    // Helper
-    // ==========
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String error, String message) {
         ErrorResponse body = new ErrorResponse(

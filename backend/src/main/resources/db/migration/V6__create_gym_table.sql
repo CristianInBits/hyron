@@ -1,4 +1,3 @@
--- 1. CATALOGO DE EJERCICIOS
 CREATE TABLE exercises (
     id            BIGSERIAL PRIMARY KEY,
     user_id       BIGINT NOT NULL,
@@ -17,14 +16,12 @@ ALTER TABLE exercises
     ADD CONSTRAINT chk_exercises_muscle_group
     CHECK (muscle_group IN ('CHEST', 'BACK', 'LEGS', 'SHOULDERS', 'ARMS', 'ABS', 'CARDIO', 'FULL_BODY', 'OTHER'));
 
--- Nombre único por usuario (case insensitive)
 CREATE UNIQUE INDEX uk_exercises_user_name ON exercises (user_id, LOWER(name)) WHERE active = TRUE;
 
 CREATE INDEX idx_exercises_user ON exercises (user_id);
 CREATE INDEX idx_exercises_user_active ON exercises (user_id, active);
 CREATE INDEX idx_exercises_user_muscle ON exercises (user_id, muscle_group, active);
 
--- 2. GYM WORKOUT DETAILS (Cabecera)
 CREATE TABLE gym_workout_details (
     id         BIGSERIAL PRIMARY KEY,
     workout_id BIGINT NOT NULL UNIQUE,
@@ -36,13 +33,12 @@ ALTER TABLE gym_workout_details
     FOREIGN KEY (workout_id) REFERENCES workouts (id) ON DELETE CASCADE;
 
 
--- 3. GYM EXERCISES (Nivel Intermedio)
 CREATE TABLE gym_exercises (
     id          BIGSERIAL PRIMARY KEY,
     details_id  BIGINT NOT NULL,
-    exercise_id BIGINT NOT NULL, -- FK al Catálogo
+    exercise_id BIGINT NOT NULL,
     order_index INTEGER NOT NULL,
-    superset_id VARCHAR(36),     -- UUID para agrupar
+    superset_id VARCHAR(36),
     notes       VARCHAR(1000)
 );
 
@@ -50,8 +46,6 @@ ALTER TABLE gym_exercises
     ADD CONSTRAINT fk_gym_exercises_details
     FOREIGN KEY (details_id) REFERENCES gym_workout_details (id) ON DELETE CASCADE;
 
--- Si borras un ejercicio del catálogo, NO borramos el historial, pero podría dar error de integridad.
--- Como usas Soft Delete (active=false), el ID seguirá existiendo, así que esto es seguro.
 ALTER TABLE gym_exercises
     ADD CONSTRAINT fk_gym_exercises_catalog
     FOREIGN KEY (exercise_id) REFERENCES exercises (id); 
@@ -66,8 +60,6 @@ ALTER TABLE gym_exercises
 
 CREATE INDEX idx_gym_exercises_details ON gym_exercises (details_id);
 
-
--- 4. GYM SETS (La serie real)
 CREATE TABLE gym_sets (
     id                BIGSERIAL PRIMARY KEY,
     gym_exercise_id   BIGINT NOT NULL,
@@ -97,10 +89,9 @@ ALTER TABLE gym_sets
     ADD CONSTRAINT chk_gym_sets_order_positive
     CHECK (order_index > 0);
 
--- Validaciones de lógica de gimnasio
 ALTER TABLE gym_sets
     ADD CONSTRAINT chk_gym_sets_weight_positive
-    CHECK (weight_kg >= 0); -- 0 es válido (bodyweight assisted o solo cuerpo)
+    CHECK (weight_kg >= 0);
 
 ALTER TABLE gym_sets
     ADD CONSTRAINT chk_gym_sets_reps_positive
