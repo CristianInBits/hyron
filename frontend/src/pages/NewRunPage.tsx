@@ -9,7 +9,8 @@ import type { ShoeSummaryResponse } from '../types/shoe'
 import RunIntervalForm from '../components/run/RunIntervalForm'
 import type { IntervalFormData } from '../components/run/RunIntervalForm'
 import { getErrorMessage } from '../services/errorHandler'
-import DurationInput from '../components/ui/DurationInput'
+
+import { Input, Label, Select, Textarea, DurationInput } from '../components/ui'
 
 type NewRunPageProps = {
     userId: number | null
@@ -54,17 +55,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const cardCls = 'bg-white rounded-xl p-4 shadow-sm border border-gray-100'
-    const labelCls = 'block text-sm font-medium text-gray-700 mb-1'
-
-    const controlCls =
-        'w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
-        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
-
-    const compactControlCls =
-        'px-2 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
-        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
-
     useEffect(() => {
         if (userId) {
             loadInitialData()
@@ -76,7 +66,6 @@ function NewRunPage({ userId }: NewRunPageProps) {
 
         try {
             setLoadingData(true)
-
             const shoesData = await shoeService.getActiveSummary(userId)
             setShoes(shoesData)
 
@@ -87,8 +76,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
-                } catch {
-                }
+                } catch { }
 
                 try {
                     const details = await runService.getDetails(userId, wId)
@@ -114,8 +102,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                             notes: i.notes ?? '',
                         })))
                     }
-                } catch {
-                }
+                } catch { }
             }
         } catch (err) {
             setError(getErrorMessage(err))
@@ -159,6 +146,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     durationSeconds: simpleDuration,
                     distanceMeters: simpleDistance ? parseInt(simpleDistance) : null,
                     averageHr: simpleHr ? parseInt(simpleHr) : null,
+                    cadenceSpm: null,
                     elevationGain: simpleElevation ? parseInt(simpleElevation) : null,
                     notes: null,
                 }]
@@ -295,147 +283,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
         )
     }
 
-    if (mode === 'simple') {
-        return (
-            <div className="bg-green-50 min-h-screen -m-4 p-4">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center">
-                        <button
-                            onClick={() => setMode(null)}
-                            className="p-2 mr-2 text-green-600 hover:bg-green-100 rounded-lg"
-                        >
-                            <ArrowLeft className="w-6 h-6" />
-                        </button>
-                        <Dog className="w-10 h-10 mr-3 text-green-600" />
-                        <div>
-                            <h1 className="text-2xl font-bold text-green-700">Rodaje</h1>
-                            <p className="text-sm text-green-600">Carrera simple</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={loading}
-                        className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
-                    >
-                        <Save className="w-5 h-5 mr-1" />
-                        {loading ? 'Guardando...' : 'Guardar'}
-                    </button>
-                </div>
-
-                {/* Fecha del entrenamiento */}
-                <div className={`${cardCls} mb-4`}>
-                    <label className={labelCls}>
-                        Fecha y hora del entrenamiento
-                    </label>
-                    <input
-                        type="datetime-local"
-                        value={workoutDate}
-                        onChange={(e) => setWorkoutDate(e.target.value)}
-                        className={controlCls}
-                    />
-                </div>
-
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                        {error}
-                    </div>
-                )}
-
-                {/* Formulario simple */}
-                <div className={`${cardCls} mb-4`}>
-                    {/* Duración y Distancia */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelCls}>
-                                Duración *
-                            </label>
-                            <DurationInput
-                                value={simpleDuration}
-                                onChange={setSimpleDuration}
-                                className="mt-1"
-                                inputClassName={compactControlCls}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelCls}>
-                                Distancia (m)
-                            </label>
-                            <input
-                                type="number"
-                                value={simpleDistance}
-                                onChange={(e) => setSimpleDistance(e.target.value)}
-                                placeholder="6000"
-                                className={controlCls}
-                            />
-                        </div>
-                    </div>
-
-                    {/* FC y Desnivel */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelCls}>
-                                FC Media
-                            </label>
-                            <input
-                                type="number"
-                                value={simpleHr}
-                                onChange={(e) => setSimpleHr(e.target.value)}
-                                placeholder="145"
-                                className={controlCls}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelCls}>
-                                Desnivel (m)
-                            </label>
-                            <input
-                                type="number"
-                                value={simpleElevation}
-                                onChange={(e) => setSimpleElevation(e.target.value)}
-                                placeholder="50"
-                                className={controlCls}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Zapatillas */}
-                    <div>
-                        <label className={labelCls}>
-                            Zapatillas
-                        </label>
-                        <select
-                            value={shoeId ?? ''}
-                            onChange={(e) => setShoeId(e.target.value ? parseInt(e.target.value) : null)}
-                            className={controlCls}
-                        >
-                            <option value="">Sin zapatillas</option>
-                            {shoes.map(shoe => (
-                                <option key={shoe.id} value={shoe.id}>
-                                    {shoe.nickname || `${shoe.brand} ${shoe.model}`}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Notas */}
-                    <div>
-                        <label className={labelCls}>
-                            Notas
-                        </label>
-                        <textarea
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Rodaje suave por el parque..."
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
-                        />
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
+    // FORMULARIO PRINCIPAL
     return (
         <div className="bg-green-50 min-h-screen -m-4 p-4">
             {/* Header */}
@@ -449,8 +297,12 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     </button>
                     <Dog className="w-10 h-10 mr-3 text-green-600" />
                     <div>
-                        <h1 className="text-2xl font-bold text-green-700">Series</h1>
-                        <p className="text-sm text-green-600">Intervalos</p>
+                        <h1 className="text-2xl font-bold text-green-700">
+                            {mode === 'simple' ? 'Rodaje' : 'Series'}
+                        </h1>
+                        <p className="text-sm text-green-600">
+                            {mode === 'simple' ? 'Carrera simple' : 'Intervalos'}
+                        </p>
                     </div>
                 </div>
                 <button
@@ -470,29 +322,75 @@ function NewRunPage({ userId }: NewRunPageProps) {
             )}
 
             {/* Fecha del entrenamiento */}
-            <div className={`${cardCls} mb-4`}>
-                <label className={labelCls}>
-                    Fecha y hora del entrenamiento
-                </label>
-                <input
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                <Label>Fecha y hora del entrenamiento</Label>
+                <Input
+                    variant="green"
                     type="datetime-local"
                     value={workoutDate}
                     onChange={(e) => setWorkoutDate(e.target.value)}
-                    className={controlCls}
                 />
             </div>
 
-            {/* Datos generales */}
-            <div className={`${cardCls} mb-4`}>
-                <div className="grid grid-cols-2 gap-4">
+            {/* MODO SIMPLE: Inputs específicos */}
+            {mode === 'simple' && (
+                <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Duración *</Label>
+                            <DurationInput
+                                variant="green"
+                                value={simpleDuration}
+                                onChange={setSimpleDuration}
+                                className="mt-1"
+                            />
+                        </div>
+                        <div>
+                            <Label>Distancia (m)</Label>
+                            <Input
+                                type="number"
+                                variant="green"
+                                value={simpleDistance}
+                                onChange={(e) => setSimpleDistance(e.target.value)}
+                                placeholder="6000"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <Label>FC Media</Label>
+                            <Input
+                                type="number"
+                                variant="green"
+                                value={simpleHr}
+                                onChange={(e) => setSimpleHr(e.target.value)}
+                                placeholder="145"
+                            />
+                        </div>
+                        <div>
+                            <Label>Desnivel (m)</Label>
+                            <Input
+                                type="number"
+                                variant="green"
+                                value={simpleElevation}
+                                onChange={(e) => setSimpleElevation(e.target.value)}
+                                placeholder="50"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Zapatillas y Notas (Común para ambos modos) */}
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                <div className="space-y-4">
                     <div>
-                        <label className={labelCls}>
-                            Zapatillas
-                        </label>
-                        <select
+                        <Label>Zapatillas</Label>
+                        <Select
+                            variant="green"
                             value={shoeId ?? ''}
                             onChange={(e) => setShoeId(e.target.value ? parseInt(e.target.value) : null)}
-                            className={controlCls}
                         >
                             <option value="">Sin zapatillas</option>
                             {shoes.map(shoe => (
@@ -500,50 +398,50 @@ function NewRunPage({ userId }: NewRunPageProps) {
                                     {shoe.nickname || `${shoe.brand} ${shoe.model}`}
                                 </option>
                             ))}
-                        </select>
+                        </Select>
                     </div>
                     <div>
-                        <label className={labelCls}>
-                            Notas
-                        </label>
-                        <input
-                            type="text"
+                        <Label>Notas</Label>
+                        <Textarea
                             value={notes}
+                            variant="green"
                             onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Serie de 400m..."
-                            className={controlCls}
+                            placeholder="Rodaje suave por el parque..."
+                            rows={3}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Intervalos */}
-            <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-semibold text-gray-700">Intervalos</h2>
-                    <button
-                        type="button"
-                        onClick={handleAddInterval}
-                        className="flex items-center text-green-600 hover:text-green-700 text-sm"
-                    >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Añadir
-                    </button>
-                </div>
+            {/* MODO INTERVALOS: Lista de intervalos */}
+            {mode === 'intervals' && (
+                <div className="mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-gray-700">Intervalos</h2>
+                        <button
+                            type="button"
+                            onClick={handleAddInterval}
+                            className="flex items-center text-green-600 hover:text-green-700 text-sm"
+                        >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Añadir
+                        </button>
+                    </div>
 
-                <div className="space-y-3">
-                    {intervals.map((interval, index) => (
-                        <RunIntervalForm
-                            key={index}
-                            index={index}
-                            interval={interval}
-                            onChange={handleUpdateInterval}
-                            onRemove={handleRemoveInterval}
-                            canRemove={intervals.length > 1}
-                        />
-                    ))}
+                    <div className="space-y-3">
+                        {intervals.map((interval, index) => (
+                            <RunIntervalForm
+                                key={index}
+                                index={index}
+                                interval={interval}
+                                onChange={handleUpdateInterval}
+                                onRemove={handleRemoveInterval}
+                                canRemove={intervals.length > 1}
+                            />
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

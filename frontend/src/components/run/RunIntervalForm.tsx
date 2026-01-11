@@ -2,6 +2,9 @@ import { Trash2, GripVertical } from 'lucide-react'
 import type { RunIntervalType } from '../../types/run'
 import { runIntervalTypeLabels } from '../../types/run'
 import DurationInput from '../ui/DurationInput'
+import { Input } from '../ui/Input'
+import { Label } from '../ui/Label'
+import { Select } from '../ui/Select'
 
 type IntervalFormData = {
     type: RunIntervalType
@@ -28,15 +31,6 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
         onChange(index, { ...interval, [field]: value })
     }
 
-    const labelCls = 'block text-xs font-medium text-gray-500 mb-1'
-    const controlCls =
-        'w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
-        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
-
-    const compactControlCls =
-        'px-2 py-2 text-sm border border-gray-200 rounded-lg bg-white ' +
-        'focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400'
-
     return (
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
@@ -60,27 +54,26 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
             {/* Tipo y Duración */}
             <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                    <label className={labelCls}>Tipo</label>
-                    <select
+                    <Label>Tipo</Label>
+                    <Select
+                        variant="green"
                         value={interval.type}
                         onChange={(e) => updateField('type', e.target.value as RunIntervalType)}
-                        className={controlCls}
                     >
                         {intervalTypes.map((t) => (
                             <option key={t} value={t}>
                                 {runIntervalTypeLabels[t]}
                             </option>
                         ))}
-                    </select>
+                    </Select>
                 </div>
 
                 <div>
-                    <label className={labelCls}>Duración *</label>
-                    {/* Ideal: que DurationInput acepte className para aplicar el mismo controlCls */}
+                    <Label>Duración *</Label>
                     <DurationInput
+                        variant="green"
                         value={interval.durationSeconds}
                         onChange={(secs) => updateField('durationSeconds', secs)}
-                        inputClassName={compactControlCls}
                     />
                 </div>
             </div>
@@ -88,24 +81,24 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
             {/* Distancia y FC */}
             <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                    <label className={labelCls}>Distancia (m)</label>
-                    <input
+                    <Label>Distancia (m)</Label>
+                    <Input
+                        variant="green"
                         type="number"
                         value={interval.distanceMeters ?? ''}
                         onChange={(e) => updateField('distanceMeters', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="1000"
-                        className={controlCls}
                     />
                 </div>
 
                 <div>
-                    <label className={labelCls}>FC Media</label>
-                    <input
+                    <Label>FC Media</Label>
+                    <Input
+                        variant="green"
                         type="number"
                         value={interval.averageHr ?? ''}
                         onChange={(e) => updateField('averageHr', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="150"
-                        className={controlCls}
                     />
                 </div>
             </div>
@@ -113,24 +106,24 @@ function RunIntervalForm({ index, interval, onChange, onRemove, canRemove }: Run
             {/* Cadencia y Desnivel */}
             <div className="grid grid-cols-2 gap-3">
                 <div>
-                    <label className={labelCls}>Cadencia (spm)</label>
-                    <input
+                    <Label>Cadencia (spm)</Label>
+                    <Input
+                        variant="green"
                         type="number"
                         value={interval.cadenceSpm ?? ''}
                         onChange={(e) => updateField('cadenceSpm', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="180"
-                        className={controlCls}
                     />
                 </div>
 
                 <div>
-                    <label className={labelCls}>Desnivel (m)</label>
-                    <input
+                    <Label>Desnivel (m)</Label>
+                    <Input
+                        variant="green"
                         type="number"
                         value={interval.elevationGain ?? ''}
                         onChange={(e) => updateField('elevationGain', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="50"
-                        className={controlCls}
                     />
                 </div>
             </div>
