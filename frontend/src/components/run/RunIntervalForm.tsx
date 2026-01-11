@@ -1,10 +1,7 @@
 import { Trash2, GripVertical } from 'lucide-react'
 import type { RunIntervalType } from '../../types/run'
 import { runIntervalTypeLabels } from '../../types/run'
-import DurationInput from '../ui/DurationInput'
-import { Input } from '../ui/Input'
-import { Label } from '../ui/Label'
-import { Select } from '../ui/Select'
+import { Input, Label, Select, DurationInput } from '../ui'
 
 type IntervalFormData = {
     type: RunIntervalType

@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Flame, Plus, ArrowLeft, Save, Zap } from 'lucide-react'
+import { Flame, Plus, ArrowLeft, Save, Zap, Footprints } from 'lucide-react'
 import { hyroxService } from '../services/hyroxService'
 import { workoutService } from '../services/workoutService'
+import { shoeService } from '../services/shoeService'
 import type { HyroxDetailsCreateRequest, HyroxStation } from '../types/hyrox'
+import type { ShoeSummaryResponse } from '../types/shoe'
 import HyroxBlockForm from '../components/hyrox/HyroxBlockForm'
 import type { BlockFormData } from '../components/hyrox/HyroxBlockForm'
 import type { ItemFormData } from '../components/hyrox/HyroxItemForm'
 import { getErrorMessage } from '../services/errorHandler'
-import { shoeService } from '../services/shoeService'
-import type { ShoeSummaryResponse } from '../types/shoe'
-import { Footprints } from 'lucide-react'
+import { Input, Label, Select, Textarea } from '../components/ui'
 
 type NewHyroxPageProps = {
     userId: number | null
@@ -66,13 +66,13 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
     const [notes, setNotes] = useState('')
     const [blocks, setBlocks] = useState<BlockFormData[]>([createEmptyBlock()])
 
+    const [shoes, setShoes] = useState<ShoeSummaryResponse[]>([])
+    const [shoeId, setShoeId] = useState<number | null>(null)
+
     const [loading, setLoading] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [showTemplateChoice, setShowTemplateChoice] = useState(!workoutIdParam)
-
-    const [shoes, setShoes] = useState<ShoeSummaryResponse[]>([])
-    const [shoeId, setShoeId] = useState<number | null>(null)
 
     useEffect(() => {
         if (userId) {
@@ -97,8 +97,7 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
-                } catch {
-                }
+                } catch { }
 
                 try {
                     const details = await hyroxService.getDetails(userId, wId)
@@ -125,8 +124,7 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                             })),
                         })))
                     }
-                } catch {
-                }
+                } catch { }
             }
         } catch (err) {
             setError(getErrorMessage(err))
@@ -234,6 +232,7 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
+    // Sin usuario
     if (!userId) {
         return (
             <div className="bg-orange-50 min-h-screen -m-4 p-4">
@@ -246,6 +245,7 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         )
     }
 
+    // Cargando
     if (loadingData) {
         return (
             <div className="bg-orange-50 min-h-screen -m-4 p-4">
@@ -258,6 +258,7 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         )
     }
 
+    // Selector de plantilla
     if (showTemplateChoice) {
         return (
             <div className="bg-orange-50 min-h-screen -m-4 p-4">
@@ -305,6 +306,7 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
         )
     }
 
+    // Formulario principal
     return (
         <div className="bg-orange-50 min-h-screen -m-4 p-4">
             {/* Header */}
@@ -343,31 +345,28 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
             )}
 
             {/* Fecha */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha y hora del entrenamiento
-                </label>
-                <input
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                <Label>Fecha y hora del entrenamiento</Label>
+                <Input
                     type="datetime-local"
                     value={workoutDate}
                     onChange={(e) => setWorkoutDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    variant="orange"
                 />
             </div>
 
             {/* Zapatillas y Notas */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm space-y-4">
-                {/* Selector de zapatillas */}
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100 space-y-4">
                 {shoes.length > 0 && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Label>
                             <Footprints className="w-4 h-4 inline mr-1" />
                             Zapatillas (opcional)
-                        </label>
-                        <select
+                        </Label>
+                        <Select
                             value={shoeId ?? ''}
                             onChange={(e) => setShoeId(e.target.value ? parseInt(e.target.value) : null)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            variant="orange"
                         >
                             <option value="">Sin zapatillas</option>
                             {shoes.map(shoe => (
@@ -375,21 +374,18 @@ function NewHyroxPage({ userId }: NewHyroxPageProps) {
                                     {shoe.nickname || `${shoe.brand} ${shoe.model}`}
                                 </option>
                             ))}
-                        </select>
+                        </Select>
                     </div>
                 )}
 
-                {/* Notas */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Notas del entrenamiento (opcional)
-                    </label>
-                    <input
-                        type="text"
+                    <Label>Notas del entrenamiento (opcional)</Label>
+                    <Textarea
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Simulacro de competición, entrenamiento parcial..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        rows={2}
+                        variant="orange"
                     />
                 </div>
             </div>

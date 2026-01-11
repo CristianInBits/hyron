@@ -3,7 +3,7 @@ import { Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react'
 import type { HyroxStation } from '../../types/hyrox'
 import HyroxItemForm from './HyroxItemForm'
 import type { ItemFormData } from './HyroxItemForm'
-import DurationInput from '../ui/DurationInput'
+import { Input, Label, DurationInput } from '../ui'
 
 export type BlockFormData = {
     restDurationSeconds: number | null
@@ -67,7 +67,7 @@ function HyroxBlockForm({ index, block, onChange, onRemove, canRemove }: HyroxBl
         <div className="bg-orange-50 rounded-xl border-2 border-orange-200 overflow-hidden">
             {/* Cabecera del bloque */}
             <div
-                className="flex items-center justify-between p-4 cursor-pointer hover:bg-orange-100"
+                className="flex items-center justify-between p-4 cursor-pointer hover:bg-orange-100 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center">
@@ -121,7 +121,7 @@ function HyroxBlockForm({ index, block, onChange, onRemove, canRemove }: HyroxBl
                     <button
                         type="button"
                         onClick={handleAddItem}
-                        className="w-full py-2 border-2 border-dashed border-orange-300 text-orange-600 rounded-lg hover:bg-orange-100 flex items-center justify-center text-sm mb-4"
+                        className="w-full py-2 border-2 border-dashed border-orange-300 text-orange-600 rounded-lg hover:bg-orange-100 flex items-center justify-center text-sm mb-4 transition-colors"
                     >
                         <Plus className="w-4 h-4 mr-1" />
                         Añadir estación
@@ -130,20 +130,21 @@ function HyroxBlockForm({ index, block, onChange, onRemove, canRemove }: HyroxBl
                     {/* Descanso y notas del bloque */}
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-orange-200">
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Descanso tras ronda</label>
+                            <Label>Descanso tras ronda</Label>
                             <DurationInput
                                 value={block.restDurationSeconds ?? 0}
                                 onChange={(secs) => updateField('restDurationSeconds', secs || null)}
+                                variant="orange"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Notas</label>
-                            <input
+                            <Label>Notas</Label>
+                            <Input
                                 type="text"
                                 value={block.notes}
                                 onChange={(e) => updateField('notes', e.target.value)}
                                 placeholder="Notas de la ronda..."
-                                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-400"
+                                variant="orange"
                             />
                         </div>
                     </div>
