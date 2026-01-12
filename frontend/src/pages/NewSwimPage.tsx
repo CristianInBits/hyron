@@ -4,11 +4,11 @@ import { Fish, Plus, ArrowLeft, Save, Timer, BarChart3 } from 'lucide-react'
 import { swimService } from '../services/swimService'
 import { workoutService } from '../services/workoutService'
 import type { SwimDetailsCreateRequest, PoolType, SwimIntervalType, SwimStroke } from '../types/swim'
-import { poolTypeLabels } from '../types/swim'
+import { poolTypeLabels, swimStrokeLabels } from '../types/swim'
 import SwimIntervalForm from '../components/swim/SwimIntervalForm'
 import type { SwimIntervalFormData } from '../components/swim/SwimIntervalForm'
-import DurationInput from '../components/ui/DurationInput'
 import { getErrorMessage } from '../services/errorHandler'
+import { Input, Label, Select, Textarea, DurationInput } from '../components/ui'
 
 type NewSwimPageProps = {
     userId: number | null
@@ -17,6 +17,7 @@ type NewSwimPageProps = {
 type SwimMode = 'simple' | 'intervals'
 
 const poolTypes: PoolType[] = ['SHORT_COURSE', 'LONG_COURSE', 'OPEN_WATER', 'OTHER']
+const strokes: SwimStroke[] = ['FREESTYLE', 'BACKSTROKE', 'BREASTSTROKE', 'BUTTERFLY', 'MEDLEY']
 
 const emptyInterval: SwimIntervalFormData = {
     type: 'WORK',
@@ -73,8 +74,7 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
-                } catch {
-                }
+                } catch { }
 
                 try {
                     const details = await swimService.getDetails(userId, wId)
@@ -100,8 +100,7 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
                             notes: i.notes ?? '',
                         })))
                     }
-                } catch {
-                }
+                } catch { }
             }
         } catch (err) {
             setError(getErrorMessage(err))
@@ -210,6 +209,7 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         }
     }
 
+    // Sin usuario
     if (!userId) {
         return (
             <div className="bg-blue-50 min-h-screen -m-4 p-4">
@@ -222,6 +222,7 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         )
     }
 
+    // Cargando
     if (loadingData) {
         return (
             <div className="bg-blue-50 min-h-screen -m-4 p-4">
@@ -234,6 +235,7 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         )
     }
 
+    // Selector de modo
     if (!mode) {
         return (
             <div className="bg-blue-50 min-h-screen -m-4 p-4">
@@ -277,133 +279,7 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
         )
     }
 
-    if (mode === 'simple') {
-        return (
-            <div className="bg-blue-50 min-h-screen -m-4 p-4">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center">
-                        <button
-                            onClick={() => setMode(null)}
-                            className="p-2 mr-2 text-blue-600 hover:bg-blue-100 rounded-lg"
-                        >
-                            <ArrowLeft className="w-6 h-6" />
-                        </button>
-                        <Fish className="w-10 h-10 mr-3 text-blue-600" />
-                        <div>
-                            <h1 className="text-2xl font-bold text-blue-700">Nado continuo</h1>
-                            <p className="text-sm text-blue-600">Entrenamiento simple</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={loading}
-                        className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    >
-                        <Save className="w-5 h-5 mr-1" />
-                        {loading ? 'Guardando...' : 'Guardar'}
-                    </button>
-                </div>
-
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                        {error}
-                    </div>
-                )}
-
-                {/* Fecha */}
-                <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Fecha y hora del entrenamiento
-                    </label>
-                    <input
-                        type="datetime-local"
-                        value={workoutDate}
-                        onChange={(e) => setWorkoutDate(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                </div>
-
-                {/* Formulario simple */}
-                <div className="bg-white rounded-lg p-4 shadow-sm space-y-4">
-                    {/* Tipo de piscina y Estilo */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Piscina
-                            </label>
-                            <select
-                                value={poolType}
-                                onChange={(e) => setPoolType(e.target.value as PoolType)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            >
-                                {poolTypes.map(pt => (
-                                    <option key={pt} value={pt}>{poolTypeLabels[pt]}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Estilo
-                            </label>
-                            <select
-                                value={simpleStroke}
-                                onChange={(e) => setSimpleStroke(e.target.value as SwimStroke)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            >
-                                <option value="FREESTYLE">Crol</option>
-                                <option value="BACKSTROKE">Espalda</option>
-                                <option value="BREASTSTROKE">Braza</option>
-                                <option value="BUTTERFLY">Mariposa</option>
-                                <option value="MEDLEY">Estilos</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Distancia y Duración */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Distancia (m)
-                            </label>
-                            <input
-                                type="number"
-                                value={simpleDistance}
-                                onChange={(e) => setSimpleDistance(e.target.value)}
-                                placeholder="2000"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Duración
-                            </label>
-                            <DurationInput
-                                value={simpleDuration}
-                                onChange={setSimpleDuration}
-                                className="mt-1"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Notas */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Notas
-                        </label>
-                        <textarea
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Nado suave de recuperación..."
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-                        />
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
+    // Formulario principal
     return (
         <div className="bg-blue-50 min-h-screen -m-4 p-4">
             {/* Header */}
@@ -417,8 +293,12 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
                     </button>
                     <Fish className="w-10 h-10 mr-3 text-blue-600" />
                     <div>
-                        <h1 className="text-2xl font-bold text-blue-700">Series</h1>
-                        <p className="text-sm text-blue-600">Intervalos</p>
+                        <h1 className="text-2xl font-bold text-blue-700">
+                            {mode === 'simple' ? 'Nado continuo' : 'Series'}
+                        </h1>
+                        <p className="text-sm text-blue-600">
+                            {mode === 'simple' ? 'Entrenamiento simple' : 'Intervalos'}
+                        </p>
                     </div>
                 </div>
                 <button
@@ -438,77 +318,143 @@ function NewSwimPage({ userId }: NewSwimPageProps) {
             )}
 
             {/* Fecha */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha y hora del entrenamiento
-                </label>
-                <input
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                <Label>Fecha y hora del entrenamiento</Label>
+                <Input
                     type="datetime-local"
                     value={workoutDate}
                     onChange={(e) => setWorkoutDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    variant="blue"
                 />
             </div>
 
-            {/* Datos generales */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Piscina
-                        </label>
-                        <select
-                            value={poolType}
-                            onChange={(e) => setPoolType(e.target.value as PoolType)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        >
-                            {poolTypes.map(pt => (
-                                <option key={pt} value={pt}>{poolTypeLabels[pt]}</option>
-                            ))}
-                        </select>
+            {/* Modo Simple */}
+            {mode === 'simple' && (
+                <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100 space-y-4">
+                    {/* Piscina y Estilo */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Piscina</Label>
+                            <Select
+                                value={poolType}
+                                onChange={(e) => setPoolType(e.target.value as PoolType)}
+                                variant="blue"
+                            >
+                                {poolTypes.map(pt => (
+                                    <option key={pt} value={pt}>{poolTypeLabels[pt]}</option>
+                                ))}
+                            </Select>
+                        </div>
+                        <div>
+                            <Label>Estilo</Label>
+                            <Select
+                                value={simpleStroke}
+                                onChange={(e) => setSimpleStroke(e.target.value as SwimStroke)}
+                                variant="blue"
+                            >
+                                {strokes.map(s => (
+                                    <option key={s} value={s}>{swimStrokeLabels[s]}</option>
+                                ))}
+                            </Select>
+                        </div>
                     </div>
+
+                    {/* Distancia y Duración */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Distancia (m)</Label>
+                            <Input
+                                type="number"
+                                value={simpleDistance}
+                                onChange={(e) => setSimpleDistance(e.target.value)}
+                                placeholder="2000"
+                                variant="blue"
+                            />
+                        </div>
+                        <div>
+                            <Label>Duración</Label>
+                            <DurationInput
+                                value={simpleDuration}
+                                onChange={setSimpleDuration}
+                                variant="blue"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Notas */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Notas
-                        </label>
-                        <input
-                            type="text"
+                        <Label>Notas</Label>
+                        <Textarea
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Técnica de crol..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            placeholder="Nado suave de recuperación..."
+                            rows={3}
+                            variant="blue"
                         />
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Intervalos */}
-            <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-semibold text-gray-700">Intervalos</h2>
-                    <button
-                        type="button"
-                        onClick={handleAddInterval}
-                        className="flex items-center text-blue-600 hover:text-blue-700 text-sm"
-                    >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Añadir
-                    </button>
-                </div>
+            {/* Modo Intervalos */}
+            {mode === 'intervals' && (
+                <>
+                    {/* Datos generales */}
+                    <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>Piscina</Label>
+                                <Select
+                                    value={poolType}
+                                    onChange={(e) => setPoolType(e.target.value as PoolType)}
+                                    variant="blue"
+                                >
+                                    {poolTypes.map(pt => (
+                                        <option key={pt} value={pt}>{poolTypeLabels[pt]}</option>
+                                    ))}
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Notas</Label>
+                                <Input
+                                    type="text"
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    placeholder="Técnica de crol..."
+                                    variant="blue"
+                                />
+                            </div>
+                        </div>
+                    </div>
 
-                <div className="space-y-3">
-                    {intervals.map((interval, index) => (
-                        <SwimIntervalForm
-                            key={index}
-                            index={index}
-                            interval={interval}
-                            onChange={handleUpdateInterval}
-                            onRemove={handleRemoveInterval}
-                            canRemove={intervals.length > 1}
-                        />
-                    ))}
-                </div>
-            </div>
+                    {/* Intervalos */}
+                    <div className="mb-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-sm font-semibold text-gray-700">Intervalos</h2>
+                            <button
+                                type="button"
+                                onClick={handleAddInterval}
+                                className="flex items-center text-blue-600 hover:text-blue-700 text-sm"
+                            >
+                                <Plus className="w-4 h-4 mr-1" />
+                                Añadir
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {intervals.map((interval, index) => (
+                                <SwimIntervalForm
+                                    key={index}
+                                    index={index}
+                                    interval={interval}
+                                    onChange={handleUpdateInterval}
+                                    onRemove={handleRemoveInterval}
+                                    canRemove={intervals.length > 1}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }
