@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Dog, Fish, Dumbbell, Flame } from 'lucide-react'
 import type { WorkoutType, WorkoutCreateRequest, WorkoutDetailResponse } from '../../types/workout'
 import { getErrorMessage } from '../../services/errorHandler'
+import { Input, Label, Textarea } from '../ui'
 
 type WorkoutFormProps = {
     workout?: WorkoutDetailResponse | null
@@ -87,10 +88,8 @@ function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutFormProps) {
             {/* Selector de tipo (solo en creación) */}
             {!workout && (
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo de entrenamiento
-                    </label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <Label>Tipo de entrenamiento</Label>
+                    <div className="grid grid-cols-4 gap-2 mt-1">
                         {workoutTypes.map(wt => {
                             const Icon = wt.icon
                             const isSelected = type === wt.type
@@ -115,55 +114,43 @@ function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutFormProps) {
 
             {/* Fecha inicio */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Inicio
-                </label>
-                <input
+                <Label>Inicio</Label>
+                <Input
                     type="datetime-local"
                     value={startDateTime}
                     onChange={(e) => setStartDateTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                 />
             </div>
 
             {/* Fecha fin */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fin (opcional)
-                </label>
-                <input
+                <Label>Fin (opcional)</Label>
+                <Input
                     type="datetime-local"
                     value={endDateTime}
                     onChange={(e) => setEndDateTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                 />
             </div>
 
             {/* RPE y Ubicación en fila */}
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        RPE (1-10)
-                    </label>
-                    <input
+                    <Label>RPE (1-10)</Label>
+                    <Input
                         type="number"
                         min="1"
                         max="10"
                         value={globalRpe}
                         onChange={(e) => setGlobalRpe(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                         placeholder="7"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Ubicación
-                    </label>
-                    <input
+                    <Label>Ubicación</Label>
+                    <Input
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                         placeholder="Gimnasio"
                     />
                 </div>
@@ -171,14 +158,11 @@ function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutFormProps) {
 
             {/* Notas */}
             <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notas
-                </label>
-                <textarea
+                <Label>Notas</Label>
+                <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
                     placeholder="Notas del entrenamiento..."
                 />
             </div>
@@ -188,14 +172,14 @@ function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutFormProps) {
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                     Cancelar
                 </button>
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                     {loading ? 'Guardando...' : 'Guardar'}
                 </button>

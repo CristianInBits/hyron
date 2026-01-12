@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react'
 import { ClipboardList } from 'lucide-react'
 import { workoutService } from '../services/workoutService'
 import { runService } from '../services/runService'
+import { swimService } from '../services/swimService'
+import { gymService } from '../services/gymService'
+import { hyroxService } from '../services/hyroxService'
 import type { WorkoutSummaryResponse } from '../types/workout'
 import type { RunDetailsResponse } from '../types/run'
+import type { SwimDetailsResponse } from '../types/swim'
+import type { GymDetailsResponse } from '../types/gym'
+import type { HyroxDetailsResponse } from '../types/hyrox'
 import WorkoutCard from '../components/workouts/WorkoutCard'
 import { useNavigate } from 'react-router-dom'
-import { swimService } from '../services/swimService'
-import type { SwimDetailsResponse } from '../types/swim'
-import { gymService } from '../services/gymService'
-import type { GymDetailsResponse } from '../types/gym'
-import { hyroxService } from '../services/hyroxService'
-import type { HyroxDetailsResponse } from '../types/hyrox'
 
 type WorkoutsPageProps = {
     userId: number | null
@@ -65,19 +65,22 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
         if (!expandedDetails[workout.id]) {
             setLoadingDetails(true)
             try {
-                if (workout.type === 'RUN') {
-                    const details = await runService.getDetails(userId, workout.id)
-                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
-                } else if (workout.type === 'SWIM') {
-                    const details = await swimService.getDetails(userId, workout.id)
-                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
-                } else if (workout.type === 'GYM') {
-                    const details = await gymService.getDetails(userId, workout.id)
-                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
-                } else if (workout.type === 'HYROX') {
-                    const details = await hyroxService.getDetails(userId, workout.id)
-                    setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
+                let details = null
+                switch (workout.type) {
+                    case 'RUN':
+                        details = await runService.getDetails(userId, workout.id)
+                        break
+                    case 'SWIM':
+                        details = await swimService.getDetails(userId, workout.id)
+                        break
+                    case 'GYM':
+                        details = await gymService.getDetails(userId, workout.id)
+                        break
+                    case 'HYROX':
+                        details = await hyroxService.getDetails(userId, workout.id)
+                        break
                 }
+                setExpandedDetails(prev => ({ ...prev, [workout.id]: details }))
             } catch (err) {
                 console.error('Error loading details:', err)
                 setExpandedDetails(prev => ({ ...prev, [workout.id]: null }))
@@ -88,20 +91,13 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
     }
 
     const handleEdit = (workout: WorkoutSummaryResponse) => {
-        switch (workout.type) {
-            case 'RUN':
-                navigate(`/new/run?workoutId=${workout.id}`)
-                break
-            case 'SWIM':
-                navigate(`/new/swim?workoutId=${workout.id}`)
-                break
-            case 'GYM':
-                navigate(`/new/gym?workoutId=${workout.id}`)
-                break
-            case 'HYROX':
-                navigate(`/new/hyrox?workoutId=${workout.id}`)
-                break
+        const routes: Record<string, string> = {
+            RUN: '/new/run',
+            SWIM: '/new/swim',
+            GYM: '/new/gym',
+            HYROX: '/new/hyrox',
         }
+        navigate(`${routes[workout.type]}?workoutId=${workout.id}`)
     }
 
     const handleDelete = async (id: number) => {
@@ -146,11 +142,13 @@ function WorkoutsPage({ userId }: WorkoutsPageProps) {
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
             {!loading && !error && workouts.length === 0 && (
-                <p className="text-gray-500">No hay workouts. Usa el botón + para crear uno.</p>
+                <div className="bg-gray-50 rounded-xl p-8 text-center">
+                    <p className="text-gray-500">No hay workouts. Usa el botón + para crear uno.</p>
+                </div>
             )}
 
             {!loading && !error && workouts.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                     {workouts.map(workout => (
                         <WorkoutCard
                             key={workout.id}

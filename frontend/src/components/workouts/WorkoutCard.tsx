@@ -22,10 +22,10 @@ type WorkoutCardProps = {
 }
 
 const workoutConfig = {
-    RUN: { icon: Dog, color: 'text-green-500', bg: 'bg-green-50', label: 'Run' },
-    SWIM: { icon: Fish, color: 'text-blue-500', bg: 'bg-blue-50', label: 'Swim' },
-    GYM: { icon: Dumbbell, color: 'text-purple-500', bg: 'bg-purple-50', label: 'Gym' },
-    HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-50', label: 'Hyrox' },
+    RUN: { icon: Dog, color: 'text-green-500', bg: 'bg-green-50', border: 'border-green-200', label: 'Run' },
+    SWIM: { icon: Fish, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-200', label: 'Swim' },
+    GYM: { icon: Dumbbell, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-200', label: 'Gym' },
+    HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-200', label: 'Hyrox' },
 }
 
 function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExpand, onDelete, onEdit, showActions = true }: WorkoutCardProps) {
@@ -78,7 +78,7 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                     {showActions && (
                         <>
                             <button
-                                className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     onEdit(workout)
@@ -101,7 +101,6 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                         </>
                     )}
 
-                    {/* Chevron siempre visible */}
                     {isExpanded ? (
                         <ChevronUp className="w-5 h-5 text-gray-400 ml-1" />
                     ) : (
@@ -110,11 +109,9 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
                 </div>
             </div>
 
-            {/* Detalles expandidos (Solo se muestran si isExpanded es true, 
-                así que en Home no se verán nunca porque isExpanded siempre será false) */}
+            {/* Detalles expandidos */}
             {isExpanded && (
-                <div className="border-t border-gray-100 p-4 bg-gray-50">
-                    {/* ... contenido de los detalles ... */}
+                <div className={`border-t ${config.border} p-4 ${config.bg}`}>
                     {loadingDetails && <p className="text-sm text-gray-500">Cargando detalles...</p>}
                     {!loadingDetails && !details && <p className="text-sm text-gray-500">No hay detalles disponibles</p>}
                     {!loadingDetails && details && workout.type === 'RUN' && <RunDetails details={details as RunDetailsResponse} />}
@@ -154,25 +151,25 @@ function RunDetails({ details }: { details: RunDetailsResponse }) {
             {/* Resumen */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {details.totalDurationSeconds && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Duración</p>
                         <p className="font-semibold text-gray-800">{formatDuration(details.totalDurationSeconds)}</p>
                     </div>
                 )}
                 {details.totalDistanceMeters && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Distancia</p>
                         <p className="font-semibold text-gray-800">{formatDistance(details.totalDistanceMeters)}</p>
                     </div>
                 )}
                 {details.averagePaceSecondsPerKm && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Ritmo medio</p>
                         <p className="font-semibold text-gray-800">{formatPace(details.averagePaceSecondsPerKm)}</p>
                     </div>
                 )}
                 {details.averageHr && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">FC Media</p>
                         <p className="font-semibold text-gray-800">{details.averageHr} bpm</p>
                     </div>
@@ -181,26 +178,26 @@ function RunDetails({ details }: { details: RunDetailsResponse }) {
 
             {/* Zapatillas */}
             {details.shoe && (
-                <div className="flex items-center text-sm text-gray-600">
-                    <Footprints className="w-4 h-4 mr-2 text-gray-400" />
+                <div className="flex items-center text-sm text-gray-600 bg-white px-3 py-2 rounded-lg shadow-sm">
+                    <Footprints className="w-4 h-4 mr-2 text-green-500" />
                     <span>{details.shoe.nickname || `${details.shoe.brand} ${details.shoe.model}`}</span>
                 </div>
             )}
 
             {/* Notas */}
             {details.notes && (
-                <p className="text-sm text-gray-600 italic">"{details.notes}"</p>
+                <p className="text-sm text-gray-600 italic bg-white px-3 py-2 rounded-lg shadow-sm">"{details.notes}"</p>
             )}
 
             {/* Intervalos */}
-            {details.intervals.length > 0 && (
+            {details.intervals.length > 1 && (
                 <div>
                     <p className="text-xs font-semibold text-gray-500 mb-2">
-                        {details.intervals.length === 1 ? 'Resumen' : `Intervalos (${details.intervals.length})`}
+                        Intervalos ({details.intervals.length})
                     </p>
                     <div className="space-y-2">
                         {details.intervals.map((interval, index) => (
-                            <div key={interval.id} className="bg-white p-3 rounded-lg flex items-center justify-between">
+                            <div key={interval.id} className="bg-white p-3 rounded-lg shadow-sm flex items-center justify-between">
                                 <div className="flex items-center">
                                     <span className="text-xs font-medium text-gray-400 w-6">{index + 1}</span>
                                     <span className="text-sm font-medium text-green-600 mr-3">
@@ -254,24 +251,24 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
             {/* Resumen */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {details.totalTimeSeconds && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Duración</p>
                         <p className="font-semibold text-gray-800">{formatDuration(details.totalTimeSeconds)}</p>
                     </div>
                 )}
                 {details.totalDistanceMeters && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Distancia</p>
                         <p className="font-semibold text-gray-800">{formatDistance(details.totalDistanceMeters)}</p>
                     </div>
                 )}
                 {details.averagePaceSecondsPer100m && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Ritmo medio</p>
                         <p className="font-semibold text-gray-800">{formatPace(details.averagePaceSecondsPer100m)}</p>
                     </div>
                 )}
-                <div className="bg-white p-3 rounded-lg">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
                     <p className="text-xs text-gray-500">Piscina</p>
                     <p className="font-semibold text-gray-800">{poolTypeLabels[details.poolType]}</p>
                 </div>
@@ -279,18 +276,18 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
 
             {/* Notas */}
             {details.notes && (
-                <p className="text-sm text-gray-600 italic">"{details.notes}"</p>
+                <p className="text-sm text-gray-600 italic bg-white px-3 py-2 rounded-lg shadow-sm">"{details.notes}"</p>
             )}
 
             {/* Intervalos */}
-            {details.intervals.length > 0 && (
+            {details.intervals.length > 1 && (
                 <div>
                     <p className="text-xs font-semibold text-gray-500 mb-2">
-                        {details.intervals.length === 1 ? 'Resumen' : `Intervalos (${details.intervals.length})`}
+                        Intervalos ({details.intervals.length})
                     </p>
                     <div className="space-y-2">
                         {details.intervals.map((interval, index) => (
-                            <div key={interval.id} className="bg-white p-3 rounded-lg">
+                            <div key={interval.id} className="bg-white p-3 rounded-lg shadow-sm">
                                 <div className="flex items-center justify-between mb-1">
                                     <div className="flex items-center">
                                         <span className="text-xs font-medium text-gray-400 w-6">{index + 1}</span>
@@ -354,11 +351,9 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
     const getSupersetLabels = (): Map<string, string> => {
         const labels = new Map<string, string>()
         const supersetIds = [...new Set(details.exercises.filter(ex => ex.supersetId).map(ex => ex.supersetId!))]
-
         supersetIds.forEach((id, index) => {
-            labels.set(id, String.fromCharCode(65 + index)) // A, B, C...
+            labels.set(id, String.fromCharCode(65 + index))
         })
-
         return labels
     }
 
@@ -368,18 +363,18 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
         <div className="space-y-4">
             {/* Resumen */}
             <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white p-3 rounded-lg">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
                     <p className="text-xs text-gray-500">Ejercicios</p>
                     <p className="font-semibold text-gray-800">{details.exercises.length}</p>
                 </div>
                 {details.totalDurationSeconds && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Duración</p>
                         <p className="font-semibold text-gray-800">{formatDuration(details.totalDurationSeconds)}</p>
                     </div>
                 )}
                 {details.totalVolumeKg && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Volumen</p>
                         <p className="font-semibold text-gray-800">{details.totalVolumeKg.toFixed(0)} kg</p>
                     </div>
@@ -388,7 +383,7 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
 
             {/* Notas */}
             {details.notes && (
-                <p className="text-sm text-gray-600 italic">"{details.notes}"</p>
+                <p className="text-sm text-gray-600 italic bg-white px-3 py-2 rounded-lg shadow-sm">"{details.notes}"</p>
             )}
 
             {/* Ejercicios */}
@@ -400,7 +395,7 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
                         return (
                             <div
                                 key={exercise.id}
-                                className={`bg-white p-3 rounded-lg ${supersetLabel ? 'border-l-4 border-purple-400' : ''
+                                className={`bg-white p-3 rounded-lg shadow-sm ${supersetLabel ? 'border-l-4 border-purple-400' : ''
                                     }`}
                             >
                                 <div className="flex items-center justify-between mb-2">
@@ -418,7 +413,6 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
                                     <span className="text-xs text-purple-600">{muscleGroupLabels[exercise.muscleGroup]}</span>
                                 </div>
 
-                                {/* Series */}
                                 <div className="space-y-1">
                                     {exercise.sets.map((set, setIndex) => (
                                         <div key={set.id} className="flex items-center text-sm text-gray-600">
@@ -489,18 +483,18 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
         <div className="space-y-4">
             {/* Resumen */}
             <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white p-3 rounded-lg">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
                     <p className="text-xs text-gray-500">Rondas</p>
                     <p className="font-semibold text-gray-800">{details.blocks.length}</p>
                 </div>
                 {totalTime > 0 && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Tiempo total</p>
                         <p className="font-semibold text-gray-800">{formatDuration(totalTime)}</p>
                     </div>
                 )}
                 {totalDistance > 0 && (
-                    <div className="bg-white p-3 rounded-lg">
+                    <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Distancia</p>
                         <p className="font-semibold text-gray-800">{(totalDistance / 1000).toFixed(1)} km</p>
                     </div>
@@ -509,22 +503,22 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
 
             {/* Zapatilla */}
             {details.shoe && (
-                <div className="flex items-center text-sm text-gray-600">
-                    <Footprints className="w-4 h-4 mr-2 text-gray-400" />
+                <div className="flex items-center text-sm text-gray-600 bg-white px-3 py-2 rounded-lg shadow-sm">
+                    <Footprints className="w-4 h-4 mr-2 text-orange-500" />
                     <span>{details.shoe.nickname || `${details.shoe.brand} ${details.shoe.model}`}</span>
                 </div>
             )}
 
             {/* Notas */}
             {details.notes && (
-                <p className="text-sm text-gray-600 italic">"{details.notes}"</p>
+                <p className="text-sm text-gray-600 italic bg-white px-3 py-2 rounded-lg shadow-sm">"{details.notes}"</p>
             )}
 
             {/* Rondas */}
             {details.blocks.length > 0 && (
                 <div className="space-y-3">
                     {details.blocks.map((block) => (
-                        <div key={block.id} className="bg-white p-3 rounded-lg">
+                        <div key={block.id} className="bg-white p-3 rounded-lg shadow-sm">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="font-bold text-orange-600">Ronda {block.orderIndex}</span>
                                 {block.restDurationSeconds && (
@@ -534,7 +528,6 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
                                 )}
                             </div>
 
-                            {/* Items/Estaciones */}
                             <div className="space-y-2">
                                 {block.items.map((item) => (
                                     <div key={item.id} className="flex items-center text-sm">
