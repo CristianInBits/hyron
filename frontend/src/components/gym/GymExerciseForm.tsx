@@ -4,6 +4,7 @@ import type { ExerciseSummaryResponse } from '../../types/exercise'
 import { muscleGroupLabels } from '../../types/exercise'
 import type { SetFormData } from './GymSetForm'
 import GymSetForm from './GymSetForm'
+import { Input, Label, Select } from '../ui'
 
 export type ExerciseFormData = {
     exerciseId: number | null
@@ -96,14 +97,13 @@ function GymExerciseForm({
         .filter(([id]) => id !== exercise.supersetId)
 
     return (
-        <div className={`bg-white rounded-lg border-2 overflow-hidden ${supersetLabel
+        <div className={`bg-white rounded-xl border-2 overflow-hidden ${supersetLabel
                 ? 'border-purple-300 ring-2 ring-purple-100'
                 : 'border-gray-200'
             }`}>
             {/* Cabecera del ejercicio */}
             <div
-                className={`flex items-center justify-between p-3 cursor-pointer ${supersetLabel ? 'bg-purple-50' : 'bg-purple-50'
-                    }`}
+                className="flex items-center justify-between p-3 cursor-pointer bg-purple-50 hover:bg-purple-100 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center flex-1 min-w-0">
@@ -229,14 +229,14 @@ function GymExerciseForm({
 
             {/* Contenido expandido */}
             {isExpanded && (
-                <div className="p-3">
+                <div className="p-4">
                     {/* Selector de ejercicio */}
-                    <div className="mb-3">
-                        <label className="block text-xs text-gray-500 mb-1">Ejercicio</label>
-                        <select
+                    <div className="mb-4">
+                        <Label>Ejercicio</Label>
+                        <Select
                             value={exercise.exerciseId ?? ''}
                             onChange={(e) => handleExerciseSelect(parseInt(e.target.value))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            variant="purple"
                         >
                             <option value="">Selecciona ejercicio...</option>
                             {Object.entries(groupedExercises).map(([group, exs]) => (
@@ -248,13 +248,13 @@ function GymExerciseForm({
                                     ))}
                                 </optgroup>
                             ))}
-                        </select>
+                        </Select>
                     </div>
 
                     {/* Series */}
-                    <div className="mb-3">
+                    <div className="mb-4">
                         <div className="flex items-center justify-between mb-2">
-                            <label className="text-xs font-medium text-gray-500">Series</label>
+                            <Label className="mb-0">Series</Label>
                             <button
                                 type="button"
                                 onClick={handleAddSet}
@@ -290,13 +290,13 @@ function GymExerciseForm({
 
                     {/* Notas */}
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">Notas (opcional)</label>
-                        <input
+                        <Label>Notas (opcional)</Label>
+                        <Input
                             type="text"
                             value={exercise.notes}
                             onChange={(e) => updateField('notes', e.target.value)}
                             placeholder="Notas del ejercicio..."
-                            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-400"
+                            variant="purple"
                         />
                     </div>
                 </div>

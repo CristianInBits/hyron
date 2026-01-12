@@ -10,7 +10,7 @@ import GymExerciseForm from '../components/gym/GymExerciseForm'
 import type { ExerciseFormData } from '../components/gym/GymExerciseForm'
 import type { SetFormData } from '../components/gym/GymSetForm'
 import { getErrorMessage } from '../services/errorHandler'
-import DurationInput from '../components/ui/DurationInput'
+import { Input, Label, Textarea, DurationInput } from '../components/ui'
 
 type NewGymPageProps = {
     userId: number | null
@@ -75,8 +75,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
                     setWorkoutDate(workoutData.startDateTime.slice(0, 16))
-                } catch {
-                }
+                } catch { }
 
                 try {
                     const details = await gymService.getDetails(userId, wId)
@@ -99,8 +98,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
                             })),
                         })))
                     }
-                } catch {
-                }
+                } catch { }
             }
         } catch (err) {
             setError(getErrorMessage(err))
@@ -122,7 +120,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
         const supersetIds = [...new Set(exercisesList.filter(ex => ex.supersetId).map(ex => ex.supersetId!))]
 
         supersetIds.forEach((id, index) => {
-            groups.set(id, String.fromCharCode(65 + index)) // A, B, C...
+            groups.set(id, String.fromCharCode(65 + index))
         })
 
         return groups
@@ -237,6 +235,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
         }
     }
 
+    // Sin usuario
     if (!userId) {
         return (
             <div className="bg-purple-50 min-h-screen -m-4 p-4">
@@ -249,6 +248,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
         )
     }
 
+    // Cargando
     if (loadingData) {
         return (
             <div className="bg-purple-50 min-h-screen -m-4 p-4">
@@ -261,6 +261,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
         )
     }
 
+    // Sin ejercicios
     if (availableExercises.length === 0) {
         return (
             <div className="bg-purple-50 min-h-screen -m-4 p-4">
@@ -274,7 +275,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
                     <Dumbbell className="w-10 h-10 mr-3 text-purple-600" />
                     <h1 className="text-2xl font-bold text-purple-700">Nuevo Gym</h1>
                 </div>
-                <div className="bg-white rounded-lg p-6 text-center">
+                <div className="bg-white rounded-xl p-6 text-center shadow-sm">
                     <p className="text-gray-600 mb-4">No tienes ejercicios en tu catálogo.</p>
                     <button
                         onClick={() => navigate('/exercises')}
@@ -287,6 +288,7 @@ function NewGymPage({ userId }: NewGymPageProps) {
         )
     }
 
+    // Formulario principal
     return (
         <div className="bg-purple-50 min-h-screen -m-4 p-4">
             {/* Header */}
@@ -320,27 +322,24 @@ function NewGymPage({ userId }: NewGymPageProps) {
             )}
 
             {/* Fecha */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha y hora del entrenamiento
-                </label>
-                <input
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                <Label>Fecha y hora del entrenamiento</Label>
+                <Input
                     type="datetime-local"
                     value={workoutDate}
                     onChange={(e) => setWorkoutDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    variant="purple"
                 />
             </div>
 
             {/* Duración y Notas */}
-            <div className="bg-white rounded-lg p-4 mb-4 shadow-sm space-y-4">
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100 space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Duración total (opcional)
-                    </label>
+                    <Label>Duración total (opcional)</Label>
                     <DurationInput
                         value={totalDuration}
                         onChange={setTotalDuration}
+                        variant="purple"
                     />
                     <p className="text-xs text-gray-400 mt-1">
                         Si no lo indicas, se calculará de los tiempos de las series
@@ -348,15 +347,13 @@ function NewGymPage({ userId }: NewGymPageProps) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Notas del entrenamiento (opcional)
-                    </label>
-                    <input
-                        type="text"
+                    <Label>Notas del entrenamiento (opcional)</Label>
+                    <Textarea
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Día de pecho y tríceps..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        rows={2}
+                        variant="purple"
                     />
                 </div>
             </div>

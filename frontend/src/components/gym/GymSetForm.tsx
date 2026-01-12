@@ -2,6 +2,7 @@ import { Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { useState } from 'react'
 import type { GymSetType } from '../../types/gym'
 import { gymSetTypeLabels } from '../../types/gym'
+import { Input, Select } from '../ui'
 
 export type SetFormData = {
     type: GymSetType
@@ -39,44 +40,47 @@ function GymSetForm({ index, set, onChange, onRemove, canRemove }: GymSetFormPro
                 <span className="text-xs font-medium text-gray-400 w-6">{index + 1}</span>
 
                 {/* Tipo */}
-                <select
+                <Select
                     value={set.type}
                     onChange={(e) => updateField('type', e.target.value as GymSetType)}
-                    className="w-24 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-400"
+                    variant="purple"
+                    className="w-24 px-2 py-1 text-xs"
                 >
                     {setTypes.map(t => (
                         <option key={t} value={t}>{gymSetTypeLabels[t]}</option>
                     ))}
-                </select>
+                </Select>
 
                 {/* Peso */}
                 <div className="flex items-center">
-                    <input
+                    <Input
                         type="number"
                         step="0.5"
                         value={set.weightKg ?? ''}
                         onChange={(e) => updateField('weightKg', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0"
-                        className="w-14 px-2 py-1 text-sm text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-400"
+                        variant="purple"
+                        className="w-14 px-2 py-1 text-sm text-center"
                     />
                     <span className="text-xs text-gray-400 ml-1">kg</span>
                 </div>
 
                 {/* Reps */}
                 <div className="flex items-center">
-                    <input
+                    <Input
                         type="number"
                         value={set.reps ?? ''}
                         onChange={(e) => updateField('reps', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="0"
-                        className="w-12 px-2 py-1 text-sm text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-400"
+                        variant="purple"
+                        className="w-12 px-2 py-1 text-sm text-center"
                     />
                     <span className="text-xs text-gray-400 ml-1">reps</span>
                 </div>
 
                 {/* RPE */}
                 <div className="flex items-center">
-                    <input
+                    <Input
                         type="number"
                         step="0.5"
                         min="0"
@@ -84,7 +88,8 @@ function GymSetForm({ index, set, onChange, onRemove, canRemove }: GymSetFormPro
                         value={set.rpe ?? ''}
                         onChange={(e) => updateField('rpe', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="-"
-                        className="w-10 px-1 py-1 text-sm text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-400"
+                        variant="purple"
+                        className="w-10 px-1 py-1 text-sm text-center"
                     />
                     <span className="text-xs text-gray-400 ml-1">RPE</span>
                 </div>
@@ -115,24 +120,26 @@ function GymSetForm({ index, set, onChange, onRemove, canRemove }: GymSetFormPro
                 <div className="flex items-center space-x-3 mt-2 ml-6 pl-1">
                     {/* Tiempo de ejecución */}
                     <div className="flex items-center">
-                        <input
+                        <Input
                             type="number"
                             value={set.executionSeconds ?? ''}
                             onChange={(e) => updateField('executionSeconds', e.target.value ? parseInt(e.target.value) : null)}
                             placeholder="0"
-                            className="w-14 px-2 py-1 text-sm text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-400"
+                            variant="purple"
+                            className="w-14 px-2 py-1 text-sm text-center"
                         />
                         <span className="text-xs text-gray-400 ml-1">seg ejecución</span>
                     </div>
 
                     {/* Descanso */}
                     <div className="flex items-center">
-                        <input
+                        <Input
                             type="number"
                             value={set.restSeconds ?? ''}
                             onChange={(e) => updateField('restSeconds', e.target.value ? parseInt(e.target.value) : null)}
                             placeholder="0"
-                            className="w-14 px-2 py-1 text-sm text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-400"
+                            variant="purple"
+                            className="w-14 px-2 py-1 text-sm text-center"
                         />
                         <span className="text-xs text-gray-400 ml-1">seg descanso</span>
                     </div>
