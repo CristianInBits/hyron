@@ -9,7 +9,6 @@ type ShoeCardProps = {
 }
 
 function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
-
     const formatDistance = (meters: number | null) => {
         if (meters === null) return '0 km'
         return `${(meters / 1000).toFixed(1)} km`
@@ -25,19 +24,25 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
     }
 
     return (
-        <div className={`bg-white p-4 rounded-xl shadow-sm border border-gray-100 transition-all 
-            ${!shoe.active ? 'opacity-75 bg-gray-50' : 'hover:shadow-md'}`}>
-
+        <div
+        className={`bg-white p-4 rounded-xl shadow-sm border overflow-hidden
+            transition-all duration-200
+            ${shoe.active
+            ? 'border-gray-100 hover:-translate-y-0.5 hover:shadow-md hover:bg-green-50/30 hover:ring-1 hover:ring-green-100'
+            : 'opacity-75 bg-gray-50 border-gray-200 hover:opacity-90 hover:shadow hover:bg-gray-100/60'
+            }`}
+        >
             <div className="flex items-start justify-between">
                 {/* Info principal */}
                 <div className="flex items-start flex-1">
-                    <div className={`p-2.5 rounded-lg mr-3 ${shoe.active ? 'bg-green-50 text-green-600' : 'bg-gray-200 text-gray-500'}`}>
+                    <div className={`p-2.5 rounded-lg mr-3 ${shoe.active ? 'bg-green-50 text-green-600' : 'bg-gray-200 text-gray-500'
+                        }`}>
                         <Footprints className="w-6 h-6" />
                     </div>
 
-                    <div className="w-full mr-4">
-                        <div className="flex items-center flex-wrap">
-                            <h3 className="font-semibold text-gray-800 text-lg mr-2">
+                    <div className="flex-1 mr-4">
+                        <div className="flex items-center flex-wrap gap-2">
+                            <h3 className="font-semibold text-gray-800 text-lg">
                                 {shoe.nickname || `${shoe.brand} ${shoe.model}`}
                             </h3>
                             {!shoe.active && (
@@ -47,11 +52,13 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                             )}
                         </div>
 
-                        <p className="text-sm text-gray-500 mb-2">
-                            {shoe.brand} {shoe.model}
-                        </p>
+                        {shoe.nickname && (
+                            <p className="text-sm text-gray-500 mb-2">
+                                {shoe.brand} {shoe.model}
+                            </p>
+                        )}
 
-                        {/* Barra de progreso (Visible SIEMPRE si tiene límite, aunque esté inactiva) */}
+                        {/* Barra de progreso */}
                         {shoe.maxDistanceMeters ? (
                             <div className="mt-2">
                                 <div className="flex justify-between text-xs text-gray-500 mb-1 font-medium">
@@ -91,7 +98,7 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                     </button>
 
                     <button
-                        className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         onClick={() => onEdit(shoe)}
                         title="Editar"
                     >

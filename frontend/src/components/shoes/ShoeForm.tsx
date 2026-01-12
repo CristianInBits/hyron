@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getErrorMessage } from '../../services/errorHandler'
 import type { Shoe, ShoeCreateRequest } from '../../types/shoe'
+import { Input, Label } from '../ui'
 
 type ShoeFormProps = {
     shoe?: Shoe | null
@@ -74,74 +75,64 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
             {/* Marca y Modelo */}
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Marca *
-                    </label>
-                    <input
+                    <Label>Marca *</Label>
+                    <Input
                         type="text"
                         value={brand}
                         onChange={(e) => setBrand(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                         placeholder="Nike"
+                        variant="green"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Modelo *
-                    </label>
-                    <input
+                    <Label>Modelo *</Label>
+                    <Input
                         type="text"
                         value={model}
                         onChange={(e) => setModel(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                         placeholder="Pegasus 40"
+                        variant="green"
                     />
                 </div>
             </div>
 
             {/* Nickname */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Apodo (opcional)
-                </label>
-                <input
+                <Label>Apodo (opcional)</Label>
+                <Input
                     type="text"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                     placeholder="Las verdes"
+                    variant="green"
                 />
             </div>
 
             {/* Distancias */}
             <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Km iniciales
-                    </label>
-                    <input
+                    <Label>Km iniciales</Label>
+                    <Input
                         type="number"
                         step="0.1"
                         min="0"
                         value={initialDistanceKm}
                         onChange={(e) => setInitialDistanceKm(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                         placeholder="0"
+                        variant="green"
                     />
                     <p className="text-xs text-gray-400 mt-1">Si ya tenían uso previo</p>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Km máximos
-                    </label>
-                    <input
+                    <Label>Km máximos</Label>
+                    <Input
                         type="number"
                         step="0.1"
                         min="0"
                         value={maxDistanceKm}
                         onChange={(e) => setMaxDistanceKm(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                         placeholder="800"
+                        variant="green"
                     />
                     <p className="text-xs text-gray-400 mt-1">Para aviso de desgaste</p>
                 </div>
@@ -152,14 +143,14 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                     Cancelar
                 </button>
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
                 >
                     {loading ? 'Guardando...' : 'Guardar'}
                 </button>

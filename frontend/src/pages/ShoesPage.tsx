@@ -99,11 +99,9 @@ function ShoesPage({ userId }: ShoesPageProps) {
 
     if (!userId) {
         return (
-            <div>
-                <div className="flex items-center mb-4">
-                    <Footprints className="w-7 h-7 mr-2 text-gray-700" />
-                    <h1 className="text-2xl font-bold text-gray-800">Zapatillas</h1>
-                </div>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                <Footprints className="w-16 h-16 text-gray-300 mb-4" />
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">Zapatillas</h2>
                 <p className="text-gray-500">Selecciona un usuario para ver sus zapatillas</p>
             </div>
         )
@@ -111,13 +109,16 @@ function ShoesPage({ userId }: ShoesPageProps) {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
-                    <Footprints className="w-7 h-7 mr-2 text-gray-700" />
+                    <div className="p-2 bg-green-100 rounded-lg mr-3">
+                        <Footprints className="w-6 h-6 text-green-600" />
+                    </div>
                     <h1 className="text-2xl font-bold text-gray-800">Zapatillas</h1>
                 </div>
                 <button
-                    className="flex items-center bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700"
+                    className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                     onClick={handleCreate}
                 >
                     <Plus className="w-5 h-5 mr-1" />
@@ -127,10 +128,23 @@ function ShoesPage({ userId }: ShoesPageProps) {
 
             {loading && <p className="text-gray-500">Cargando...</p>}
 
-            {error && <p className="text-red-500 mb-4">{error}</p>}
+            {error && (
+                <div className="text-red-600 mb-4 bg-red-50 p-3 rounded-lg text-sm">
+                    {error}
+                </div>
+            )}
 
             {!loading && !error && shoes.length === 0 && (
-                <p className="text-gray-500">No hay zapatillas</p>
+                <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                    <Footprints className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 mb-4">No tienes zapatillas registradas</p>
+                    <button
+                        onClick={handleCreate}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                        Añadir zapatilla
+                    </button>
+                </div>
             )}
 
             {!loading && !error && shoes.length > 0 && (
@@ -152,9 +166,14 @@ function ShoesPage({ userId }: ShoesPageProps) {
 
                     {/* Zapatillas retiradas */}
                     {inactiveShoes.length > 0 && (
-                        <>
-                            <h2 className="text-sm font-medium text-gray-500 mb-3">Retiradas</h2>
-                            <div className="space-y-3">
+                        <div className="mt-8 pt-6 border-t border-gray-100">
+                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                                Retiradas
+                                <span className="ml-2 bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">
+                                    {inactiveShoes.length}
+                                </span>
+                            </h2>
+                            <div className="space-y-3 opacity-75">
                                 {inactiveShoes.map(shoe => (
                                     <ShoeCard
                                         key={shoe.id}
@@ -165,7 +184,7 @@ function ShoesPage({ userId }: ShoesPageProps) {
                                     />
                                 ))}
                             </div>
-                        </>
+                        </div>
                     )}
                 </>
             )}
