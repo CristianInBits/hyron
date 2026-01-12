@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { ExerciseResponse, ExerciseCreateRequest, MuscleGroup } from '../../types/exercise'
 import { muscleGroupLabels } from '../../types/exercise'
 import { getErrorMessage } from '../../services/errorHandler'
+import { Input, Label, Select } from '../ui'
 
 type ExerciseFormProps = {
     exercise?: ExerciseResponse | null
@@ -69,53 +70,47 @@ function ExerciseForm({ exercise, onSubmit, onCancel }: ExerciseFormProps) {
 
             {/* Nombre */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre *
-                </label>
-                <input
+                <Label>Nombre *</Label>
+                <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
                     placeholder="Press de banca"
+                    variant="purple"
                 />
             </div>
 
             {/* Grupo muscular */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Grupo muscular *
-                </label>
-                <select
+                <Label>Grupo muscular *</Label>
+                <Select
                     value={muscleGroup}
                     onChange={(e) => setMuscleGroup(e.target.value as MuscleGroup)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    variant="purple"
                 >
                     {muscleGroups.map(mg => (
                         <option key={mg} value={mg}>
                             {muscleGroupLabels[mg]}
                         </option>
                     ))}
-                </select>
+                </Select>
             </div>
 
             {/* Notas */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notas (opcional)
-                </label>
-                <input
+                <Label>Notas (opcional)</Label>
+                <Input
                     type="text"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
                     placeholder="Posición del asiento, agarre, etc."
+                    variant="purple"
                 />
             </div>
 
             {/* Unilateral */}
             <div className="mb-6">
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
                         checked={isUnilateral}
@@ -124,7 +119,9 @@ function ExerciseForm({ exercise, onSubmit, onCancel }: ExerciseFormProps) {
                     />
                     <span className="ml-2 text-sm text-gray-700">Ejercicio unilateral</span>
                 </label>
-                <p className="text-xs text-gray-400 mt-1">Marca si se realiza un lado a la vez (ej: curl a una mano)</p>
+                <p className="text-xs text-gray-400 mt-1 ml-6">
+                    Marca si se realiza un lado a la vez (ej: curl a una mano)
+                </p>
             </div>
 
             {/* Botones */}
@@ -132,14 +129,14 @@ function ExerciseForm({ exercise, onSubmit, onCancel }: ExerciseFormProps) {
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                     Cancelar
                 </button>
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
                 >
                     {loading ? 'Guardando...' : 'Guardar'}
                 </button>
