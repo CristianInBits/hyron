@@ -22,10 +22,10 @@ type WorkoutCardProps = {
 }
 
 const workoutConfig = {
-    RUN: { icon: Dog, color: 'text-green-500', bg: 'bg-green-50', border: 'border-green-200', label: 'Run' },
-    SWIM: { icon: Fish, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-200', label: 'Swim' },
-    GYM: { icon: Dumbbell, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-200', label: 'Gym' },
-    HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-200', label: 'Hyrox' },
+    RUN: { icon: Dog, color: 'text-green-500', bg: 'bg-green-50', border: 'border-green-200', hoverBg: 'hover:bg-green-50', label: 'Run' },
+    SWIM: { icon: Fish, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-200', hoverBg: 'hover:bg-blue-50', label: 'Swim' },
+    GYM: { icon: Dumbbell, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-200', hoverBg: 'hover:bg-purple-50', label: 'Gym' },
+    HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-200', hoverBg: 'hover:bg-orange-50', label: 'Hyrox' },
 }
 
 function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExpand, onDelete, onEdit, showActions = true }: WorkoutCardProps) {
@@ -44,10 +44,15 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md overflow-hidden">
+        <div
+            className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md
+                ${config.hoverBg}`}
+        >
+
             {/* Cabecera clickeable */}
             <div
-                className="p-4 flex items-center cursor-pointer transition-colors hover:bg-gray-50"
+                className={`p-4 flex items-center cursor-pointer transition-colors ${config.hoverBg}`}
                 onClick={() => onToggleExpand(workout)}
             >
                 {/* Icono del tipo */}
