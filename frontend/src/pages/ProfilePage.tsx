@@ -1,63 +1,79 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User, Footprints, Dumbbell, Settings, Users } from 'lucide-react'
+
+import ProfileHeader from '../components/profile/ProfileHeader'
+import AchievementsSection from '../components/profile/AchievementsSection'
+import ProfileMenu from '../components/profile/ProfileMenu'
+import LogoutButton from '../components/profile/LogoutButton'
+
+import { userService } from '../services/userService'
+import type { User as UserType } from '../types/user'
+
+import { Medal, Trophy } from 'lucide-react'
+
+const MOCK_ACHIEVEMENTS = [
+    { id: 1, title: '10K Run', value: '48:00 PB', icon: Medal, color: 'text-green-600', bg: 'bg-green-50' },
+    { id: 2, title: '1km Swim', value: '25:30', icon: Medal, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { id: 3, title: 'Hyrox Finisher', value: 'Full Race', icon: Trophy, color: 'text-orange-600', bg: 'bg-orange-50' },
+]
 
 function ProfilePage() {
     const navigate = useNavigate()
+    const [user, setUser] = useState<UserType | null>(null)
+    const [loading, setLoading] = useState(true)
 
-    const itemBase =
-        'w-full flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md hover:bg-gray-50'
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const data = await userService.getById(1)
+                setUser(data)
+            } catch (error) {
+                console.error('Error cargando perfil', error)
+            } finally {
+                setLoading(false)
+            }
+        }
 
-    const leftBase = 'flex items-center'
-    const iconBase = 'p-2.5 rounded-lg mr-3'
+        loadUser()
+    }, [])
+
+    if (loading) {
+        return <div className="p-8 text-center text-gray-500">Cargando perfil...</div>
+    }
+
+    if (!user) {
+        return <div className="p-8 text-center text-gray-500">Usuario no encontrado</div>
+    }
+
+    const formattedDate = new Date(user.registeredAt).toLocaleDateString('es-ES', {
+        month: 'long',
+        year: 'numeric',
+    })
 
     return (
-        <div>
-            <div className="flex items-center mb-4">
-                <User className="w-7 h-7 mr-2 text-gray-700" />
-                <h1 className="text-2xl font-bold text-gray-800">Perfil</h1>
-            </div>
+        <div className="max-w-md mx-auto pb-10">
+            <ProfileHeader
+                user={user}
+                formattedDate={formattedDate}
+                onEditClick={() => console.log('Editar perfil')}
+                isPro={true}
+            />
 
-            <div className="space-y-3">
-                <button className={itemBase} onClick={() => navigate('/users')}>
-                    <div className={leftBase}>
-                        <div className={`${iconBase} bg-gray-100 text-gray-800`}>
-                            <Users className="w-6 h-6" />
-                        </div>
-                        <span className="text-gray-800 font-medium">Usuarios</span>
-                    </div>
-                    <span className="text-gray-400">›</span>
-                </button>
+            <AchievementsSection
+                achievements={MOCK_ACHIEVEMENTS}
+                onViewHistoryClick={() => console.log('Ver historial')}
+            />
 
-                <button className={itemBase} onClick={() => navigate('/shoes')}>
-                    <div className={leftBase}>
-                        <div className={`${iconBase} bg-gray-100 text-gray-800`}>
-                            <Footprints className="w-6 h-6" />
-                        </div>
-                        <span className="text-gray-800 font-medium">Mis Zapatillas</span>
-                    </div>
-                    <span className="text-gray-400">›</span>
-                </button>
+            <ProfileMenu
+                onGoExercises={() => navigate('/exercises')}
+                onGoShoes={() => navigate('/shoes')}
+                onGoSettings={() => console.log('Ir a settings')}
+            />
 
-                <button className={itemBase} onClick={() => navigate('/exercises')}>
-                    <div className={leftBase}>
-                        <div className={`${iconBase} bg-gray-100 text-gray-800`}>
-                            <Dumbbell className="w-6 h-6" />
-                        </div>
-                        <span className="text-gray-800 font-medium">Mis Ejercicios</span>
-                    </div>
-                    <span className="text-gray-400">›</span>
-                </button>
-
-                <button className={itemBase}>
-                    <div className={leftBase}>
-                        <div className={`${iconBase} bg-gray-100 text-gray-600`}>
-                            <Settings className="w-6 h-6" />
-                        </div>
-                        <span className="text-gray-800 font-medium">Configuración</span>
-                    </div>
-                    <span className="text-gray-400">›</span>
-                </button>
-            </div>
+            <LogoutButton
+                onLogout={() => console.log('Cerrar sesión')}
+                version="1.0.0"
+            />
         </div>
     )
 }
