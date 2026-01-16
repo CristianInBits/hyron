@@ -1,16 +1,20 @@
 import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
+
 import Layout from './components/layout/Layout'
-import HomePage from './pages/HomePage'
-import WorkoutsPage from './pages/WorkoutsPage'
-import ProfilePage from './pages/ProfilePage'
-import UsersPage from './pages/UsersPage'
-import ShoesPage from './pages/ShoesPage'
-import ExercisesPage from './pages/ExercisesPage'
-import NewRunPage from './pages/NewRunPage'
-import NewSwimPage from './pages/NewSwimPage'
-import NewGymPage from './pages/NewGymPage'
-import NewHyroxPage from './pages/NewHyroxPage'
+
+import {
+  ExercisesPage,
+  HomePage,
+  NewGymPage,
+  NewHyroxPage,
+  NewRunPage,
+  NewSwimPage,
+  ProfilePage,
+  ShoesPage,
+  UsersPage,
+  WorkoutsPage,
+} from './pages'
 
 function App() {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
@@ -23,7 +27,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage userId={selectedUserId} />} />
         <Route path="/workouts" element={<WorkoutsPage userId={selectedUserId} />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfilePage userId={selectedUserId}/>} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/shoes" element={<ShoesPage userId={selectedUserId} />} />
         <Route path="/exercises" element={<ExercisesPage userId={selectedUserId} />} />

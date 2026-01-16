@@ -67,7 +67,7 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
     return (
         <form onSubmit={handleSubmit}>
             {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
                     {error}
                 </div>
             )}
@@ -81,7 +81,7 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                         value={brand}
                         onChange={(e) => setBrand(e.target.value)}
                         placeholder="Nike"
-                        variant="green"
+                        autoFocus
                     />
                 </div>
                 <div>
@@ -91,7 +91,6 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                         value={model}
                         onChange={(e) => setModel(e.target.value)}
                         placeholder="Pegasus 40"
-                        variant="green"
                     />
                 </div>
             </div>
@@ -104,7 +103,6 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     placeholder="Las verdes"
-                    variant="green"
                 />
             </div>
 
@@ -119,7 +117,6 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                         value={initialDistanceKm}
                         onChange={(e) => setInitialDistanceKm(e.target.value)}
                         placeholder="0"
-                        variant="green"
                     />
                     <p className="text-xs text-gray-400 mt-1">Si ya tenían uso previo</p>
                 </div>
@@ -132,7 +129,6 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                         value={maxDistanceKm}
                         onChange={(e) => setMaxDistanceKm(e.target.value)}
                         placeholder="800"
-                        variant="green"
                     />
                     <p className="text-xs text-gray-400 mt-1">Para aviso de desgaste</p>
                 </div>
@@ -150,7 +146,7 @@ function ShoeForm({ shoe, onSubmit, onCancel }: ShoeFormProps) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                    className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors shadow-lg shadow-gray-200"
                 >
                     {loading ? 'Guardando...' : 'Guardar'}
                 </button>

@@ -25,17 +25,20 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
 
     return (
         <div
-        className={`bg-white p-4 rounded-xl shadow-sm border overflow-hidden
+            className={`bg-white p-4 rounded-xl shadow-sm border overflow-hidden
             transition-all duration-200
             ${shoe.active
-            ? 'border-gray-100 hover:-translate-y-0.5 hover:shadow-md hover:bg-green-50/30 hover:ring-1 hover:ring-green-100'
-            : 'opacity-75 bg-gray-50 border-gray-200 hover:opacity-90 hover:shadow hover:bg-gray-100/60'
-            }`}
+                    // ESTILO NEUTRO (Gris/Slate) - Idéntico a UserCard
+                    ? 'border-gray-200 hover:-translate-y-0.5 hover:shadow-md hover:bg-gray-50/80 hover:ring-1 hover:ring-gray-200'
+                    // Estilo Inactivo
+                    : 'opacity-75 bg-gray-50 border-gray-200 hover:opacity-90 hover:shadow hover:bg-gray-100/60'
+                }`}
         >
             <div className="flex items-start justify-between">
                 {/* Info principal */}
                 <div className="flex items-start flex-1">
-                    <div className={`p-2.5 rounded-lg mr-3 ${shoe.active ? 'bg-green-50 text-green-600' : 'bg-gray-200 text-gray-500'
+                    {/* Icono: Gris neutro en lugar de verde */}
+                    <div className={`p-2.5 rounded-lg mr-3 ${shoe.active ? 'bg-gray-100 text-gray-700' : 'bg-gray-200 text-gray-500'
                         }`}>
                         <Footprints className="w-6 h-6" />
                     </div>
@@ -88,10 +91,13 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                 <div className="flex flex-col space-y-1 sm:flex-row sm:space-y-0 sm:space-x-1">
                     <button
                         className={`p-2 rounded-lg transition-colors ${shoe.active
-                                ? 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
-                                : 'text-green-600 hover:bg-green-50'
+                            ? 'text-gray-400 hover:text-orange-600 hover:bg-orange-50' // Retirar (neutro -> naranja)
+                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'   // Reactivar (neutro -> verde)
                             }`}
-                        onClick={() => onToggleActive(shoe)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onToggleActive(shoe)
+                        }}
                         title={shoe.active ? 'Retirar zapatilla' : 'Reactivar zapatilla'}
                     >
                         {shoe.active ? <Power className="w-5 h-5" /> : <RotateCcw className="w-5 h-5" />}
@@ -99,7 +105,10 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
 
                     <button
                         className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        onClick={() => onEdit(shoe)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit(shoe)
+                        }}
                         title="Editar"
                     >
                         <Pencil className="w-5 h-5" />
@@ -107,7 +116,10 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
 
                     <button
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        onClick={() => onDelete(shoe.id)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onDelete(shoe.id)
+                        }}
                         title="Eliminar permanentemente"
                     >
                         <Trash2 className="w-5 h-5" />

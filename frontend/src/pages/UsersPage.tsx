@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users, Plus } from 'lucide-react'
+import { Users, Plus, UserPlus } from 'lucide-react'
 import { userService } from '../services/userService'
 import type { User, UserCreateRequest } from '../types/user'
 import Modal from '../components/ui/Modal'
@@ -43,7 +43,7 @@ function UsersPage() {
     }
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Estás seguro de eliminar este usuario?')) return
+        if (!confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) return
 
         try {
             await userService.delete(id)
@@ -71,43 +71,58 @@ function UsersPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center">
-                    <Users className="w-7 h-7 mr-2 text-gray-700" />
-                    <h1 className="text-2xl font-bold text-gray-800">Usuarios</h1>
+                    <div className="p-2 bg-gray-100 rounded-lg mr-3">
+                        <Users className="w-7 h-7 text-gray-700" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-800">Usuarios</h1>
+                        <p className="text-sm text-gray-500">Gestión de acceso y perfiles</p>
+                    </div>
                 </div>
                 <button
-                    className="flex items-center bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700"
+                    className="flex items-center justify-center bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 shadow-lg shadow-gray-200 transition-all whitespace-nowrap"
                     onClick={handleCreate}
                 >
-                    <Plus className="w-5 h-5 mr-1" />
-                    <span>Nuevo</span>
+                    <Plus className="w-5 h-5 sm:mr-1" />
+                    <span className="hidden sm:inline">Nuevo Usuario</span>
                 </button>
             </div>
 
             {loading && (
-                <p className="text-gray-500">Cargando...</p>
+                <div className="py-12 text-center text-gray-500">
+                    Cargando usuarios...
+                </div>
             )}
 
             {error && (
-                <p className="text-red-500 mb-4">{error}</p>
-            )}
-
-            {!loading && !error && users.length === 0 && (
-                <p className="text-gray-500">No hay usuarios</p>
-            )}
-
-            {!loading && !error && users.length > 0 && (
-                <div className="space-y-3">
-                    {users.map(user => (
-                        <UserCard
-                            key={user.id}
-                            user={user}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                        />
-                    ))}
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl">
+                    {error}
                 </div>
+            )}
+
+            {!loading && !error && (
+                <>
+                    {users.length === 0 ? (
+                        <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                            <UserPlus className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                            <p className="text-gray-500">No hay usuarios registrados.</p>
+                        </div>
+                    ) : (
+                        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                            {users.map(user => (
+                                <UserCard
+                                    key={user.id}
+                                    user={user}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
 
             <Modal

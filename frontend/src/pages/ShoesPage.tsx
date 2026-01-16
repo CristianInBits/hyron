@@ -112,13 +112,16 @@ function ShoesPage({ userId }: ShoesPageProps) {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
-                    <div className="p-2 bg-green-100 rounded-lg mr-3">
-                        <Footprints className="w-6 h-6 text-green-600" />
+                    <div className="p-2 bg-gray-100 rounded-lg mr-3">
+                        <Footprints className="w-7 h-7 text-gray-700" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-800">Zapatillas</h1>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-800">Zapatillas</h1>
+                        <p className="text-sm text-gray-500">Gestión de material</p>
+                    </div>
                 </div>
                 <button
-                    className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex items-center bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 shadow-lg shadow-gray-200 transition-all"
                     onClick={handleCreate}
                 >
                     <Plus className="w-5 h-5 mr-1" />
@@ -126,21 +129,21 @@ function ShoesPage({ userId }: ShoesPageProps) {
                 </button>
             </div>
 
-            {loading && <p className="text-gray-500">Cargando...</p>}
+            {loading && <p className="text-gray-500 text-center py-12">Cargando...</p>}
 
             {error && (
-                <div className="text-red-600 mb-4 bg-red-50 p-3 rounded-lg text-sm">
+                <div className="text-red-600 mb-4 bg-red-50 p-3 rounded-lg text-sm border border-red-100">
                     {error}
                 </div>
             )}
 
             {!loading && !error && shoes.length === 0 && (
-                <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
                     <Footprints className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500 mb-4">No tienes zapatillas registradas</p>
                     <button
                         onClick={handleCreate}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200"
                     >
                         Añadir zapatilla
                     </button>

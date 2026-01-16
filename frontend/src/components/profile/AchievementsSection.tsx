@@ -52,21 +52,25 @@ function AchievementsSection({ achievements, onViewHistoryClick }: AchievementsS
 
             {/* Grid de logros */}
             <div className="grid grid-cols-3 gap-3 mt-3">
-                {achievements.map((ach) => (
-                    <div
-                        key={ach.id}
-                        className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-gray-200 transition-colors"
-                    >
-                        <div className={`p-2 rounded-full ${ach.bg} ${ach.color}`}>
-                            <ach.icon className="w-4 h-4" />
-                        </div>
+                {achievements.map((ach) => {
+                    const Icon = ach.icon
 
-                        <div>
-                            <p className="text-[10px] text-gray-400 uppercase font-bold leading-tight">{ach.title}</p>
-                            <p className="font-bold text-gray-800 text-xs mt-0.5">{ach.value}</p>
+                    return (
+                        <div
+                            key={ach.id}
+                            className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-gray-200 transition-colors"
+                        >
+                            <div className={`p-2 rounded-full ${ach.bg} ${ach.color}`}>
+                                <Icon className="w-4 h-4" />
+                            </div>
+
+                            <div>
+                                <p className="text-[10px] text-gray-400 uppercase font-bold leading-tight">{ach.title}</p>
+                                <p className="font-bold text-gray-800 text-xs mt-0.5">{ach.value}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
         </div>
     )

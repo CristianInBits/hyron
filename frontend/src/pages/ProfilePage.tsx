@@ -11,38 +11,50 @@ import type { User as UserType } from '../types/user'
 
 import { Medal, Trophy } from 'lucide-react'
 
+type ProfilePageProps = {
+    userId: number | null
+}
+
 const MOCK_ACHIEVEMENTS = [
     { id: 1, title: '10K Run', value: '48:00 PB', icon: Medal, color: 'text-green-600', bg: 'bg-green-50' },
     { id: 2, title: '1km Swim', value: '25:30', icon: Medal, color: 'text-blue-600', bg: 'bg-blue-50' },
     { id: 3, title: 'Hyrox Finisher', value: 'Full Race', icon: Trophy, color: 'text-orange-600', bg: 'bg-orange-50' },
 ]
 
-function ProfilePage() {
+function ProfilePage({ userId }: ProfilePageProps) {
     const navigate = useNavigate()
     const [user, setUser] = useState<UserType | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const loadUser = async () => {
+            if (userId === null) {
+                setUser(null)
+                setLoading(false)
+                return
+            }
+
             try {
-                const data = await userService.getById(1)
+                setLoading(true)
+                const data = await userService.getById(userId)
                 setUser(data)
             } catch (error) {
                 console.error('Error cargando perfil', error)
+                setUser(null)
             } finally {
                 setLoading(false)
             }
         }
 
         loadUser()
-    }, [])
+    }, [userId])
 
     if (loading) {
         return <div className="p-8 text-center text-gray-500">Cargando perfil...</div>
     }
 
     if (!user) {
-        return <div className="p-8 text-center text-gray-500">Usuario no encontrado</div>
+        return <div className="p-8 text-center text-gray-500">Selecciona un usuario</div>
     }
 
     const formattedDate = new Date(user.registeredAt).toLocaleDateString('es-ES', {
