@@ -1,6 +1,13 @@
 import { createContext, useContext, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { formatDistanceFromMeters, formatWeightFromKg, formatPaceFromSecondsPerKm, type DistanceUnit, type WeightUnit } from '../utils/units'
+import {
+    formatDistanceFromMeters,
+    formatWeightFromKg,
+    formatPaceFromSecondsPerKm,
+    formatSwimPace,
+    type DistanceUnit,
+    type WeightUnit
+} from '../utils/units'
 import { loadSettings, patchSettings, type AppSettings } from '../utils/settingsStorage'
 
 type SettingsContextValue = {
@@ -10,6 +17,7 @@ type SettingsContextValue = {
     formatDistance: (meters: number | null | undefined, decimals?: number) => string
     formatWeight: (kg: number | null | undefined, decimals?: number) => string
     formatPace: (secondsPerKm: number | null | undefined) => string
+    formatSwimPace: (secondsPer100m: number | null | undefined) => string
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null)
@@ -37,6 +45,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             formatWeightFromKg(kg, settings.weightUnit, decimals),
         formatPace: (secondsPerKm) =>
             formatPaceFromSecondsPerKm(secondsPerKm, settings.distanceUnit),
+        formatSwimPace: (secondsPer100m) =>
+            formatSwimPace(secondsPer100m),
     }), [settings])
 
     return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>

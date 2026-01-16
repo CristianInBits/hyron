@@ -9,6 +9,7 @@ import { gymSetTypeLabels } from '../../types/gym'
 import { muscleGroupLabels } from '../../types/exercise'
 import type { HyroxDetailsResponse } from '../../types/hyrox'
 import { hyroxStationLabels, hyroxStationIcons } from '../../types/hyrox'
+import { useSettings } from '../../context/SettingsContext'
 
 type WorkoutCardProps = {
     workout: WorkoutSummaryResponse
@@ -22,10 +23,10 @@ type WorkoutCardProps = {
 }
 
 const workoutConfig = {
-    RUN: { icon: Dog, color: 'text-green-500', bg: 'bg-green-50', border: 'border-green-200', hoverBg: 'hover:bg-green-50', label: 'Run' },
-    SWIM: { icon: Fish, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-200', hoverBg: 'hover:bg-blue-50', label: 'Swim' },
-    GYM: { icon: Dumbbell, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-200', hoverBg: 'hover:bg-purple-50', label: 'Gym' },
-    HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-200', hoverBg: 'hover:bg-orange-50', label: 'Hyrox' },
+    RUN: { icon: Dog, color: 'text-green-500', bg: 'bg-green-100', border: 'border-green-200', label: 'Run' },
+    SWIM: { icon: Fish, color: 'text-blue-500', bg: 'bg-blue-100', border: 'border-blue-200', label: 'Swim' },
+    GYM: { icon: Dumbbell, color: 'text-purple-500', bg: 'bg-purple-100', border: 'border-purple-200', label: 'Gym' },
+    HYROX: { icon: Flame, color: 'text-orange-500', bg: 'bg-orange-100', border: 'border-orange-200', label: 'Hyrox' },
 }
 
 function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExpand, onDelete, onEdit, showActions = true }: WorkoutCardProps) {
@@ -44,15 +45,10 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
     }
 
     return (
-        <div
-            className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
-                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md
-                ${config.hoverBg}`}
-        >
-
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md overflow-hidden">
             {/* Cabecera clickeable */}
             <div
-                className={`p-4 flex items-center cursor-pointer transition-colors ${config.hoverBg}`}
+                className="p-4 flex items-center cursor-pointer transition-colors hover:bg-gray-50"
                 onClick={() => onToggleExpand(workout)}
             >
                 {/* Icono del tipo */}
@@ -130,25 +126,17 @@ function WorkoutCard({ workout, isExpanded, details, loadingDetails, onToggleExp
 }
 
 function RunDetails({ details }: { details: RunDetailsResponse }) {
+    const { formatDistance, formatPace } = useSettings()
+
     const formatDuration = (seconds: number) => {
-        const mins = Math.floor(seconds / 60)
+        const hrs = Math.floor(seconds / 3600)
+        const mins = Math.floor((seconds % 3600) / 60)
         const secs = seconds % 60
-        return `${mins}:${secs.toString().padStart(2, '0')}`
-    }
 
-    const formatDistance = (meters: number | null) => {
-        if (meters === null) return '-'
-        if (meters >= 1000) {
-            return `${(meters / 1000).toFixed(2)} km`
+        if (hrs > 0) {
+            return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
         }
-        return `${meters} m`
-    }
-
-    const formatPace = (secondsPerKm: number | null) => {
-        if (secondsPerKm === null) return '-'
-        const mins = Math.floor(secondsPerKm / 60)
-        const secs = secondsPerKm % 60
-        return `${mins}:${secs.toString().padStart(2, '0')} /km`
+        return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
     return (
@@ -228,6 +216,8 @@ function RunDetails({ details }: { details: RunDetailsResponse }) {
 }
 
 function SwimDetails({ details }: { details: SwimDetailsResponse }) {
+    const { formatDistance, formatSwimPace } = useSettings()
+
     const formatDuration = (seconds: number) => {
         const hours = Math.floor(seconds / 3600)
         const mins = Math.floor((seconds % 3600) / 60)
@@ -239,16 +229,9 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    const formatDistance = (meters: number | null) => {
+    const formatSwimDistance = (meters: number | null) => {
         if (meters === null) return '-'
         return `${meters} m`
-    }
-
-    const formatPace = (secondsPer100m: number | null) => {
-        if (secondsPer100m === null) return '-'
-        const mins = Math.floor(secondsPer100m / 60)
-        const secs = secondsPer100m % 60
-        return `${mins}:${secs.toString().padStart(2, '0')} /100m`
     }
 
     return (
@@ -264,13 +247,13 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
                 {details.totalDistanceMeters && (
                     <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Distancia</p>
-                        <p className="font-semibold text-gray-800">{formatDistance(details.totalDistanceMeters)}</p>
+                        <p className="font-semibold text-gray-800">{formatSwimDistance(details.totalDistanceMeters)}</p>
                     </div>
                 )}
                 {details.averagePaceSecondsPer100m && (
                     <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Ritmo medio</p>
-                        <p className="font-semibold text-gray-800">{formatPace(details.averagePaceSecondsPer100m)}</p>
+                        <p className="font-semibold text-gray-800">{formatSwimPace(details.averagePaceSecondsPer100m)}</p>
                     </div>
                 )}
                 <div className="bg-white p-3 rounded-lg shadow-sm">
@@ -311,13 +294,13 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
                                 </div>
                                 <div className="flex items-center space-x-4 text-sm text-gray-600">
                                     {interval.distanceMeters && (
-                                        <span>{formatDistance(interval.distanceMeters)}</span>
+                                        <span>{formatSwimDistance(interval.distanceMeters)}</span>
                                     )}
                                     {interval.durationSeconds && (
                                         <span>{formatDuration(interval.durationSeconds)}</span>
                                     )}
                                     {interval.paceSecondsPer100m && (
-                                        <span className="text-gray-400">{formatPace(interval.paceSecondsPer100m)}</span>
+                                        <span className="text-gray-400">{formatSwimPace(interval.paceSecondsPer100m)}</span>
                                     )}
                                     {interval.restSeconds && (
                                         <span className="text-gray-400">🔄 {formatDuration(interval.restSeconds)}</span>
@@ -342,6 +325,8 @@ function SwimDetails({ details }: { details: SwimDetailsResponse }) {
 }
 
 function GymDetails({ details }: { details: GymDetailsResponse }) {
+    const { formatWeight } = useSettings()
+
     const formatDuration = (seconds: number) => {
         const hours = Math.floor(seconds / 3600)
         const mins = Math.floor((seconds % 3600) / 60)
@@ -381,7 +366,7 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
                 {details.totalVolumeKg && (
                     <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Volumen</p>
-                        <p className="font-semibold text-gray-800">{details.totalVolumeKg.toFixed(0)} kg</p>
+                        <p className="font-semibold text-gray-800">{formatWeight(details.totalVolumeKg, 0)}</p>
                     </div>
                 )}
             </div>
@@ -424,7 +409,7 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
                                             <span className="w-6 text-xs text-gray-400">{setIndex + 1}</span>
                                             <span className="w-20 text-xs text-purple-500">{gymSetTypeLabels[set.type]}</span>
                                             {set.weightKg !== null && (
-                                                <span className="w-16">{set.weightKg} kg</span>
+                                                <span className="w-16">{formatWeight(set.weightKg, 1)}</span>
                                             )}
                                             {set.reps !== null && (
                                                 <span className="w-12">×{set.reps}</span>
@@ -455,6 +440,8 @@ function GymDetails({ details }: { details: GymDetailsResponse }) {
 }
 
 function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
+    const { formatDistance, formatPace, formatWeight } = useSettings()
+
     const formatDuration = (seconds: number) => {
         const hours = Math.floor(seconds / 3600)
         const mins = Math.floor((seconds % 3600) / 60)
@@ -464,13 +451,6 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
             return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
         }
         return `${mins}:${secs.toString().padStart(2, '0')}`
-    }
-
-    const formatPace = (secondsPerKm: number | null) => {
-        if (secondsPerKm === null) return null
-        const mins = Math.floor(secondsPerKm / 60)
-        const secs = secondsPerKm % 60
-        return `${mins}:${secs.toString().padStart(2, '0')} /km`
     }
 
     const totalTime = details.blocks.reduce((sum, block) => {
@@ -501,7 +481,7 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
                 {totalDistance > 0 && (
                     <div className="bg-white p-3 rounded-lg shadow-sm">
                         <p className="text-xs text-gray-500">Distancia</p>
-                        <p className="font-semibold text-gray-800">{(totalDistance / 1000).toFixed(1)} km</p>
+                        <p className="font-semibold text-gray-800">{formatDistance(totalDistance, 1)}</p>
                     </div>
                 )}
             </div>
@@ -540,13 +520,13 @@ function HyroxDetails({ details }: { details: HyroxDetailsResponse }) {
                                         <span className="w-28 text-gray-700">{hyroxStationLabels[item.station]}</span>
                                         <span className="w-16 text-gray-600">{formatDuration(item.durationSeconds)}</span>
                                         {item.distanceMeters && (
-                                            <span className="w-16 text-gray-500">{item.distanceMeters}m</span>
+                                            <span className="w-20 text-gray-500">{formatDistance(item.distanceMeters, 0)}</span>
                                         )}
                                         {item.paceSecondsPerKm && (
                                             <span className="text-xs text-gray-400">{formatPace(item.paceSecondsPerKm)}</span>
                                         )}
                                         {item.weightKg && (
-                                            <span className="text-xs text-gray-400 ml-2">{item.weightKg}kg</span>
+                                            <span className="text-xs text-gray-400 ml-2">{formatWeight(item.weightKg, 0)}</span>
                                         )}
                                         {item.reps && (
                                             <span className="text-xs text-gray-400 ml-2">×{item.reps}</span>

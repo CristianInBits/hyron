@@ -79,3 +79,14 @@ export function formatPaceFromSecondsPerKm(
 
     return `${mins}:${secs.toString().padStart(2, '0')} ${suffix}`
 }
+
+export function formatSwimPace(
+    secondsPer100m: number | null | undefined
+): string {
+    if (!secondsPer100m) return '-'
+    
+    const mins = Math.floor(secondsPer100m / 60)
+    const secs = Math.round(secondsPer100m % 60)
+    
+    return `${mins}:${secs.toString().padStart(2, '0')} /100m`
+}
