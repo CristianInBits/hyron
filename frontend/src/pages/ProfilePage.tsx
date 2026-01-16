@@ -79,7 +79,7 @@ function ProfilePage({ userId }: ProfilePageProps) {
             <ProfileMenu
                 onGoExercises={() => navigate('/exercises')}
                 onGoShoes={() => navigate('/shoes')}
-                onGoSettings={() => console.log('Ir a settings')}
+                onGoSettings={() => navigate('/settings')}
             />
 
             <LogoutButton

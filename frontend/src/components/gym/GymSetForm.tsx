@@ -4,6 +4,8 @@ import type { GymSetType } from '../../types/gym'
 import { gymSetTypeLabels } from '../../types/gym'
 import { Input, Select } from '../ui'
 
+import { useSettings } from '../../context/SettingsContext'
+
 export type SetFormData = {
     type: GymSetType
     weightKg: number | null
@@ -32,6 +34,8 @@ function GymSetForm({ index, set, onChange, onRemove, canRemove }: GymSetFormPro
         onChange(index, { ...set, [field]: value })
     }
 
+    const { formatWeight } = useSettings()
+
     return (
         <div className="py-2 border-b border-gray-100 last:border-0">
             {/* Fila principal */}
@@ -56,7 +60,7 @@ function GymSetForm({ index, set, onChange, onRemove, canRemove }: GymSetFormPro
                     <Input
                         type="number"
                         step="0.5"
-                        value={set.weightKg ?? ''}
+                        value={formatWeight(set.weightKg) ?? ''}
                         onChange={(e) => updateField('weightKg', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="0"
                         variant="purple"

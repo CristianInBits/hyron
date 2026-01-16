@@ -1,6 +1,8 @@
 import { Footprints, Pencil, Trash2, Power, RotateCcw } from 'lucide-react'
 import type { Shoe } from '../../types/shoe'
 
+import { useSettings } from '../../context/SettingsContext'
+
 type ShoeCardProps = {
     shoe: Shoe
     onEdit: (shoe: Shoe) => void
@@ -9,10 +11,8 @@ type ShoeCardProps = {
 }
 
 function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
-    const formatDistance = (meters: number | null) => {
-        if (meters === null) return '0 km'
-        return `${(meters / 1000).toFixed(1)} km`
-    }
+
+    const { formatDistance } = useSettings()
 
     const percentage = shoe.percentageUsed ??
         (shoe.maxDistanceMeters ? (shoe.totalDistanceMeters * 100) / shoe.maxDistanceMeters : 0)
@@ -28,9 +28,7 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
             className={`bg-white p-4 rounded-xl shadow-sm border overflow-hidden
             transition-all duration-200
             ${shoe.active
-                    // ESTILO NEUTRO (Gris/Slate) - Idéntico a UserCard
                     ? 'border-gray-200 hover:-translate-y-0.5 hover:shadow-md hover:bg-gray-50/80 hover:ring-1 hover:ring-gray-200'
-                    // Estilo Inactivo
                     : 'opacity-75 bg-gray-50 border-gray-200 hover:opacity-90 hover:shadow hover:bg-gray-100/60'
                 }`}
         >
@@ -91,8 +89,8 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                 <div className="flex flex-col space-y-1 sm:flex-row sm:space-y-0 sm:space-x-1">
                     <button
                         className={`p-2 rounded-lg transition-colors ${shoe.active
-                            ? 'text-gray-400 hover:text-orange-600 hover:bg-orange-50' // Retirar (neutro -> naranja)
-                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'   // Reactivar (neutro -> verde)
+                            ? 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
+                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'   
                             }`}
                         onClick={(e) => {
                             e.stopPropagation()
