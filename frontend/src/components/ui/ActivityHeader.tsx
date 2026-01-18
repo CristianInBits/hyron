@@ -1,15 +1,9 @@
 import { Dog, type LucideIcon } from 'lucide-react'
+import type { ColorVariant } from '../../types/ui'
 
 /* =========================
    Types
 ========================= */
-
-/**
- * Variantes de color soportadas por {@link ActivityHeader}.
- *
- * Se usan para mapear clases Tailwind “estáticas” (evita clases dinámicas que Tailwind no detecte).
- */
-type ColorVariant = 'green' | 'blue' | 'purple' | 'hyrox'
 
 /**
  * Tema visual asociado a una variante.
@@ -103,8 +97,8 @@ type ActivityHeaderProps = {
     icon?: LucideIcon
 
     /**
-     * Variante visual de color.
-     * @default 'green'
+     * Variante visual soportada por este componente.
+     * Definida como subtipo de `ColorVariant` en `types/ui`.
      */
     color?: ColorVariant
 }

@@ -1,18 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Minus, Plus } from 'lucide-react'
 import { useSettings } from '../../context/SettingsContext'
+import type { DistanceColorVariant as ColorVariant } from '../../types/ui'
 
 /* =========================
    Types
 ========================= */
-
-/**
- * Variantes de color soportadas por {@link DistanceInput}.
- *
- * Se usan para mapear clases Tailwind “estáticas” y evitar clases dinámicas
- * que Tailwind no detecta durante el build.
- */
-type ColorVariant = 'green' | 'blue' | 'hyrox'
 
 /**
  * Props del componente {@link DistanceInput}.
@@ -21,28 +14,32 @@ type DistanceInputProps = {
     /**
      * Valor controlado en **metros enteros**.
      *
-     * Importante: internamente el componente puede mostrar km/mi o m/yd según `settings.distanceUnit`,
-     * pero el contrato de entrada/salida siempre es metros (number entero).
+     * El componente puede mostrar este valor en km/mi o m/yd (según `mode` y `settings.distanceUnit`),
+     * pero el contrato de entrada/salida siempre es en metros.
      */
     value: number // METROS ENTEROS (Integer)
 
     /**
-     * Callback de cambios. Siempre emite metros enteros (redondeados).
+     * Callback cuando cambia la distancia.
      *
-     * @param meters Distancia en metros (entero, clamped a [0..max]).
+     * Se emite siempre en **metros enteros**, con clamp a [0..max].
+     *
+     * @param meters Distancia total en metros (entero).
      */
     onChange: (meters: number) => void
 
     /**
-     * Variante visual.
+     * Variante visual soportada por este componente.
+     *
+     * Se restringe a {@link DistanceColorVariant} para evitar variantes no soportadas en THEME.
      * @default 'green'
      */
     color?: ColorVariant
 
     /**
-     * Modo de entrada:
-     * - `long`: muestra km/mi (con decimales), pensado para distancias largas.
-     * - `short`: muestra m/yd (sin decimales), pensado para intervalos cortos (piscina/track).
+     * Modo visual:
+     * - `long`: muestra km/mi con decimales (distancias largas).
+     * - `short`: muestra m/yd sin decimales (intervalos cortos).
      *
      * @default 'long'
      */
@@ -50,50 +47,46 @@ type DistanceInputProps = {
 
     /**
      * Incremento/decremento (botones +/-) en **metros**.
-     * Si no se indica, se usa un step por defecto según `mode` y unidad.
+     * Si no se proporciona, se usa un step por defecto según `mode` y unidad.
      */
     step?: number
 
     /**
-     * Presets mostrados como chips. El array se interpreta en la **unidad visible**:
-     * - `mode='long'`: valores en km o mi (según settings)
-     * - `mode='short'`: valores en m o yd (según settings)
+     * Presets mostrados como chips, expresados en la **unidad visible**:
+     * - `mode='long'`: valores en km o mi
+     * - `mode='short'`: valores en m o yd
      *
-     * Si no se indica, se usan presets por defecto.
+     * Si no se proporciona, se generan presets por defecto.
      */
     presets?: number[]
 
     /**
-     * Máximo permitido en metros (clamp).
+     * Máximo permitido en metros.
      * @default 999000
      */
     max?: number
 }
 
 /**
- * Tema visual interno para estilos del componente.
+ * Tema visual interno (clases Tailwind) para {@link DistanceInput}.
  */
 type Theme = {
-    /** Fondo base del contenedor. */
+    /** Fondo del contenedor. */
     bgStart: string
-    /** Estilo del chip activo (preset seleccionado). */
+    /** Estilo del chip activo. */
     activeChip: string
     /** Estilo del botón de incremento (+). */
     plusBtn: string
     /** Color del número principal. */
     text: string
-    /** Color de la unidad (km/mi/m/yd). */
+    /** Color del sufijo de unidad (km/mi/m/yd). */
     subText: string
 }
 
-/* =========================
-   Theme
-========================= */
-
 /**
- * Temas por variante.
+ * Mapa de estilos por variante.
  *
- * Importante: se definen clases Tailwind explícitas para que se incluyan en build-time.
+ * Importante: clases Tailwind explícitas para asegurar inclusión en build-time.
  */
 const THEME: Record<ColorVariant, Theme> = {
     green: {
@@ -124,20 +117,20 @@ const THEME: Record<ColorVariant, Theme> = {
 ========================= */
 
 /**
- * Input de distancia controlado (metros enteros) con:
- * - Chips de presets en la unidad visible.
- * - Botones +/- para ajustar por step.
- * - Campo de texto con formateo y normalización decimal (coma/punto).
- * - Conversión automática a km/mi o m/yd en función de:
- *   - `mode` (long/short)
- *   - `settings.distanceUnit` (KM/MI) desde {@link useSettings}
+ * Input de distancia mobile-first con:
+ * - Presets en chips (selección rápida).
+ * - Stepper +/- con incremento configurable.
+ * - Campo de texto para entrada manual con normalización decimal.
  *
- * Contrato:
- * - Entrada (`value`) y salida (`onChange`) siempre en **metros** (enteros).
+ * Conversión de unidades:
+ * - El valor de entrada/salida es siempre **metros enteros**.
+ * - La unidad visible depende de:
+ *   - `mode` (`long` → km/mi, `short` → m/yd)
+ *   - `settings.distanceUnit` (KM/MI) vía {@link useSettings}
  *
- * Notas de UX:
- * - Mientras el input está enfocado, no se fuerza el formateo (para no “pelearse” con el usuario).
- * - Al perder foco, se formatea al número de decimales esperado.
+ * UX:
+ * - Mientras el input está enfocado, no se fuerza el formateo para no interferir con la escritura.
+ * - En blur, se normaliza y se muestra el valor con los decimales esperados.
  */
 export default function DistanceInput({
     value,
@@ -149,17 +142,27 @@ export default function DistanceInput({
     max = 999000,
 }: DistanceInputProps) {
     const { settings } = useSettings()
+
+    /** Estilos derivados de la variante seleccionada. */
     const styles = THEME[color]
 
-    /** Determina si la unidad base del usuario es métrica (KM) o imperial (MI). */
+    /** Ref para detectar foco y evitar sobreescritura del input mientras el usuario edita. */
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    /**
+     * Valor del input como string para permitir estados intermedios (ej. "", "1.", "0,5"),
+     * evitando saltos visuales mientras se escribe.
+     */
+    const [inputValue, setInputValue] = useState('')
+
+    /** true si el usuario trabaja en métrico (KM) o imperial (MI). */
     const isMetric = settings.distanceUnit === 'KM'
 
     /**
-     * Factor de conversión desde “unidad visible” a metros:
-     * - long: km -> 1000, mi -> 1609.344
-     * - short: m -> 1, yd -> 0.9144
+     * Factor de conversión desde unidad visible a metros y configuración de formato.
      *
-     * `decimals` controla el formato del input visible.
+     * - long: km (1000) / mi (1609.344), con 2 decimales
+     * - short: m (1) / yd (0.9144), sin decimales
      */
     let factor = 1
     let unitLabel = ''
@@ -176,42 +179,29 @@ export default function DistanceInput({
     }
 
     /**
-     * Presets por defecto en la unidad visible (no en metros).
-     * - long + KM: [5, 10, 15, 21]
-     * - long + MI: [3, 5, 6, 10, 13]
-     * - short: [25, 50, 100, 200, 400]
+     * Presets por defecto expresados en unidad visible:
+     * - long + KM: distancias típicas (5k, 10k, 15k, 21k)
+     * - long + MI: aproximaciones comunes en millas
+     * - short: distancias típicas de intervalos
      */
     const defaultPresets =
         presets ??
         (mode === 'long'
-            ? isMetric
-                ? [5, 10, 15, 21]
-                : [3, 5, 6, 10, 13]
+            ? (isMetric ? [5, 10, 15, 21] : [3, 5, 6, 10, 13])
             : [25, 50, 100, 200, 400])
 
     /**
-     * Step por defecto (en metros) si no se pasa por props:
-     * - long: 500m (KM) o 400m (MI) como incremento cómodo
-     * - short: 25m (típico intervalos)
+     * Step por defecto (en metros) si no se indica por props:
+     * - long: 500m (KM) / 400m (MI)
+     * - short: 25m
      */
     const defaultStep = mode === 'long' ? (isMetric ? 500 : 400) : 25
     const activeStep = step || defaultStep
 
     /**
-     * Valor del input como string para permitir:
-     * - edición progresiva (ej. "1.", "")
-     * - normalización coma/punto
-     * - evitar saltos visuales al escribir
-     */
-    const [inputValue, setInputValue] = useState('')
-
-    /** Ref para saber si el input está enfocado y evitar sobrescribir mientras el usuario escribe. */
-    const inputRef = useRef<HTMLInputElement>(null)
-
-    /**
      * Emite cambios al padre garantizando:
      * - clamp a [0..max]
-     * - enteros en metros
+     * - entero en metros (redondeo)
      */
     const updateParent = (meters: number) => {
         const safe = Math.min(Math.max(0, meters), max)
@@ -220,7 +210,7 @@ export default function DistanceInput({
 
     /**
      * Sincroniza el string visible cuando cambia `value` desde fuera,
-     * pero no si el usuario está escribiendo (input enfocado).
+     * pero no mientras el usuario está editando (input enfocado).
      */
     useEffect(() => {
         if (document.activeElement !== inputRef.current) {
@@ -230,9 +220,7 @@ export default function DistanceInput({
     }, [value, factor, decimals])
 
     /**
-     * Selección de un preset (en unidad visible).
-     *
-     * @param visualAmount Cantidad en la unidad visible (km/mi o m/yd).
+     * Selección rápida desde un chip (preset en unidad visible).
      */
     const handleChipClick = (visualAmount: number) => {
         updateParent(visualAmount * factor)
@@ -240,25 +228,22 @@ export default function DistanceInput({
 
     /**
      * Ajuste por step (en metros) con botones +/-.
-     *
-     * @param direction -1 decrementa, +1 incrementa.
      */
     const handleStepClick = (direction: -1 | 1) => {
         updateParent(value + direction * activeStep)
     }
 
     /**
-     * Maneja cambios del input de texto:
-     * - Normaliza `,` a `.` para parseo
-     * - Valida formato numérico simple (dígitos + decimal)
-     * - Emite al padre sólo si el número es parseable
-     * - Si el input queda vacío, se interpreta como 0
+     * Entrada manual:
+     * - Normaliza coma a punto para parsear.
+     * - Permite sólo números y un decimal.
+     * - Si el valor es parseable, actualiza al padre en metros.
+     * - Si queda vacío, se interpreta como 0.
      */
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value
         const normalized = raw.replace(/,/g, '.')
 
-        // Permite estados intermedios ("" / "1."), pero bloquea caracteres no numéricos.
         if (!/^\d*\.?\d*$/.test(normalized)) return
 
         setInputValue(raw)
@@ -272,8 +257,7 @@ export default function DistanceInput({
     }
 
     /**
-     * En blur, fuerza el formateo “bonito” acorde a `decimals`.
-     * Esto elimina estados intermedios como "1." o "".
+     * Al perder foco, normaliza el valor mostrado al formato esperado.
      */
     const handleBlur = () => {
         const visualVal = value / factor
@@ -282,13 +266,14 @@ export default function DistanceInput({
 
     return (
         <div className={`px-4 py-6 rounded-xl ${styles.bgStart}`}>
+            {/* Chips (presets) */}
             <div className="flex flex-wrap justify-center gap-2 mb-6">
                 {defaultPresets.map((preset) => {
                     const presetMeters = Math.round(preset * factor)
 
                     /**
-                     * Chip activo si el valor actual está “casi igual” al preset.
-                     * Se usa tolerancia para evitar problemas por redondeos (factor imperial).
+                     * Se usa una tolerancia pequeña para marcar activo, ya que la conversión
+                     * (especialmente en imperial) puede introducir redondeos.
                      */
                     const isActive = Math.abs(value - presetMeters) < 2
 
@@ -297,10 +282,11 @@ export default function DistanceInput({
                             key={preset}
                             type="button"
                             onClick={() => handleChipClick(preset)}
+                            aria-label={`Seleccionar ${preset} ${unitLabel}`}
                             className={`
-                px-4 py-1.5 rounded-full text-sm font-semibold transition-all
-                ${isActive ? styles.activeChip : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
-              `}
+                                px-4 py-1.5 rounded-full text-sm font-semibold transition-all
+                                ${isActive ? styles.activeChip : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                            `}
                         >
                             {preset}
                             <span className="text-xs ml-0.5">{unitLabel}</span>
@@ -309,6 +295,7 @@ export default function DistanceInput({
                 })}
             </div>
 
+            {/* Stepper + Input */}
             <div className="flex items-center justify-center gap-4">
                 <button
                     type="button"
@@ -319,7 +306,7 @@ export default function DistanceInput({
                     <Minus className="w-6 h-6" />
                 </button>
 
-                <div className="flex items-baseline justify-center w-40">
+                <div className="flex items-baseline justify-center w-48">
                     <input
                         ref={inputRef}
                         type="text"
@@ -331,9 +318,11 @@ export default function DistanceInput({
                         className={`w-full text-center text-5xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 p-0 ${styles.text}`}
                         placeholder="0"
                         autoComplete="off"
-                        aria-label="Distancia"
+                        aria-label="Distancia personalizada"
                     />
-                    <span className={`text-2xl font-medium ml-1 ${styles.subText}`}>{unitLabel}</span>
+                    <span className={`text-2xl font-medium ml-1 flex-shrink-0 ${styles.subText}`}>
+                        {unitLabel}
+                    </span>
                 </div>
 
                 <button

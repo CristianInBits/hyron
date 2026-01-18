@@ -6,10 +6,14 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    allowedHosts: [
+      'shaniqua-restricted-chartographically.ngrok-free.dev',
+    ],
     watch: {
       usePolling: true,
       interval: 300,
     },
+    hmr: false,
     proxy: {
       '/api': {
         target: 'http://backend:8080',

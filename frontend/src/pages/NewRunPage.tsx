@@ -1,20 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Dog, Plus, ArrowLeft, Save, Timer, BarChart3 } from 'lucide-react'
+import { Activity, BarChart3, Timer, ArrowLeft } from 'lucide-react'
+
+// Servicios y Tipos
 import { runService } from '../services/runService'
 import { shoeService } from '../services/shoeService'
 import { workoutService } from '../services/workoutService'
+import { getErrorMessage } from '../services/errorHandler'
 import type { RunDetailsCreateRequest, RunIntervalType } from '../types/run'
 import type { ShoeSummaryResponse } from '../types/shoe'
-import RunIntervalForm from '../components/run/RunIntervalForm'
 import type { IntervalFormData } from '../components/run/RunIntervalForm'
-import { getErrorMessage } from '../services/errorHandler'
 
-import { Input, Label, Select, Textarea, DurationInput } from '../components/ui'
-
-type NewRunPageProps = {
-    userId: number | null
-}
+// Componentes
+import RunIntervalForm from '../components/run/RunIntervalForm'
+import RunHeader from '../components/run/RunHeader'
+import WeekCalendar from '../components/ui/WeekCalendar'
+import DistanceInput from '../components/ui/DistanceInput'
+import IntensityCard from '../components/run/IntensityCard'
+import ShoeSelector from '../components/ui/ShoeSelector'
+import NotesCollapsible from '../components/run/NotesCollapsible'
+import SaveButton from '../components/run/SaveButton'
 
 type RunMode = 'simple' | 'intervals'
 
@@ -28,42 +33,58 @@ const emptyInterval: IntervalFormData = {
     notes: '',
 }
 
-function NewRunPage({ userId }: NewRunPageProps) {
+export default function NewRunPage({ userId }: { userId: number | null }) {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const workoutIdParam = searchParams.get('workoutId')
 
-    const [mode, setMode] = useState<RunMode | null>(null)
+    // REF para el scroll (NUEVO)
+    const scrollRef = useRef<HTMLDivElement>(null)
+    const [isCompact, setIsCompact] = useState(false)
 
-    const [simpleDuration, setSimpleDuration] = useState(0)
-    const [simpleDistance, setSimpleDistance] = useState('')
-    const [simpleHr, setSimpleHr] = useState('')
-    const [simpleElevation, setSimpleElevation] = useState('')
-
-    const [intervals, setIntervals] = useState<IntervalFormData[]>([{ ...emptyInterval }])
-
-    const [shoeId, setShoeId] = useState<number | null>(null)
-    const [notes, setNotes] = useState('')
-    const [workoutDate, setWorkoutDate] = useState<string>(() => {
-        const now = new Date()
-        return now.toISOString().slice(0, 16)
-    })
-    const [workoutId, setWorkoutId] = useState<number | null>(workoutIdParam ? parseInt(workoutIdParam) : null)
-
-    const [shoes, setShoes] = useState<ShoeSummaryResponse[]>([])
+    // --- ESTADOS LÓGICOS (ROBUSTEZ MANTENIDA) ---
+    const [mode, setMode] = useState<RunMode>('simple')
     const [loading, setLoading] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
+    // Datos generales
+    const [workoutDate, setWorkoutDate] = useState<Date>(new Date())
+    const [shoeId, setShoeId] = useState<number | null>(null)
+    const [notes, setNotes] = useState('')
+    const [shoes, setShoes] = useState<ShoeSummaryResponse[]>([])
+
+    // Datos Modo Simple
+    const [simpleDuration, setSimpleDuration] = useState(0)
+    const [simpleDistance, setSimpleDistance] = useState(0)
+    const [simpleHr, setSimpleHr] = useState<number | null>(null)
+    const [simpleElevation, setSimpleElevation] = useState<number | null>(null)
+    const [feeling, setFeeling] = useState<number | null>(null)
+
+    // Datos Modo Intervalos
+    const [intervals, setIntervals] = useState<IntervalFormData[]>([{ ...emptyInterval }])
+    const [workoutId, setWorkoutId] = useState<number | null>(workoutIdParam ? parseInt(workoutIdParam) : null)
+
+    // --- EFECTO DE SCROLL (NUEVO) ---
     useEffect(() => {
-        if (userId) {
-            loadInitialData()
+        const handleScroll = () => {
+            if (scrollRef.current) {
+                // Si scrolleamos más de 20px, compactamos el header
+                setIsCompact(scrollRef.current.scrollTop > 20)
+            }
         }
+        const ref = scrollRef.current
+        ref?.addEventListener('scroll', handleScroll)
+        return () => ref?.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    // --- CARGA DE DATOS ---
+    useEffect(() => {
+        if (userId) loadInitialData()
     }, [userId, workoutIdParam])
 
     const loadInitialData = async () => {
         if (!userId) return
-
         try {
             setLoadingData(true)
             const shoesData = await shoeService.getActiveSummary(userId)
@@ -75,7 +96,7 @@ function NewRunPage({ userId }: NewRunPageProps) {
 
                 try {
                     const workoutData = await workoutService.getById(userId, wId)
-                    setWorkoutDate(workoutData.startDateTime.slice(0, 16))
+                    setWorkoutDate(new Date(workoutData.startDateTime))
                 } catch { }
 
                 try {
@@ -83,24 +104,16 @@ function NewRunPage({ userId }: NewRunPageProps) {
                     setShoeId(details.shoe?.id ?? null)
                     setNotes(details.notes ?? '')
 
-                    if (details.intervals.length === 1) {
-                        setMode('simple')
-                        const interval = details.intervals[0]
-                        setSimpleDuration(interval.durationSeconds)
-                        setSimpleDistance(interval.distanceMeters?.toString() ?? '')
-                        setSimpleHr(interval.averageHr?.toString() ?? '')
-                        setSimpleElevation(interval.elevationGain?.toString() ?? '')
-                    } else if (details.intervals.length > 1) {
+                    if (details.intervals.length > 1) {
                         setMode('intervals')
-                        setIntervals(details.intervals.map(i => ({
-                            type: i.type,
-                            durationSeconds: i.durationSeconds,
-                            distanceMeters: i.distanceMeters,
-                            averageHr: i.averageHr,
-                            cadenceSpm: i.cadenceSpm,
-                            elevationGain: i.elevationGain,
-                            notes: i.notes ?? '',
-                        })))
+                        setIntervals(details.intervals.map(i => ({ ...i, notes: i.notes ?? '' })))
+                    } else if (details.intervals.length === 1) {
+                        setMode('simple')
+                        const i = details.intervals[0]
+                        setSimpleDuration(i.durationSeconds)
+                        setSimpleDistance(i.distanceMeters ?? 0)
+                        setSimpleHr(i.averageHr)
+                        setSimpleElevation(i.elevationGain)
                     }
                 } catch { }
             }
@@ -111,54 +124,40 @@ function NewRunPage({ userId }: NewRunPageProps) {
         }
     }
 
-    const handleAddInterval = () => {
-        setIntervals([...intervals, { ...emptyInterval }])
-    }
-
-    const handleUpdateInterval = (index: number, interval: IntervalFormData) => {
-        const updated = [...intervals]
-        updated[index] = interval
-        setIntervals(updated)
-    }
-
-    const handleRemoveInterval = (index: number) => {
-        setIntervals(intervals.filter((_, i) => i !== index))
+    // --- MANEJADORES ---
+    const handleAddInterval = () => setIntervals([...intervals, { ...emptyInterval }])
+    const handleRemoveInterval = (index: number) => setIntervals(intervals.filter((_, i) => i !== index))
+    const handleUpdateInterval = (index: number, val: IntervalFormData) => {
+        const copy = [...intervals]
+        copy[index] = val
+        setIntervals(copy)
     }
 
     const handleSubmit = async () => {
-        if (!userId || !mode) return
+        if (!userId) return
+        setLoading(true)
+        setError(null)
 
         try {
-            setLoading(true)
-            setError(null)
-
             let requestIntervals: RunDetailsCreateRequest['intervals'] = []
 
             if (mode === 'simple') {
-                if (simpleDuration === 0) {
-                    setError('La duración es obligatoria')
-                    setLoading(false)
-                    return
-                }
+                if (simpleDuration === 0) throw new Error('La duración es obligatoria')
 
                 requestIntervals = [{
-                    type: 'WORK' as RunIntervalType,
+                    type: 'WORK',
                     durationSeconds: simpleDuration,
-                    distanceMeters: simpleDistance ? parseInt(simpleDistance) : null,
-                    averageHr: simpleHr ? parseInt(simpleHr) : null,
+                    distanceMeters: simpleDistance > 0 ? simpleDistance : null,
+                    averageHr: simpleHr,
                     cadenceSpm: null,
-                    elevationGain: simpleElevation ? parseInt(simpleElevation) : null,
+                    elevationGain: simpleElevation,
                     notes: null,
                 }]
             } else {
-                const validIntervals = intervals.filter(i => i.durationSeconds > 0)
-                if (validIntervals.length === 0) {
-                    setError('Añade al menos un intervalo con duración')
-                    setLoading(false)
-                    return
-                }
+                const valid = intervals.filter(i => i.durationSeconds > 0)
+                if (valid.length === 0) throw new Error('Añade al menos un intervalo con duración')
 
-                requestIntervals = validIntervals.map(i => ({
+                requestIntervals = valid.map(i => ({
                     type: i.type as RunIntervalType,
                     durationSeconds: i.durationSeconds,
                     distanceMeters: i.distanceMeters,
@@ -170,269 +169,142 @@ function NewRunPage({ userId }: NewRunPageProps) {
             }
 
             let wId = workoutId
+            const isoDate = workoutDate.toISOString()
+
             if (!wId) {
-                const workout = await workoutService.create(userId, {
-                    type: 'RUN',
-                    startDateTime: new Date(workoutDate).toISOString(),
-                })
+                const workout = await workoutService.create(userId, { type: 'RUN', startDateTime: isoDate })
                 wId = workout.id
                 setWorkoutId(wId)
             } else {
-                await workoutService.update(userId, wId, {
-                    startDateTime: new Date(workoutDate).toISOString(),
-                })
+                await workoutService.update(userId, wId, { startDateTime: isoDate })
             }
 
-            let totalDistance: number | null = null
-            let totalElevation: number | null = null
-            let avgHr: number | null = null
+            let totalDistance = 0
+            let totalElevation = 0
 
             if (mode === 'simple') {
-                totalDistance = simpleDistance ? parseInt(simpleDistance) : null
-                totalElevation = simpleElevation ? parseInt(simpleElevation) : null
-                avgHr = simpleHr ? parseInt(simpleHr) : null
+                totalDistance = simpleDistance
+                totalElevation = simpleElevation ?? 0
             } else {
-                const distances = requestIntervals.map(i => i.distanceMeters ?? 0)
-                const elevations = requestIntervals.map(i => i.elevationGain ?? 0)
-                totalDistance = distances.reduce((a, b) => a + b, 0) || null
-                totalElevation = elevations.reduce((a, b) => a + b, 0) || null
+                totalDistance = requestIntervals.reduce((acc, i) => acc + (i.distanceMeters ?? 0), 0)
+                totalElevation = requestIntervals.reduce((acc, i) => acc + (i.elevationGain ?? 0), 0)
+            }
+
+            let finalNotes = notes.trim()
+            if (feeling && mode === 'simple') {
+                const feelingMap: Record<number, string> = { 1: 'Muy duro', 2: 'Duro', 3: 'Normal', 4: 'Bien', 5: 'Genial' }
+                finalNotes = finalNotes ? `${finalNotes}\n\nSensación: ${feelingMap[feeling]}` : `Sensación: ${feelingMap[feeling]}`
             }
 
             const request: RunDetailsCreateRequest = {
-                totalDistanceMeters: totalDistance,
-                totalElevationGain: totalElevation,
-                averageHr: avgHr,
-                shoeId: shoeId,
-                notes: notes.trim() || null,
+                totalDistanceMeters: totalDistance > 0 ? totalDistance : null,
+                totalElevationGain: totalElevation > 0 ? totalElevation : null,
+                averageHr: mode === 'simple' ? simpleHr : null,
+                shoeId,
+                notes: finalNotes || null,
                 intervals: requestIntervals,
             }
 
             await runService.saveDetails(userId, wId, request)
             navigate('/workouts')
+
         } catch (err) {
-            setError(getErrorMessage(err))
+            setError(getErrorMessage(err) || 'Error al guardar')
         } finally {
             setLoading(false)
         }
     }
 
-    if (!userId) {
-        return (
-            <div className="bg-green-50 min-h-screen -m-4 p-4">
-                <div className="flex items-center mb-6">
-                    <Dog className="w-10 h-10 mr-3 text-green-600" />
-                    <h1 className="text-2xl font-bold text-green-700">Nuevo Run</h1>
-                </div>
-                <p className="text-green-600">Selecciona un usuario primero</p>
-            </div>
-        )
-    }
+    if (!userId || loadingData) return <div className="p-8 text-center text-gray-500">Cargando...</div>
 
-    if (loadingData) {
-        return (
-            <div className="bg-green-50 min-h-screen -m-4 p-4">
-                <div className="flex items-center mb-6">
-                    <Dog className="w-10 h-10 mr-3 text-green-600" />
-                    <h1 className="text-2xl font-bold text-green-700">Nuevo Run</h1>
-                </div>
-                <p className="text-green-600">Cargando...</p>
-            </div>
-        )
-    }
-
-    if (!mode) {
-        return (
-            <div className="bg-green-50 min-h-screen -m-4 p-4">
-                <div className="flex items-center mb-6">
-                    <button
-                        onClick={() => navigate('/workouts')}
-                        className="p-2 mr-2 text-green-600 hover:bg-green-100 rounded-lg"
-                    >
-                        <ArrowLeft className="w-6 h-6" />
-                    </button>
-                    <Dog className="w-10 h-10 mr-3 text-green-600" />
-                    <h1 className="text-2xl font-bold text-green-700">Nuevo Run</h1>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 shadow-sm">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-                        ¿Qué tipo de carrera?
-                    </h2>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <button
-                            onClick={() => setMode('simple')}
-                            className="flex flex-col items-center p-6 bg-green-50 rounded-xl border-2 border-green-200 hover:border-green-400 transition-colors"
-                        >
-                            <Timer className="w-12 h-12 text-green-500 mb-3" />
-                            <span className="font-semibold text-green-700">Simple</span>
-                            <span className="text-sm text-green-600 mt-1 text-center">Rodaje, carrera continua</span>
-                        </button>
-
-                        <button
-                            onClick={() => setMode('intervals')}
-                            className="flex flex-col items-center p-6 bg-green-50 rounded-xl border-2 border-green-200 hover:border-green-400 transition-colors"
-                        >
-                            <BarChart3 className="w-12 h-12 text-green-500 mb-3" />
-                            <span className="font-semibold text-green-700">Series</span>
-                            <span className="text-sm text-green-600 mt-1 text-center">Intervalos, fartlek</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    // FORMULARIO PRINCIPAL
     return (
-        <div className="bg-green-50 min-h-screen -m-4 p-4">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                    <button
-                        onClick={() => setMode(null)}
-                        className="p-2 mr-2 text-green-600 hover:bg-green-100 rounded-lg"
-                    >
-                        <ArrowLeft className="w-6 h-6" />
-                    </button>
-                    <Dog className="w-10 h-10 mr-3 text-green-600" />
-                    <div>
-                        <h1 className="text-2xl font-bold text-green-700">
-                            {mode === 'simple' ? 'Rodaje' : 'Series'}
-                        </h1>
-                        <p className="text-sm text-green-600">
-                            {mode === 'simple' ? 'Carrera simple' : 'Intervalos'}
-                        </p>
-                    </div>
-                </div>
+        // LAYOUT PRINCIPAL: Fixed Height + Flex Column
+        <div className="h-[100dvh] flex flex-col bg-gray-50 overflow-hidden">
+
+            {/* 1. HEADER (Fuera del scroll area, o sticky dentro de él) */}
+            <div className="relative z-20 flex-shrink-0 transition-all duration-300">
+                {/* Botón Volver Flotante */}
                 <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    onClick={() => navigate('/workouts')}
+                    className={`absolute top-4 left-4 z-30 p-2 rounded-full transition-colors ${isCompact ? 'text-white hover:bg-white/10' : 'bg-white/20 text-white hover:bg-white/30'
+                        }`}
                 >
-                    <Save className="w-5 h-5 mr-1" />
-                    {loading ? 'Guardando...' : 'Guardar'}
+                    <ArrowLeft className="w-5 h-5" />
                 </button>
-            </div>
 
-            {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                    {error}
-                </div>
-            )}
-
-            {/* Fecha del entrenamiento */}
-            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
-                <Label>Fecha y hora del entrenamiento</Label>
-                <Input
-                    variant="green"
-                    type="datetime-local"
-                    value={workoutDate}
-                    onChange={(e) => setWorkoutDate(e.target.value)}
+                <RunHeader
+                    title={mode === 'simple' ? 'Rodaje' : 'Series'}
+                    subtitle={workoutDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    compact={isCompact} // Pasamos el estado al componente
                 />
             </div>
 
-            {/* MODO SIMPLE: Inputs específicos */}
-            {mode === 'simple' && (
-                <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label>Duración *</Label>
-                            <DurationInput
-                                variant="green"
-                                value={simpleDuration}
-                                onChange={setSimpleDuration}
-                                className="mt-1"
-                            />
-                        </div>
-                        <div>
-                            <Label>Distancia (m)</Label>
-                            <Input
-                                type="number"
-                                variant="green"
-                                value={simpleDistance}
-                                onChange={(e) => setSimpleDistance(e.target.value)}
-                                placeholder="6000"
-                            />
-                        </div>
-                    </div>
+            {/* 2. ÁREA SCROLLEABLE (Con Ref) */}
+            <div
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto scrollbar-hide"
+            >
+                {/* Calendario */}
+                <WeekCalendar
+                    selectedDate={workoutDate}
+                    onSelectDate={setWorkoutDate}
+                />
 
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <Label>FC Media</Label>
-                            <Input
-                                type="number"
-                                variant="green"
-                                value={simpleHr}
-                                onChange={(e) => setSimpleHr(e.target.value)}
-                                placeholder="145"
-                            />
-                        </div>
-                        <div>
-                            <Label>Desnivel (m)</Label>
-                            <Input
-                                type="number"
-                                variant="green"
-                                value={simpleElevation}
-                                onChange={(e) => setSimpleElevation(e.target.value)}
-                                placeholder="50"
-                            />
-                        </div>
+                {/* Error Alert */}
+                {error && (
+                    <div className="mx-4 mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 animate-in fade-in slide-in-from-top-2">
+                        {error}
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Zapatillas y Notas (Común para ambos modos) */}
-            <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
-                <div className="space-y-4">
-                    <div>
-                        <Label>Zapatillas</Label>
-                        <Select
-                            variant="green"
-                            value={shoeId ?? ''}
-                            onChange={(e) => setShoeId(e.target.value ? parseInt(e.target.value) : null)}
-                        >
-                            <option value="">Sin zapatillas</option>
-                            {shoes.map(shoe => (
-                                <option key={shoe.id} value={shoe.id}>
-                                    {shoe.nickname || `${shoe.brand} ${shoe.model}`}
-                                </option>
-                            ))}
-                        </Select>
-                    </div>
-                    <div>
-                        <Label>Notas</Label>
-                        <Textarea
-                            value={notes}
-                            variant="green"
-                            onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Rodaje suave por el parque..."
-                            rows={3}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* MODO INTERVALOS: Lista de intervalos */}
-            {mode === 'intervals' && (
-                <div className="mb-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-semibold text-gray-700">Intervalos</h2>
+                {/* Tabs Selector de Modo */}
+                <div className="px-4 py-4">
+                    <div className="bg-gray-200 p-1 rounded-xl flex">
                         <button
-                            type="button"
-                            onClick={handleAddInterval}
-                            className="flex items-center text-green-600 hover:text-green-700 text-sm"
+                            onClick={() => setMode('simple')}
+                            className={`flex-1 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all ${mode === 'simple' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                                }`}
                         >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Añadir
+                            <Timer className="w-4 h-4" />
+                            Simple
+                        </button>
+                        <button
+                            onClick={() => setMode('intervals')}
+                            className={`flex-1 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all ${mode === 'intervals' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            <BarChart3 className="w-4 h-4" />
+                            Intervalos
                         </button>
                     </div>
+                </div>
 
-                    <div className="space-y-3">
-                        {intervals.map((interval, index) => (
+                {/* FORMULARIO */}
+                {mode === 'simple' ? (
+                    <div className="space-y-2 pb-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <DistanceInput
+                            value={simpleDistance}
+                            onChange={setSimpleDistance}
+                        />
+                        <IntensityCard
+                            heartRate={simpleHr}
+                            onHeartRateChange={setSimpleHr}
+                            feeling={feeling}
+                            onFeelingChange={setFeeling}
+                        />
+                    </div>
+                ) : (
+                    <div className="px-4 pb-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Bloques</span>
+                            <button onClick={handleAddInterval} className="text-sm font-bold text-green-600">
+                                + Añadir Intervalo
+                            </button>
+                        </div>
+                        {intervals.map((interval, idx) => (
                             <RunIntervalForm
-                                key={index}
-                                index={index}
+                                key={idx}
+                                index={idx}
                                 interval={interval}
                                 onChange={handleUpdateInterval}
                                 onRemove={handleRemoveInterval}
@@ -440,10 +312,33 @@ function NewRunPage({ userId }: NewRunPageProps) {
                             />
                         ))}
                     </div>
+                )}
+
+                {/* Componentes Comunes (Zapatillas y Notas) */}
+                <div className="pb-8 space-y-1"> {/* Padding bottom extra para aire antes del footer */}
+                    <ShoeSelector
+                        shoes={shoes}
+                        selectedShoeId={shoeId}
+                        onSelectShoe={setShoeId}
+                        onAddShoe={() => navigate('/gear/shoes/new')}
+                    />
+                    <NotesCollapsible
+                        value={notes}
+                        onChange={setNotes}
+                    />
                 </div>
-            )}
+            </div>
+
+            {/* 3. FOOTER FIJO (Fuera del scroll) */}
+            <div className="flex-shrink-0 bg-white border-t border-gray-100 p-4 pb-safe z-20">
+                <SaveButton
+                    onClick={handleSubmit}
+                    loading={loading}
+                // Quitamos el div wrapper del componente SaveButton original si es necesario, 
+                // o dejamos que este div actúe como contenedor.
+                />
+            </div>
+
         </div>
     )
 }
-
-export default NewRunPage

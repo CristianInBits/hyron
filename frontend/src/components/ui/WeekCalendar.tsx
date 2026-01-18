@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import type { ColorVariant } from '../../types/ui'
 
 /* =========================
    Types
@@ -10,7 +11,6 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-reac
  *
  * Se usan para mapear clases Tailwind “completas” (evita clases dinámicas que Tailwind no detecte).
  */
-type ColorVariant = 'green' | 'blue' | 'purple' | 'hyrox'
 
 /**
  * Props del componente {@link WeekCalendar}.

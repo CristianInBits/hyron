@@ -16,7 +16,8 @@ import {
   ShoesPage,
   UsersPage,
   WorkoutsPage,
-  SettingsPage
+  SettingsPage,
+  TestCalendarPage
 } from './pages'
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
           <Route path="/new/gym" element={<NewGymPage userId={selectedUserId} />} />
           <Route path="/new/hyrox" element={<NewHyroxPage userId={selectedUserId} />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/test" element={<TestCalendarPage userId={selectedUserId} />} />
         </Routes>
       </Layout>
     </SettingsProvider>
