@@ -17,7 +17,7 @@ import RunHeader from '../components/run/RunHeader'
 import WeekCalendar from '../components/ui/WeekCalendar'
 import DistanceInput from '../components/ui/DistanceInput'
 import IntensityCard from '../components/run/IntensityCard'
-import ShoeSelector from '../components/ui/ShoeSelector'
+import ShoeSelector from '../components/run/ShoeSelector'
 import NotesCollapsible from '../components/run/NotesCollapsible'
 import SaveButton from '../components/run/SaveButton'
 

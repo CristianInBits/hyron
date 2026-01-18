@@ -9,7 +9,9 @@ import TimeRoller from '../components/ui/TimeRoller'
 import DurationCard from '../components/ui/DurationCard'
 import ElevationCard from '../components/ui/ElevationCard'
 import HeartRateInput from '../components/ui/HeartRateInput'
-import ShoeSelector from '../components/ui/ShoeSelector'
+import SaveButton from '../components/ui/SaveButton'
+import NotesCard from '../components/ui/NotesCard'
+import ShoeSelector from '../components/run/ShoeSelector'
 
 import type { ShoeSummaryResponse } from '../types/shoe'
 import { shoeService } from '../services/shoeService'
@@ -44,6 +46,8 @@ export default function TestCalendarPage({ userId }: Props) {
     const [duration2, setDuration2] = useState(300)
     const [duration3, setDuration3] = useState(390)
     const [duration4, setDuration4] = useState(0)
+
+    const [notes, setNotes] = useState('')
 
 
     const [selectedShoeId, setSelectedShoeId] = useState<number | null>(null)
@@ -80,6 +84,59 @@ export default function TestCalendarPage({ userId }: Props) {
         },
         ...shoes // Mantenemos tus zapatillas reales detrás
     ]
+
+    // 1. ESTADO DE CARGA PARA EL BOTÓN
+    const [isSaving, setIsSaving] = useState(false)
+
+    // 2. FUNCIÓN PARA GUARDAR (Simulada)
+    const handleSubmit = async () => {
+        // A. Validación básica (opcional)
+        // Por ejemplo, impedir guardar si la distancia es 0
+        if (simpleDistance === 0 && duration1 === 0) {
+            alert("Por favor, introduce al menos una distancia o tiempo.")
+            return
+        }
+
+        // B. Activar estado de carga (el botón mostrará el spinner)
+        setIsSaving(true)
+
+        try {
+            // C. Recopilar todos los datos (Payload)
+            // Así es como enviarías los datos a tu backend
+            const activityPayload = {
+                userId,
+                date: runDate, // O la fecha que corresponda a la actividad activa
+                type: 'RUNNING', // Esto debería ser dinámico según la tab activa
+                data: {
+                    distance: simpleDistance,
+                    duration: duration1, // O el tiempo total calculado
+                    elevation: simpleElevation,
+                    heartRate: simpleHr,
+                    shoeId: selectedShoeId,
+                    notes: notes
+                }
+            }
+
+            console.log("📦 Enviando al Backend:", activityPayload)
+
+            // D. Simular retardo de red (1.5 segundos)
+            await new Promise(resolve => setTimeout(resolve, 1500))
+
+            // E. Éxito
+            console.log("✅ Guardado con éxito")
+            // Aquí podrías mostrar un Toast de éxito
+
+            // F. Redirigir al usuario (ej: al dashboard o lista de actividades)
+            // navigate('/dashboard') 
+
+        } catch (error) {
+            console.error("❌ Error al guardar", error)
+            alert("Hubo un error al guardar la actividad")
+        } finally {
+            // G. Desactivar estado de carga siempre (éxito o error)
+            setIsSaving(false)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-100 space-y-10 pb-10">
@@ -380,7 +437,32 @@ export default function TestCalendarPage({ userId }: Props) {
 
             </div>
 
+            {/* SECCIÓN NOTAS */}
+            <div className="px-4 mt-6">
+                <NotesCard
+                    value={notes}
+                    onChange={setNotes}
+                    color="hyrox" // O el color que corresponda a la actividad
+                />
+            </div>
 
+            {/* BOTÓN DE GUARDAR */}
+            <div className="px-4 mt-8">
+                <SaveButton
+                    onClick={handleSubmit}
+                    isLoading={isSaving}
+                    color="hyrox"
+                    label="Registrar Entrenamiento"
+                />
+
+                {/* Botón secundario opcional para cancelar */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="w-full mt-3 py-3 text-gray-400 font-medium text-sm hover:text-gray-600 transition-colors"
+                >
+                    Cancelar
+                </button>
+            </div>
 
         </div>
     )
