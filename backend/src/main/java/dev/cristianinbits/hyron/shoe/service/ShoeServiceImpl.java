@@ -46,9 +46,9 @@ public class ShoeServiceImpl implements ShoeService {
             throw new NotFoundException("User not found");
         }
 
-        return shoeRepository.findByUserIdAndActiveTrue(userId).stream()
-                .map(this::toSummaryResponse)
-                .toList();
+        // CAMBIO: Usamos la nueva consulta optimizada
+        // Pasamos HyroxStation.RUN para sumar solo los km de correr de Hyrox
+        return shoeRepository.findActiveShoeSummaries(userId, HyroxStation.RUN);
     }
 
     @Override
@@ -140,6 +140,10 @@ public class ShoeServiceImpl implements ShoeService {
                 shoe.getId(),
                 shoe.getBrand(),
                 shoe.getModel(),
-                shoe.getNickname());
+                shoe.getNickname(),
+                null, // image
+                (long) shoe.getInitialDistanceMeters(), // totalDistance (fallback al inicial)
+                shoe.getMaxDistanceMeters()
+        );
     }
 }

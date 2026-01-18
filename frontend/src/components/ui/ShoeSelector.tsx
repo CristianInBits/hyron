@@ -1,5 +1,5 @@
 import { Footprints, Plus, CheckCircle2, type LucideIcon, AlertCircle } from 'lucide-react'
-import type { ShoeSummaryResponse } from '../../types/shoe' // Tu tipo actualizado
+import type { ShoeSummaryResponse } from '../../types/shoe'
 import type { ColorVariant } from '../../types/ui'
 
 type ShoeSelectorProps = {
@@ -12,11 +12,49 @@ type ShoeSelectorProps = {
     label?: string
 }
 
-const THEME: Record<ColorVariant, { gradient: string; text: string; bar: string }> = {
-    green: { gradient: 'from-green-500 to-green-600', text: 'text-green-700', bar: 'bg-green-500' },
-    blue: { gradient: 'from-blue-500 to-blue-600', text: 'text-blue-700', bar: 'bg-blue-500' },
-    purple: { gradient: 'from-purple-500 to-purple-600', text: 'text-purple-700', bar: 'bg-purple-500' },
-    hyrox: { gradient: 'from-yellow-400 to-yellow-500', text: 'text-yellow-800', bar: 'bg-yellow-500' }
+// Definición expandida del tema para controlar todos los estados
+type ThemeStyles = {
+    gradient: string
+    text: string
+    ring: string
+    check: string      // Color del icono de check
+    addBorder: string  // Color del borde hover en botón añadir
+    addText: string    // Color del texto hover en botón añadir
+}
+
+const THEME: Record<ColorVariant, ThemeStyles> = {
+    green: {
+        gradient: 'from-emerald-500 to-green-600',
+        text: 'text-emerald-700',
+        ring: 'ring-emerald-500',
+        check: 'text-emerald-600',
+        addBorder: 'hover:border-emerald-400',
+        addText: 'hover:text-emerald-600'
+    },
+    blue: {
+        gradient: 'from-blue-500 to-indigo-600',
+        text: 'text-blue-700',
+        ring: 'ring-blue-500',
+        check: 'text-blue-600',
+        addBorder: 'hover:border-blue-400',
+        addText: 'hover:text-blue-600'
+    },
+    purple: {
+        gradient: 'from-violet-500 to-purple-600',
+        text: 'text-purple-700',
+        ring: 'ring-purple-500',
+        check: 'text-purple-600',
+        addBorder: 'hover:border-purple-400',
+        addText: 'hover:text-purple-600'
+    },
+    hyrox: {
+        gradient: 'from-yellow-400 to-orange-500',
+        text: 'text-yellow-800',
+        ring: 'ring-yellow-500',
+        check: 'text-orange-600', // Orange se lee mejor que yellow en iconos
+        addBorder: 'hover:border-yellow-500',
+        addText: 'hover:text-yellow-700'
+    }
 }
 
 export default function ShoeSelector({
@@ -31,54 +69,54 @@ export default function ShoeSelector({
 
     const styles = THEME[color]
 
-    // Función segura para calcular progreso
-    const getProgressStats = (current: number, max: number | null) => {
-        // Si no hay máximo definido en backend, asumimos 800km (estándar running)
+    // Cálculo de estadísticas
+    const getShoeStats = (distance: number, max: number | null) => {
         const safeMax = max || 800000
-        const percentage = Math.min((current / safeMax) * 100, 100)
+        const percentage = Math.min((distance / safeMax) * 100, 100)
 
-        let progressColor = styles.bar
-        if (percentage > 100) progressColor = 'bg-red-500'
-        else if (percentage > 90) progressColor = 'bg-orange-500'
+        let statusColor = styles.gradient // Usamos el gradiente del tema por defecto
 
-        return { percentage, progressColor }
+        if (percentage >= 100) statusColor = 'bg-red-500'
+        else if (percentage > 90) statusColor = 'bg-orange-500'
+        else statusColor = 'bg-white'
+
+        return { percentage, statusColor }
     }
 
+    // Estado vacío
     if (shoes.length === 0) {
-        // Estado vacío simple
         return (
-            <div className="p-4 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 m-4">
-                <Icon className="w-8 h-8 mb-2 opacity-50" />
-                <span className="text-sm font-medium">No hay zapatillas</span>
-                {onAddShoe && (
-                    <button onClick={onAddShoe} className="mt-2 text-xs text-blue-600 font-bold hover:underline">
-                        Añadir ahora
-                    </button>
-                )}
+            <div className="px-4 py-2">
+                <div className="flex items-center text-gray-400 mb-3">
+                    <Icon className="w-4 h-4 mr-2" />
+                    <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+                </div>
+                <button
+                    onClick={onAddShoe}
+                    className={`w-full py-8 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-gray-400 ${styles.addBorder} ${styles.addText} transition-all bg-gray-50/50 group`}
+                >
+                    <div className="p-3 bg-white rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                        <Plus className="w-6 h-6" />
+                    </div>
+                    <span className="text-sm font-medium">Añadir {label.toLowerCase()}</span>
+                </button>
             </div>
         )
     }
 
     return (
         <div className="py-4 select-none">
-            {/* Header */}
-            <div className="px-5 flex items-center justify-between text-gray-400 mb-3">
-                <div className="flex items-center">
-                    <Icon className={`w-4 h-4 mr-2 ${selectedShoeId ? styles.text : ''}`} />
-                    <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
-                </div>
+            <div className="px-4 flex items-center text-gray-400 mb-3">
+                <Icon className={`w-4 h-4 mr-2 ${selectedShoeId ? styles.text : ''}`} />
+                <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
             </div>
 
-            {/* Scroll Container */}
-            <div className="flex gap-3 overflow-x-auto pb-6 px-5 scrollbar-hide snap-x">
+            <div className="flex gap-3 overflow-x-auto pt-4 pb-6 px-4 scrollbar-hide snap-x">
                 {shoes.map((shoe) => {
                     const isSelected = shoe.id === selectedShoeId
-                    // Usamos tus campos de shoe.ts
-                    const hasImage = !!shoe.image
                     const distanceMeters = shoe.totalDistanceMeters || 0
-
-                    const { percentage, progressColor } = getProgressStats(distanceMeters, shoe.maxDistanceMeters)
                     const distanceKm = Math.round(distanceMeters / 1000)
+                    const { percentage, statusColor } = getShoeStats(distanceMeters, shoe.maxDistanceMeters)
 
                     return (
                         <button
@@ -86,65 +124,64 @@ export default function ShoeSelector({
                             type="button"
                             onClick={() => onSelectShoe(isSelected ? null : shoe.id)}
                             className={`
-                                relative flex-shrink-0 w-40 h-48 rounded-2xl overflow-hidden text-left transition-all duration-300 snap-start shadow-sm group
+                                relative flex-shrink-0 w-36 h-48 rounded-2xl overflow-hidden text-left transition-all duration-300 snap-start group shadow-sm
                                 ${isSelected
-                                    ? 'ring-2 ring-offset-2 ring-gray-900 shadow-md translate-y-[-2px]'
+                                    ? `ring-[3px] ring-offset-2 ${styles.ring} shadow-lg scale-[1.02]`
                                     : 'border border-gray-200 hover:border-gray-300'
                                 }
                             `}
                         >
-                            {/* IMAGEN O GRADIENTE */}
-                            {hasImage ? (
+                            {/* IMAGEN / FONDO */}
+                            {shoe.image ? (
                                 <>
                                     <img
-                                        src={shoe.image!}
+                                        src={shoe.image}
                                         alt={shoe.model}
-                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        loading="lazy"
+                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
-                                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent ${isSelected ? 'opacity-90' : 'opacity-70'}`} />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                                 </>
                             ) : (
-                                <div className={`absolute inset-0 bg-gradient-to-br ${isSelected ? styles.gradient : 'from-gray-50 to-gray-100'}`}>
-                                    <span className={`absolute top-2 right-2 text-5xl font-black opacity-10 ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                                <div className={`absolute inset-0 bg-gradient-to-br ${isSelected ? styles.gradient : 'from-slate-100 to-slate-200'}`}>
+                                    <span className={`absolute -top-2 -right-2 text-6xl font-black opacity-10 select-none ${isSelected ? 'text-white' : 'text-black'}`}>
                                         {shoe.brand.slice(0, 2).toUpperCase()}
                                     </span>
                                 </div>
                             )}
 
-                            {/* CHECK SELECCIÓN */}
+                            {/* INDICADOR DE SELECCIÓN */}
                             {isSelected && (
-                                <div className="absolute top-3 right-3 animate-in zoom-in duration-300 z-20">
-                                    <div className="bg-white text-black rounded-full p-0.5">
-                                        <CheckCircle2 className="w-5 h-5 fill-current" />
+                                <div className="absolute top-2 right-2 z-20 animate-in zoom-in duration-200">
+                                    <div className="bg-white text-black rounded-full p-1 shadow-sm">
+                                        {/* AHORA USA EL COLOR DEL TEMA */}
+                                        <CheckCircle2 className={`w-4 h-4 fill-current ${styles.check}`} />
                                     </div>
                                 </div>
                             )}
 
-                            {/* DATOS */}
-                            <div className="absolute bottom-0 left-0 right-0 p-4 z-10 w-full">
-                                <span className={`text-[10px] font-bold uppercase tracking-wider block mb-0.5 ${hasImage || isSelected ? 'text-white/80' : 'text-gray-500'}`}>
+                            {/* CONTENIDO */}
+                            <div className="absolute bottom-0 left-0 right-0 p-3 z-10 w-full">
+                                <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 opacity-90 ${shoe.image || isSelected ? 'text-white' : 'text-gray-500'}`}>
                                     {shoe.brand}
-                                </span>
+                                </p>
 
-                                <span className={`text-sm font-bold leading-tight block line-clamp-2 mb-3 ${hasImage || isSelected ? 'text-white' : 'text-gray-900'}`}>
+                                <h4 className={`text-sm font-bold leading-tight line-clamp-2 mb-2 drop-shadow-sm ${shoe.image || isSelected ? 'text-white' : 'text-gray-900'}`}>
                                     {shoe.nickname || shoe.model}
-                                </span>
+                                </h4>
 
-                                {/* BARRA DE DESGASTE */}
-                                <div className="w-full">
-                                    <div className="flex justify-between text-[10px] font-medium mb-1 opacity-90">
-                                        <span className={hasImage || isSelected ? 'text-white' : 'text-gray-600'}>
-                                            {distanceKm}km
-                                        </span>
+                                <div className="space-y-1">
+                                    <div className={`flex justify-between text-[10px] font-medium ${shoe.image || isSelected ? 'text-gray-200' : 'text-gray-500'}`}>
+                                        <span>{distanceKm}km</span>
                                         {percentage > 90 && (
-                                            <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />
+                                            <AlertCircle className="w-3 h-3 text-red-500 fill-red-500/20" />
                                         )}
                                     </div>
 
-                                    <div className={`h-1.5 w-full rounded-full overflow-hidden ${hasImage || isSelected ? 'bg-white/20' : 'bg-gray-200'}`}>
+                                    <div className={`h-1.5 w-full rounded-full overflow-hidden ${shoe.image || isSelected ? 'bg-white/20' : 'bg-gray-200'}`}>
                                         <div
                                             style={{ width: `${percentage}%` }}
-                                            className={`h-full rounded-full transition-all duration-500 ${hasImage ? (percentage > 90 ? 'bg-red-500' : 'bg-white') : progressColor}`}
+                                            className={`h-full rounded-full transition-all duration-500 ${statusColor}`}
                                         />
                                     </div>
                                 </div>
@@ -158,12 +195,18 @@ export default function ShoeSelector({
                     <button
                         type="button"
                         onClick={onAddShoe}
-                        className="flex-shrink-0 w-20 h-48 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 bg-gray-50/50 hover:bg-white hover:border-gray-300 transition-all snap-start"
+                        // AHORA USA ESTILOS DINÁMICOS EN HOVER
+                        className={`
+                            relative flex-shrink-0 w-36 h-48 rounded-2xl border-2 border-dashed border-gray-200 
+                            flex flex-col items-center justify-center text-gray-400 bg-gray-50/50 
+                            hover:bg-white ${styles.addBorder} ${styles.addText} 
+                            transition-all snap-start group
+                        `}
                     >
-                        <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center mb-2">
-                            <Plus className="w-4 h-4" />
+                        <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <Plus className="w-5 h-5" />
                         </div>
-                        <span className="text-[10px] font-bold">Nueva</span>
+                        <span className="text-xs font-bold">Añadir par</span>
                     </button>
                 )}
             </div>

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import dev.cristianinbits.hyron.hyrox.domain.HyroxStation;
 import dev.cristianinbits.hyron.shoe.domain.Shoe;
+import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
 
 @Repository
 public interface ShoeRepository extends JpaRepository<Shoe, Long> {
@@ -73,4 +74,33 @@ public interface ShoeRepository extends JpaRepository<Shoe, Long> {
             ORDER BY totalDist DESC
             """)
     List<Object[]> findTopActiveShoesByDistance(@Param("userId") Long userId, @Param("station") HyroxStation station, Pageable pageable);
+
+    /*Image aún no existe en tu entidad, pasamos null */
+    @Query("""
+        SELECT new dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse(
+            s.id,
+            s.brand,
+            s.model,
+            s.nickname,
+            null, 
+            CAST(
+                (s.initialDistanceMeters
+                + COALESCE((SELECT SUM(r.totalDistanceMeters) FROM RunWorkoutDetails r WHERE r.shoe = s), 0)
+                + COALESCE((SELECT SUM(i.distanceMeters) 
+                            FROM HyroxItem i 
+                            WHERE i.station = :station 
+                              AND i.block.details.shoe = s), 0)
+                ) AS long
+            ),
+            s.maxDistanceMeters
+        )
+        FROM Shoe s
+        WHERE s.user.id = :userId 
+          AND s.active = true
+        ORDER BY s.initialDistanceMeters DESC
+    """)
+    List<ShoeSummaryResponse> findActiveShoeSummaries(
+            @Param("userId") Long userId, 
+            @Param("station") HyroxStation station
+    );
 }

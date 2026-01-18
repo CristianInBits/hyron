@@ -184,6 +184,10 @@ public class HyroxServiceImpl implements HyroxService {
                 shoe.getId(),
                 shoe.getBrand(),
                 shoe.getModel(),
-                shoe.getNickname());
+                shoe.getNickname(),
+                null, // image
+                (long) shoe.getInitialDistanceMeters(), // totalDistance (fallback al inicial)
+                shoe.getMaxDistanceMeters()
+        );
     }
 }

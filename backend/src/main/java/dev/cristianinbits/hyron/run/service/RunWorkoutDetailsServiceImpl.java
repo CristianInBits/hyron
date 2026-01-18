@@ -156,7 +156,11 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
                 shoe.getId(),
                 shoe.getBrand(),
                 shoe.getModel(),
-                shoe.getNickname());
+                shoe.getNickname(),
+                null, // image
+                (long) shoe.getInitialDistanceMeters(), // totalDistance (fallback al inicial)
+                shoe.getMaxDistanceMeters()
+        );
     }
 
     private Integer calculateTotalDistance(List<RunIntervalRequest> intervals) {

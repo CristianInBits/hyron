@@ -65,18 +65,34 @@ export default function TestCalendarPage({ userId }: Props) {
         }
     }, [userId])
 
+    /* crear imagen para shoes*/
+    const testShoes = [
+        {
+            id: 999, // ID falso
+            brand: "Nike",
+            model: "Air Zoom Pegasus",
+            nickname: "Test con Foto",
+            totalDistanceMeters: 650000, // Para que la barra se vea llena y naranja
+            maxDistanceMeters: 800000,
+            active: true,
+            // Usamos una imagen real de Unsplash para probar el CSS
+            image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400&auto=format&fit=crop"
+        },
+        ...shoes // Mantenemos tus zapatillas reales detrás
+    ]
+
     return (
         <div className="min-h-screen bg-gray-100 space-y-10 pb-10">
 
             {/* =========== SHOE SELECTOR =========== */}
 
-            <div className="max-w-md mx-auto bg-white shadow-sm rounded-xl overflow-hidden">
+            <div className="max-w-md mx-auto bg-white shadow-sm rounded-xl overflow-hidden py-2">
                 <ShoeSelector
-                    shoes={shoes}
+                    shoes={testShoes}
                     selectedShoeId={selectedShoeId}
                     onSelectShoe={setSelectedShoeId}
                     onAddShoe={() => navigate('/shoes')}
-                    color="hyrox"
+                    color="blue"
                 />
             </div>
 

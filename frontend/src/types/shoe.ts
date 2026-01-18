@@ -15,11 +15,9 @@ export type ShoeSummaryResponse = {
     brand: string
     model: string
     nickname: string | null
-    // AÑADIMOS ESTO (El backend debe enviarlo)
-    totalDistanceMeters: number
+    image: string | null         // Nuevo: Coincide con el DTO Java
+    totalDistanceMeters: number  // Nuevo: Ya viene calculado
     maxDistanceMeters: number | null
-    // OPCIONAL: Preparamos el terreno para el futuro
-    image?: string | null
 }
 
 export type ShoeCreateRequest = {
