@@ -284,7 +284,7 @@ export default function DistanceInput({
                             onClick={() => handleChipClick(preset)}
                             aria-label={`Seleccionar ${preset} ${unitLabel}`}
                             className={`
-                                px-4 py-1.5 rounded-full text-sm font-semibold transition-all
+                                px-3 py-1.5 rounded-full text-sm font-semibold transition-all
                                 ${isActive ? styles.activeChip : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
                             `}
                         >
@@ -315,7 +315,7 @@ export default function DistanceInput({
                         onChange={handleInputChange}
                         onFocus={(e) => e.target.select()}
                         onBlur={handleBlur}
-                        className={`w-full text-center text-5xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 p-0 ${styles.text}`}
+                        className={`w-full text-center text-4xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 p-0 ${styles.text}`}
                         placeholder="0"
                         autoComplete="off"
                         aria-label="Distancia personalizada"

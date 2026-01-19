@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import Layout from './components/layout/Layout'
-
 import { SettingsProvider } from './context/SettingsContext'
 
 import {
@@ -21,7 +20,15 @@ import {
 } from './pages'
 
 function App() {
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(() => {
+    // Intenta leer del disco, si no hay nada, devuelve null
+    const saved = localStorage.getItem('hyron_userId')
+    return saved ? Number(saved) : null
+  })
+
+  useEffect(() => {
+    if (selectedUserId) localStorage.setItem('hyron_userId', String(selectedUserId))
+  }, [selectedUserId])
 
   return (
     <SettingsProvider>

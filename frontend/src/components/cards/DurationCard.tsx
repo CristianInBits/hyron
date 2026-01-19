@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Clock, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react'
-import TimeRoller from './TimeRoller'
+import TimeRoller from '../ui/TimeRoller'
 import type { ColorVariant } from '../../types/ui'
 
 /* =========================

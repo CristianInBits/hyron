@@ -15,10 +15,13 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
+        // IMPORTANTE: para ngrok usa allowedOriginPatterns (comodines)
+        config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "http://localhost",
-                "http://127.0.0.1"
+                "http://127.0.0.1",
+                "http://192.168.*.*:5173", // opcional: acceso por IP en LAN
+                "https://*.ngrok-free.dev" // ngrok (plan free)
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

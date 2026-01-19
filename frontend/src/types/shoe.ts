@@ -15,8 +15,8 @@ export type ShoeSummaryResponse = {
     brand: string
     model: string
     nickname: string | null
-    image: string | null         // Nuevo: Coincide con el DTO Java
-    totalDistanceMeters: number  // Nuevo: Ya viene calculado
+    image: string | null
+    totalDistanceMeters: number
     maxDistanceMeters: number | null
 }
 

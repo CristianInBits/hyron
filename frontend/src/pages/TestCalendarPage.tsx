@@ -2,16 +2,16 @@ import { useState, useEffect } from 'react'
 import { Dog, Waves, Dumbbell, Trophy } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import ActivityHeader from '../components/ui/ActivityHeader'
-import WeekCalendar from '../components/ui/WeekCalendar'
-import DistanceInput from '../components/ui/DistanceInput'
+import ActivityHeader from '../components/layout/ActivityHeader'
+import WeekCalendar from '../components/calendar/WeekCalendar'
+import DistanceInput from '../components/inputs/DistanceInput'
 import TimeRoller from '../components/ui/TimeRoller'
-import DurationCard from '../components/ui/DurationCard'
-import ElevationCard from '../components/ui/ElevationCard'
-import HeartRateInput from '../components/ui/HeartRateInput'
-import SaveButton from '../components/ui/SaveButton'
-import NotesCard from '../components/ui/NotesCard'
-import ShoeSelector from '../components/run/ShoeSelector'
+import DurationCard from '../components/cards/DurationCard'
+import ElevationCard from '../components/cards/ElevationCard'
+import HeartRateInput from '../components/inputs/HeartRateInput'
+import SaveButton from '../components/actions/SaveButton'
+import NotesCard from '../components/cards/NotesCard'
+import ShoeSelector from '../components/selectors/ShoeSelector'
 
 import type { ShoeSummaryResponse } from '../types/shoe'
 import { shoeService } from '../services/shoeService'
@@ -19,12 +19,6 @@ import { shoeService } from '../services/shoeService'
 
 type Props = {
     userId: number | null
-}
-
-type ShoePlus = ShoeSummaryResponse & {
-    image?: string | null     // URL de la foto
-    distance: number          // Metros acumulados
-    maxDistance?: number      // Vida útil en metros (default: 800km)
 }
 
 export default function TestCalendarPage({ userId }: Props) {
