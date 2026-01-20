@@ -33,10 +33,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
+    // --- DOCUMENTACIÓN API (Swagger / OpenAPI) ---
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0") 
+
     // --- Observabilidad / Health ---
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-    // --- Migraciones (Flyway + integración con Spring Boot 4) ---
+    // --- Migraciones ---
     implementation("org.springframework.boot:spring-boot-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
 
