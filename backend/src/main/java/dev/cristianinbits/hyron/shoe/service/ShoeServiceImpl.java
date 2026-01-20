@@ -1,149 +1,145 @@
 package dev.cristianinbits.hyron.shoe.service;
 
-import java.util.List;
+import dev.cristianinbits.hyron.common.exception.ShoeNotFoundException;
+import dev.cristianinbits.hyron.common.security.CurrentUserService;
+import dev.cristianinbits.hyron.common.web.PageQuery;
+import dev.cristianinbits.hyron.common.web.PageQueryMapper;
+import dev.cristianinbits.hyron.common.web.PageResult;
+import dev.cristianinbits.hyron.shoe.domain.Shoe;
+import dev.cristianinbits.hyron.shoe.domain.ShoeType;
+import dev.cristianinbits.hyron.shoe.dto.ShoeCreateRequest;
+import dev.cristianinbits.hyron.shoe.dto.ShoeResponse;
+import dev.cristianinbits.hyron.shoe.dto.ShoeUpdateRequest;
+import dev.cristianinbits.hyron.shoe.repo.ShoeRepository;
+import dev.cristianinbits.hyron.user.repo.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.cristianinbits.hyron.common.exception.NotFoundException;
-import dev.cristianinbits.hyron.hyrox.domain.HyroxStation;
-import dev.cristianinbits.hyron.shoe.domain.Shoe;
-import dev.cristianinbits.hyron.shoe.dto.ShoeCreateRequest;
-import dev.cristianinbits.hyron.shoe.dto.ShoeResponse;
-import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
-import dev.cristianinbits.hyron.shoe.dto.ShoeUpdateRequest;
-import dev.cristianinbits.hyron.shoe.repo.ShoeRepository;
-import dev.cristianinbits.hyron.user.domain.User;
-import dev.cristianinbits.hyron.user.repo.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
 
+import static org.springframework.data.jpa.domain.Specification.where;
+import static java.util.Map.entry;
+
+/**
+ * Implementación del dominio Shoes.
+ *
+ * <p>Notas:
+ * <ul>
+ *   <li>Seguridad: siempre se filtra por userId para evitar acceso a recursos ajenos.</li>
+ *   <li>Delete: soft delete poniendo active=false.</li>
+ *   <li>Update (PUT): reemplaza campos configurables, pero NO toca accumulatedDistanceMeters.</li>
+ * </ul>
+ */
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ShoeServiceImpl implements ShoeService {
+
+    private static final Map<String, String> ALLOWED_SORTS = Map.ofEntries(
+            entry("id", "id"),
+            entry("brand", "brand"),
+            entry("model", "model"),
+            entry("purchaseDate", "purchaseDate"),
+            entry("active", "active"),
+            entry("favorite", "favorite"),
+            entry("type", "type")
+    );
+
+    // Desempate por ID (lo más nuevo creado)
+    private static final Sort DEFAULT_SORT =
+            Sort.by("purchaseDate").descending()
+                    .and(Sort.by("id").descending()); 
 
     private final ShoeRepository shoeRepository;
     private final UserRepository userRepository;
+    private final ShoeMapper shoeMapper;
+    private final CurrentUserService currentUserService;
 
     @Override
-    public List<ShoeResponse> getAllShoes(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User not found");
-        }
+    public ShoeResponse create(ShoeCreateRequest request) {
+        Long userId = currentUserService.requireUserId();
 
-        return shoeRepository.findAllWithTotalDistance(userId, HyroxStation.RUN).stream()
-                .map(row -> {
-                    Shoe shoe = (Shoe) row[0];
-                    Long total = (Long) row[1];
-                    return toResponse(shoe, total);
-                })
-                .toList();
-    }
-
-    @Override
-    public List<ShoeSummaryResponse> getActiveShoesForSelect(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User not found");
-        }
-
-        // CAMBIO: Usamos la nueva consulta optimizada
-        // Pasamos HyroxStation.RUN para sumar solo los km de correr de Hyrox
-        return shoeRepository.findActiveShoeSummaries(userId, HyroxStation.RUN);
-    }
-
-    @Override
-    public ShoeResponse getShoe(Long userId, Long shoeId) {
-        Shoe shoe = shoeRepository.findByIdAndUserId(shoeId, userId)
-                .orElseThrow(() -> new NotFoundException("Shoe not found"));
-        Long total = shoeRepository.getTotalDistanceMeters(shoeId, HyroxStation.RUN);
-        return toResponse(shoe, total);
-    }
-
-    @Override
-    @Transactional
-    public ShoeResponse createShoe(Long userId, ShoeCreateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        Shoe shoe = Shoe.builder()
-                .user(user)
-                .brand(request.brand())
-                .model(request.model())
-                .nickname(request.nickname())
-                .initialDistanceMeters(request.initialDistanceMeters() != null ? request.initialDistanceMeters() : 0)
-                .maxDistanceMeters(request.maxDistanceMeters())
-                .active(true)
-                .build();
+        Shoe shoe = shoeMapper.toEntity(request);
+        shoe.setUser(userRepository.getReferenceById(userId));
 
         Shoe saved = shoeRepository.save(shoe);
-        Long total = shoeRepository.getTotalDistanceMeters(saved.getId(),HyroxStation.RUN);
-        return toResponse(saved, total);
+        return shoeMapper.toResponse(saved);
     }
 
     @Override
-    @Transactional
-    public ShoeResponse updateShoe(Long userId, Long shoeId, ShoeUpdateRequest request) {
-        Shoe shoe = shoeRepository.findByIdAndUserId(shoeId, userId)
-                .orElseThrow(() -> new NotFoundException("Shoe not found"));
+    public ShoeResponse update(Long id, ShoeUpdateRequest request) {
+        Long userId = currentUserService.requireUserId();
 
-        if (request.brand() != null)
-            shoe.setBrand(request.brand());
-        if (request.model() != null)
-            shoe.setModel(request.model());
-        if (request.nickname() != null)
-            shoe.setNickname(request.nickname());
-        if (request.initialDistanceMeters() != null)
-            shoe.setInitialDistanceMeters(request.initialDistanceMeters());
-        if (request.maxDistanceMeters() != null)
-            shoe.setMaxDistanceMeters(request.maxDistanceMeters());
-        if (request.active() != null)
-            shoe.setActive(request.active());
+        Shoe shoe = shoeRepository.findByIdAndUser_Id(id, userId)
+                .orElseThrow(() -> new ShoeNotFoundException(id));
+
+        // PUT: reemplaza campos configurables; NO tocar accumulatedDistanceMeters
+        shoeMapper.applyPut(request, shoe);
 
         Shoe saved = shoeRepository.save(shoe);
-        Long total = shoeRepository.getTotalDistanceMeters(saved.getId(), HyroxStation.RUN);
-        return toResponse(saved, total);
+        return shoeMapper.toResponse(saved);
     }
 
     @Override
-    @Transactional
-    public void deleteShoe(Long userId, Long shoeId) {
-        if (!shoeRepository.existsByIdAndUserId(shoeId, userId)) {
-            throw new NotFoundException("Shoe not found");
-        }
-        shoeRepository.deleteById(shoeId);
+    @Transactional(readOnly = true)
+    public ShoeResponse getById(Long id) {
+        Long userId = currentUserService.requireUserId();
+
+        Shoe shoe = shoeRepository.findByIdAndUser_Id(id, userId)
+                .orElseThrow(() -> new ShoeNotFoundException(id));
+
+        return shoeMapper.toResponse(shoe);
     }
 
-    private ShoeResponse toResponse(Shoe shoe, Long totalDistance) {
-        if (totalDistance == null) {
-            totalDistance = (long) shoe.getInitialDistanceMeters();
-        }
+    @Override
+    @Transactional(readOnly = true)
+    public PageResult<ShoeResponse> getMyShoes(ShoeType type, Boolean active, PageQuery pageQuery) {
+        Long userId = currentUserService.requireUserId();
 
-        Integer percentage = null;
-        if (shoe.getMaxDistanceMeters() != null && shoe.getMaxDistanceMeters() > 0) {
-            percentage = (int) ((totalDistance * 100) / shoe.getMaxDistanceMeters());
-        }
+        Pageable pageable = PageQueryMapper.toPageable(pageQuery, DEFAULT_SORT, ALLOWED_SORTS);
 
-        return new ShoeResponse(
-                shoe.getId(),
-                shoe.getBrand(),
-                shoe.getModel(),
-                shoe.getNickname(),
-                shoe.isActive(),
-                shoe.getInitialDistanceMeters(),
-                shoe.getMaxDistanceMeters(),
-                totalDistance,
-                percentage);
-    }
-
-    private ShoeSummaryResponse toSummaryResponse(Shoe shoe) {
-        return new ShoeSummaryResponse(
-                shoe.getId(),
-                shoe.getBrand(),
-                shoe.getModel(),
-                shoe.getNickname(),
-                null, // image
-                (long) shoe.getInitialDistanceMeters(), // totalDistance (fallback al inicial)
-                shoe.getMaxDistanceMeters()
+        // 1. Especificación base: Pertenencia al usuario
+        Specification<Shoe> spec = where((root, query, cb) -> 
+            cb.equal(root.get("user").get("id"), userId)
         );
+
+        // 2. Filtros dinámicos
+        if (type != null) {
+            spec = spec.and((root, q, cb) -> cb.equal(root.get("type"), type));
+        }
+        if (active != null) {
+            spec = spec.and((root, q, cb) -> cb.equal(root.get("active"), active));
+        }
+
+        Page<Shoe> page = shoeRepository.findAll(spec, pageable);
+        return PageQueryMapper.toPageResult(page, shoeMapper::toResponse);
+    }
+
+    @Override
+    public void delete(Long id) {
+        Long userId = currentUserService.requireUserId();
+
+        Shoe shoe = shoeRepository.findByIdAndUser_Id(id, userId)
+                .orElseThrow(() -> new ShoeNotFoundException(id));
+
+        if (shoe.isActive()) {
+            shoe.setActive(false);
+            shoeRepository.save(shoe);
+        }
+    }
+
+    /**
+     * Exposición de sorts permitidos (útil para error messages o documentación).
+     */
+    public static java.util.Set<String> allowedSortKeys() {
+        return java.util.Set.copyOf(ALLOWED_SORTS.keySet());
     }
 }
