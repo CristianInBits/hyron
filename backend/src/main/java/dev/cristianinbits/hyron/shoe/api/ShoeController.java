@@ -1,83 +1,82 @@
 package dev.cristianinbits.hyron.shoe.api;
 
-import java.net.URI;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import dev.cristianinbits.hyron.common.web.PageQuery;
+import dev.cristianinbits.hyron.common.web.PageResult;
+import dev.cristianinbits.hyron.shoe.domain.ShoeType;
 import dev.cristianinbits.hyron.shoe.dto.ShoeCreateRequest;
 import dev.cristianinbits.hyron.shoe.dto.ShoeResponse;
-import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
 import dev.cristianinbits.hyron.shoe.dto.ShoeUpdateRequest;
 import dev.cristianinbits.hyron.shoe.service.ShoeService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import lombok.RequiredArgsConstructor;
+
+import java.net.URI;
 
 @RestController
-@RequestMapping("/api/users/{userId}/shoes")
+@RequestMapping("/api/v1/shoes")
 @RequiredArgsConstructor
-@Validated
+@Tag(name = "Shoes", description = "Gestión de zapatillas y seguimiento de kilometraje")
 public class ShoeController {
 
     private final ShoeService shoeService;
 
     @PostMapping
-    public ResponseEntity<ShoeResponse> createShoe(
-            @PathVariable @Positive Long userId,
-            @Valid @RequestBody ShoeCreateRequest request) {
-        ShoeResponse created = shoeService.createShoe(userId, request);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
+    @Operation(summary = "Crear nueva zapatilla", description = "Crea una zapatilla asociada al usuario autenticado.")
+    public ResponseEntity<ShoeResponse> create(@Valid @RequestBody ShoeCreateRequest request) {
+        ShoeResponse response = shoeService.create(request);
+
+        // BEST PRACTICE: Añadir header Location (ej: http://api.../v1/shoes/5)
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(created.id())
+                .buildAndExpand(response.id())
                 .toUri();
-        return ResponseEntity.created(location).body(created);
+
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/{id}")
-    public ShoeResponse getShoe(
-            @PathVariable @Positive Long userId,
-            @PathVariable @Positive Long id) {
-        return shoeService.getShoe(userId, id);
+    @Operation(summary = "Obtener zapatilla por ID")
+    public ResponseEntity<ShoeResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(shoeService.getById(id));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar zapatilla", description = "PUT: reemplazo completo. Los campos opcionales pueden borrarse enviando null o cadena vacía.")
+    public ResponseEntity<ShoeResponse> update(
+            @PathVariable Long id,
+            @Valid @RequestBody ShoeUpdateRequest request) {
+        return ResponseEntity.ok(shoeService.update(id, request));
     }
 
     @GetMapping
-    public List<ShoeResponse> getAllShoes(
-            @PathVariable @Positive Long userId) {
-        return shoeService.getAllShoes(userId);
-    }
+    @Operation(summary = "Listar mis zapatillas", description = "Obtiene lista paginada con filtros opcionales.")
+    public ResponseEntity<PageResult<ShoeResponse>> getMyShoes(
+            
+            @Parameter(description = "Filtrar por tipo (RUNNING, TRAIL, etc.)")
+            @RequestParam(required = false) ShoeType type,
 
-    @GetMapping("/active/summary")
-    public List<ShoeSummaryResponse> getActiveShoesForSelect(@PathVariable @Positive Long userId) {
-        return shoeService.getActiveShoesForSelect(userId);
-    }
+            @Parameter(description = "Estado: true (activas), false (retiradas), null (todas)")
+            @RequestParam(required = false) Boolean active,
 
-    @PatchMapping("/{id}")
-    public ShoeResponse updateShoe(
-            @PathVariable @Positive Long userId,
-            @PathVariable @Positive Long id,
-            @Valid @RequestBody ShoeUpdateRequest request) {
-        return shoeService.updateShoe(userId, id, request);
+            // @ParameterObject "explota" el record PageQuery en campos individuales en Swagger UI
+            @Valid @ParameterObject PageQuery pageQuery
+    ) {
+        return ResponseEntity.ok(shoeService.getMyShoes(type, active, pageQuery));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar zapatilla", description = "Soft delete: marca la zapatilla como inactiva.")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteShoe(
-            @PathVariable @Positive Long userId,
-            @PathVariable @Positive Long id) {
-        shoeService.deleteShoe(userId, id);
+    public void delete(@PathVariable Long id) {
+        shoeService.delete(id);
     }
 }
