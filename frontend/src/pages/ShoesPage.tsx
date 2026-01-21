@@ -10,7 +10,6 @@ import { shoeService } from '../services/shoeService'
 import Modal from '../components/ui/Modal'
 import ShoeCard from '../components/shoes/ShoeCard'
 import ShoeForm from '../components/shoes/ShoeForm'
-import { ThemeToggle } from '../components/ui/ThemeToggle';
 
 function ShoesPage() {
 
@@ -103,8 +102,6 @@ function ShoesPage() {
                         <p className="text-sm text-gray-500">Gestión de material</p>
                     </div>
                 </div>
-
-                <ThemeToggle />
 
                 <button
                     className="flex items-center bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 shadow-lg shadow-gray-200 transition-all"

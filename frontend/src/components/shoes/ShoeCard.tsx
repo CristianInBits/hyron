@@ -48,9 +48,9 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                 }`}
         >
             {/* Contenedor flexible que mantiene altura fija */}
-            <div className="flex flex-row h-32">
+            <div className="flex flex-row h-32 sm:h-auto">
 
-                {/* 1. IMAGEN */}
+                {/* --- 1. IMAGEN --- */}
                 <div className="relative w-24 sm:w-32 flex-shrink-0 bg-page flex items-center justify-center overflow-hidden border-r border-border">
                     {shoe.imageUrl ? (
                         <img
@@ -75,30 +75,46 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                     )}
                 </div>
 
-                {/* 2. CONTENIDO */}
-                <div className="flex-1 p-2 sm:p-4 flex flex-col justify-between min-w-0">
-                    <div>
-                        <div className="flex items-start justify-between mb-1 gap-1">
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border border-transparent uppercase tracking-wider inline-block truncate ${getTypeStyle(shoe.type)}`}>
-                                {shoe.type}
+                {/* 2. CONTENIDO CENTRAL */}
+                <div className="flex-1 p-2 sm:p-4 flex flex-col min-w-0">
+
+                    {/* --- FILA 0: Nickname (Personalización del usuario) --- */}
+                    {/* Solo lo mostramos si existe. Usamos 'text-brand' para que coja el color del deporte */}
+                    {shoe.nickname && (
+                        <div className="mb-0.5 leading-none">
+                            <span className="text-xs italic font-medium text-brand opacity-90">
+                                "{shoe.nickname}"
                             </span>
-                            {shoe.status === 'OVERDUE' && shoe.active && (
-                                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-1.5 py-0.5 rounded border border-rose-100 dark:border-rose-800 uppercase shrink-0">
-                                    Agotada
-                                </span>
-                            )}
                         </div>
+                    )}
 
-                        <h3 className="text-sm sm:text-lg font-bold text-main leading-tight truncate">
-                            {shoe.nickname || shoe.model}
-                        </h3>
+                    {/* --- FILA 1: Modelo (La información técnica importante) --- */}
+                    {/* Texto grande, negro (main) y negrita */}
+                    <h3 className="text-sm sm:text-lg font-bold text-main leading-tight truncate mb-1.5">
+                        {shoe.model}
+                    </h3>
 
-                        <p className="text-xs sm:text-sm text-muted font-medium truncate">
-                            {shoe.brand} {shoe.nickname ? shoe.model : ''}
-                        </p>
+                    {/* --- FILA 2: Marca • Badge --- */}
+                    <div className="flex items-center gap-1.5 mb-1">
+                        {/* Marca (Texto gris discreto) */}
+                        <span className="text-xs text-muted font-medium uppercase tracking-wide truncate">
+                            {shoe.brand}
+                        </span>
+
+                        {/* Separador */}
+                        <span className="text-muted/40 text-[10px]">•</span>
+
+                        {/* Badge de Tipo (Colores según deporte) */}
+                        <span className={`
+            text-[10px] font-bold px-1.5 py-0.5 rounded border border-transparent 
+            uppercase tracking-wider truncate
+            ${getTypeStyle(shoe.type)}
+        `}>
+                            {shoe.type}
+                        </span>
                     </div>
 
-                    {/* Barra de Progreso */}
+                    {/* --- FILA 3: Barra de Progreso (Empujada al fondo) --- */}
                     <div className="mt-auto pt-2">
                         {shoe.maxDistanceMeters && shoe.maxDistanceMeters > 0 ? (
                             <>
@@ -110,6 +126,8 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                                     </span>
                                     <span className="text-muted/70 hidden sm:inline">{percentage}%</span>
                                 </div>
+
+                                {/* Fondo de la barra */}
                                 <div className="h-1.5 sm:h-2 w-full bg-page rounded-full overflow-hidden">
                                     <div
                                         className={`h-full ${getStatusColor(shoe.status)} transition-all duration-500 rounded-full`}
