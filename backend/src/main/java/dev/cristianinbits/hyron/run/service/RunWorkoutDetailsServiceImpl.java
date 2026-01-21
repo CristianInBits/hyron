@@ -16,8 +16,9 @@ import dev.cristianinbits.hyron.run.dto.RunIntervalRequest;
 import dev.cristianinbits.hyron.run.dto.RunIntervalResponse;
 import dev.cristianinbits.hyron.run.repo.RunWorkoutDetailsRepository;
 import dev.cristianinbits.hyron.shoe.domain.Shoe;
-import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
+import dev.cristianinbits.hyron.shoe.dto.ShoeResponse;
 import dev.cristianinbits.hyron.shoe.repo.ShoeRepository;
+import dev.cristianinbits.hyron.shoe.service.ShoeMapper;
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import dev.cristianinbits.hyron.workout.repo.WorkoutRepository;
@@ -31,6 +32,7 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
     private final RunWorkoutDetailsRepository runRepository;
     private final WorkoutRepository workoutRepository;
     private final ShoeRepository shoeRepository;
+    private final ShoeMapper shoeMapper;
 
     @Override
     public RunDetailsResponse saveDetails(Long userId, Long workoutId, RunDetailsCreateRequest request) {
@@ -60,7 +62,7 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
         details.setNotes(normalizeString(request.notes()));
 
         if (request.shoeId() != null) {
-            Shoe shoe = shoeRepository.findByIdAndUserId(request.shoeId(), userId)
+            Shoe shoe = shoeRepository.findByIdAndUser_Id(request.shoeId(), userId)
                     .orElseThrow(() -> new NotFoundException("Shoe not found"));
             details.setShoe(shoe);
         } else {
@@ -122,6 +124,10 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
                 .mapToInt(RunInterval::getDurationSeconds)
                 .sum();
 
+        ShoeResponse shoeResponse = (details.getShoe() != null)
+                ? shoeMapper.toResponse(details.getShoe())
+                : null;
+
         return new RunDetailsResponse(
                 details.getId(),
                 details.getWorkout().getId(),
@@ -129,7 +135,7 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
                 totalDurationSeconds,
                 details.getTotalElevationGain(),
                 details.getAverageHr(),
-                toShoeSummary(details.getShoe()),
+                shoeResponse,
                 details.getNotes(),
                 calculateAveragePace(details),
                 intervalResponses);
@@ -147,20 +153,6 @@ public class RunWorkoutDetailsServiceImpl implements RunWorkoutDetailsService {
                 interval.getElevationGain(),
                 interval.getNotes(),
                 calculatePace(interval.getDistanceMeters(), interval.getDurationSeconds()));
-    }
-
-    private ShoeSummaryResponse toShoeSummary(Shoe shoe) {
-        if (shoe == null)
-            return null;
-        return new ShoeSummaryResponse(
-                shoe.getId(),
-                shoe.getBrand(),
-                shoe.getModel(),
-                shoe.getNickname(),
-                null, // image
-                (long) shoe.getInitialDistanceMeters(), // totalDistance (fallback al inicial)
-                shoe.getMaxDistanceMeters()
-        );
     }
 
     private Integer calculateTotalDistance(List<RunIntervalRequest> intervals) {

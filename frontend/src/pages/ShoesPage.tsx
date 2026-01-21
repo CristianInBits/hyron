@@ -1,44 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Footprints, Plus } from 'lucide-react'
-import { shoeService } from '../services/shoeService'
+import { useQueryClient, useMutation } from '@tanstack/react-query'
+
+// IMPORTS NUEVOS: Traemos los hooks y tipos
+import { useShoes, useCreateShoe, useUpdateShoe, useDeleteShoe } from '../hooks/useShoes'
 import type { Shoe, ShoeCreateRequest, ShoeUpdateRequest } from '../types/shoe'
+import { shoeService } from '../services/shoeService'
+
 import Modal from '../components/ui/Modal'
 import ShoeCard from '../components/shoes/ShoeCard'
 import ShoeForm from '../components/shoes/ShoeForm'
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 
-type ShoesPageProps = {
-    userId: number | null
-}
+function ShoesPage() {
 
-function ShoesPage({ userId }: ShoesPageProps) {
-    const [shoes, setShoes] = useState<Shoe[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    // 1. CARGA DE DATOS AUTOMÁTICA 📡
+    // params vacío = carga la primera página por defecto
+    const { data, isLoading, isError, error } = useShoes();
 
+    // Extraemos la lista real del objeto paginado
+    const shoes = data?.content || [];
+
+    // 2. HOOKS DE ACCIÓN ⚡
+    const createMutation = useCreateShoe();
+    const updateMutation = useUpdateShoe();
+    const deleteMutation = useDeleteShoe();
+
+    // Hook manual para el Toggle (porque no lo creamos en useShoes.ts)
+    const queryClient = useQueryClient();
+    const toggleMutation = useMutation({
+        mutationFn: (shoe: Shoe) => shoeService.toggleActive(shoe),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shoes'] })
+    });
+
+    // 3. ESTADOS DE LA UI (Modal) 🖼️
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingShoe, setEditingShoe] = useState<Shoe | null>(null)
 
-    useEffect(() => {
-        if (userId) {
-            loadShoes()
-        }
-    }, [userId])
-
-    const loadShoes = async () => {
-        if (!userId) return
-
-        try {
-            setLoading(true)
-            const data = await shoeService.getAll(userId)
-            setShoes(data)
-            setError(null)
-        } catch (err) {
-            setError('Error al cargar zapatillas')
-            console.error(err)
-        } finally {
-            setLoading(false)
-        }
-    }
+    // --- MANEJADORES DE EVENTOS ---
 
     const handleCreate = () => {
         setEditingShoe(null)
@@ -51,42 +50,35 @@ function ShoesPage({ userId }: ShoesPageProps) {
     }
 
     const handleDelete = async (id: number) => {
-        if (!userId) return
         if (!confirm('¿Estás seguro de eliminar esta zapatilla permanentemente?')) return
-
-        try {
-            await shoeService.delete(userId, id)
-            await loadShoes()
-        } catch (err) {
-            setError('Error al eliminar zapatilla')
-            console.error(err)
-        }
+        // Usamos el hook, no llamamos al servicio directamente
+        await deleteMutation.mutateAsync(id);
     }
 
     const handleToggleActive = async (shoe: Shoe) => {
-        if (!userId) return
-
-        try {
-            const updateData: ShoeUpdateRequest = { active: !shoe.active }
-            await shoeService.update(userId, shoe.id, updateData)
-            await loadShoes()
-        } catch (err) {
-            setError('Error al actualizar zapatilla')
-            console.error(err)
-        }
+        // Usamos la mutación manual que definimos arriba
+        await toggleMutation.mutateAsync(shoe);
     }
 
-    const handleSubmit = async (data: ShoeCreateRequest) => {
-        if (!userId) return
-
-        if (editingShoe) {
-            const updateData: ShoeUpdateRequest = { ...data }
-            await shoeService.update(userId, editingShoe.id, updateData)
-        } else {
-            await shoeService.create(userId, data)
+    const handleSubmit = async (formData: ShoeCreateRequest) => {
+        try {
+            if (editingShoe) {
+                // MODO EDICIÓN
+                // TypeScript necesita que convirtamos el formData a ShoeUpdateRequest
+                // Como usamos un formulario unificado, pasamos los datos tal cual
+                await updateMutation.mutateAsync({
+                    id: editingShoe.id,
+                    data: formData as unknown as ShoeUpdateRequest // Cast seguro aquí
+                });
+            } else {
+                // MODO CREACIÓN
+                await createMutation.mutateAsync(formData);
+            }
+            setIsModalOpen(false);
+        } catch (err) {
+            console.error("Error al guardar:", err);
+            // Aquí podrías poner un toast o notificación de error
         }
-        setIsModalOpen(false)
-        await loadShoes()
     }
 
     const handleCloseModal = () => {
@@ -94,18 +86,9 @@ function ShoesPage({ userId }: ShoesPageProps) {
         setEditingShoe(null)
     }
 
+    // Filtramos visualmente (aunque podríamos pedir filtrado al backend también)
     const activeShoes = shoes.filter(s => s.active)
     const inactiveShoes = shoes.filter(s => !s.active)
-
-    if (!userId) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                <Footprints className="w-16 h-16 text-gray-300 mb-4" />
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">Zapatillas</h2>
-                <p className="text-gray-500">Selecciona un usuario para ver sus zapatillas</p>
-            </div>
-        )
-    }
 
     return (
         <div>
@@ -120,6 +103,9 @@ function ShoesPage({ userId }: ShoesPageProps) {
                         <p className="text-sm text-gray-500">Gestión de material</p>
                     </div>
                 </div>
+
+                <ThemeToggle />
+
                 <button
                     className="flex items-center bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 shadow-lg shadow-gray-200 transition-all"
                     onClick={handleCreate}
@@ -129,15 +115,18 @@ function ShoesPage({ userId }: ShoesPageProps) {
                 </button>
             </div>
 
-            {loading && <p className="text-gray-500 text-center py-12">Cargando...</p>}
+            {/* Estado de Carga */}
+            {isLoading && <p className="text-gray-500 text-center py-12">Cargando zapatillas...</p>}
 
-            {error && (
+            {/* Estado de Error */}
+            {isError && (
                 <div className="text-red-600 mb-4 bg-red-50 p-3 rounded-lg text-sm border border-red-100">
-                    {error}
+                    Error al cargar: {error?.message}
                 </div>
             )}
 
-            {!loading && !error && shoes.length === 0 && (
+            {/* Estado Vacío */}
+            {!isLoading && !isError && shoes.length === 0 && (
                 <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
                     <Footprints className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500 mb-4">No tienes zapatillas registradas</p>
@@ -150,7 +139,8 @@ function ShoesPage({ userId }: ShoesPageProps) {
                 </div>
             )}
 
-            {!loading && !error && shoes.length > 0 && (
+            {/* LISTA DE ZAPATILLAS */}
+            {!isLoading && !isError && shoes.length > 0 && (
                 <>
                     {/* Zapatillas activas */}
                     {activeShoes.length > 0 && (
@@ -192,6 +182,7 @@ function ShoesPage({ userId }: ShoesPageProps) {
                 </>
             )}
 
+            {/* Modal de Formulario */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}

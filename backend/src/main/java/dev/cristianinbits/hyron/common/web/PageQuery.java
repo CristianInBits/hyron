@@ -36,6 +36,7 @@ public record PageQuery(
                 regexp = "^[a-zA-Z0-9_]+(,(?i)(asc|desc))?$",
                 message = "sort debe ser 'campo' o 'campo,asc|desc'"
         ) String> sort
+        
 ) {
     public int pageOrDefault(int defaultPage) {
         return page != null ? page : defaultPage;

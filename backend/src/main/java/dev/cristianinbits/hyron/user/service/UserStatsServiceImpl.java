@@ -2,15 +2,11 @@ package dev.cristianinbits.hyron.user.service;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.cristianinbits.hyron.common.exception.NotFoundException;
 import dev.cristianinbits.hyron.hyrox.domain.HyroxStation;
-import dev.cristianinbits.hyron.shoe.domain.Shoe;
-import dev.cristianinbits.hyron.shoe.dto.ShoeStatsResponse;
-import dev.cristianinbits.hyron.shoe.repo.ShoeRepository;
 import dev.cristianinbits.hyron.user.dto.UserStatsResponse;
 import dev.cristianinbits.hyron.user.repo.UserRepository;
 import dev.cristianinbits.hyron.workout.domain.Workout;
@@ -34,7 +30,6 @@ public class UserStatsServiceImpl implements UserStatsService {
 
     private final UserRepository userRepository;
     private final WorkoutRepository workoutRepository;
-    private final ShoeRepository shoeRepository;
 
     @Override
     public UserStatsResponse getStats(Long userId) {
@@ -79,8 +74,6 @@ public class UserStatsServiceImpl implements UserStatsService {
                 .map(this::toSummaryResponse)
                 .orElse(null);
 
-        List<ShoeStatsResponse> topShoes = getTopShoes(userId);
-
         return new UserStatsResponse(
                 totalWorkouts,
                 totalDurationSeconds,
@@ -95,8 +88,7 @@ public class UserStatsServiceImpl implements UserStatsService {
                 totalRunDistanceMetersThisMonth,
                 totalSwimDistanceMetersThisMonth,
                 workoutsByTypeThisWeek,
-                lastWorkout,
-                topShoes);
+                lastWorkout);
     }
 
     private long calculateTotalRunDistance(Long userId, Instant since) {
@@ -130,38 +122,5 @@ public class UserStatsServiceImpl implements UserStatsService {
                 workout.getEndDateTime(),
                 workout.getGlobalRpe(),
                 workout.getLocation());
-    }
-
-    private List<ShoeStatsResponse> getTopShoes(Long userId) {
-        List<Object[]> results = shoeRepository.findTopActiveShoesByDistance(
-                userId,
-                HyroxStation.RUN,
-                PageRequest.of(0, 3));
-
-        return results.stream()
-                .map(row -> {
-                    Shoe shoe = (Shoe) row[0];
-                    Long totalDistance = (Long) row[1];
-
-                    return mapToShoeStats(shoe, totalDistance);
-                })
-
-                .toList();
-    }
-
-    private ShoeStatsResponse mapToShoeStats(Shoe shoe, Long totalDistance) {
-        Double percentageUsed = null;
-        if (shoe.getMaxDistanceMeters() != null && shoe.getMaxDistanceMeters() > 0) {
-            percentageUsed = (totalDistance * 100.0) / shoe.getMaxDistanceMeters();
-        }
-
-        return new ShoeStatsResponse(
-                shoe.getId(),
-                shoe.getBrand(),
-                shoe.getModel(),
-                shoe.getNickname(),
-                totalDistance.intValue(),
-                shoe.getMaxDistanceMeters(),
-                percentageUsed);
     }
 }

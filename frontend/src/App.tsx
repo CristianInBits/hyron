@@ -41,7 +41,7 @@ function App() {
           <Route path="/workouts" element={<WorkoutsPage userId={selectedUserId} />} />
           <Route path="/profile" element={<ProfilePage userId={selectedUserId} />} />
           <Route path="/users" element={<UsersPage />} />
-          <Route path="/shoes" element={<ShoesPage userId={selectedUserId} />} />
+          <Route path="/shoes" element={<ShoesPage />} />
           <Route path="/exercises" element={<ExercisesPage userId={selectedUserId} />} />
           <Route path="/new/run" element={<NewRunPage userId={selectedUserId} />} />
           <Route path="/new/swim" element={<NewSwimPage userId={selectedUserId} />} />

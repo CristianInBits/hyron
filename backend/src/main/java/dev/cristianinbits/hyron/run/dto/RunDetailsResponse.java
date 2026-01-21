@@ -2,7 +2,7 @@ package dev.cristianinbits.hyron.run.dto;
 
 import java.util.List;
 
-import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
+import dev.cristianinbits.hyron.shoe.dto.ShoeResponse;
 
 public record RunDetailsResponse(
         Long id,
@@ -11,7 +11,7 @@ public record RunDetailsResponse(
         Integer totalDurationSeconds,
         Integer totalElevationGain,
         Integer averageHr,
-        ShoeSummaryResponse shoe,
+        ShoeResponse shoe,
         String notes,
         Integer averagePaceSecondsPerKm,
         List<RunIntervalResponse> intervals

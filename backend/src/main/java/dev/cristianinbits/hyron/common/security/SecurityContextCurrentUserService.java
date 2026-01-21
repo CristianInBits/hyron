@@ -5,8 +5,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import dev.cristianinbits.hyron.common.exception.UnauthorizedException;
+import dev.cristianinbits.hyron.common.interfaces.CurrentUserService;
+
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 /**
  * Implementación basada en Spring Security (SecurityContext).

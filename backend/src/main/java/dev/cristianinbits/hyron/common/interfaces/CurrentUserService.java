@@ -1,4 +1,4 @@
-package dev.cristianinbits.hyron.common.security;
+package dev.cristianinbits.hyron.common.interfaces;
 
 /**
  * Servicio para obtener información del usuario autenticado.

@@ -68,7 +68,9 @@ public class ShoeController {
             @RequestParam(required = false) Boolean active,
 
             // @ParameterObject "explota" el record PageQuery en campos individuales en Swagger UI
-            @Valid @ParameterObject PageQuery pageQuery
+            @Valid 
+            @ParameterObject 
+            PageQuery pageQuery
     ) {
         return ResponseEntity.ok(shoeService.getMyShoes(type, active, pageQuery));
     }

@@ -1,7 +1,7 @@
 package dev.cristianinbits.hyron.shoe.service;
 
 import dev.cristianinbits.hyron.common.exception.ShoeNotFoundException;
-import dev.cristianinbits.hyron.common.security.CurrentUserService;
+import dev.cristianinbits.hyron.common.interfaces.CurrentUserService;
 import dev.cristianinbits.hyron.common.web.PageQuery;
 import dev.cristianinbits.hyron.common.web.PageQueryMapper;
 import dev.cristianinbits.hyron.common.web.PageResult;

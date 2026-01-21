@@ -1,6 +1,5 @@
 import { Footprints, Pencil, Trash2, Power, RotateCcw } from 'lucide-react'
-import type { Shoe } from '../../types/shoe'
-
+import type { Shoe, ShoeStatus, ShoeType } from '../../types/shoe'
 import { useSettings } from '../../context/SettingsContext'
 
 type ShoeCardProps = {
@@ -13,114 +12,150 @@ type ShoeCardProps = {
 function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
 
     const { formatDistance } = useSettings()
+    const percentage = shoe.usagePercent ?? 0;
 
-    const percentage = shoe.percentageUsed ??
-        (shoe.maxDistanceMeters ? (shoe.totalDistanceMeters * 100) / shoe.maxDistanceMeters : 0)
+    // COLORES DE ESTADO (Semánticos siempre que sea posible)
+    const getStatusColor = (status: ShoeStatus) => {
+        switch (status) {
+            case 'OK': return 'bg-emerald-500'; // Verde siempre se ve bien
+            case 'WARNING': return 'bg-amber-500';
+            case 'OVERDUE': return 'bg-rose-500';
+            default: return 'bg-muted';
+        }
+    }
 
-    const getProgressColor = (pct: number) => {
-        if (pct >= 100) return 'bg-red-500'
-        if (pct >= 75) return 'bg-orange-500'
-        return 'bg-green-500'
+    // ETIQUETAS DE TIPO
+    // Adaptadas para que se vean bien en ambos modos usando opacidad en oscuro
+    const getTypeStyle = (type: ShoeType) => {
+        switch (type) {
+            case 'RUNNING': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200';
+            case 'TRAIL': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200';
+            case 'HYROX': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200';
+            case 'CROSSFIT': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200';
+            case 'WALKING': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200';
+            default: return 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-300';
+        }
     }
 
     return (
         <div
-            className={`bg-white p-4 rounded-xl shadow-sm border overflow-hidden
-            transition-all duration-200
+            className={`group relative rounded-xl shadow-sm border overflow-hidden transition-all duration-300
+            bg-surface
+            border-border
             ${shoe.active
-                    ? 'border-gray-200 hover:-translate-y-0.5 hover:shadow-md hover:bg-gray-50/80 hover:ring-1 hover:ring-gray-200'
-                    : 'opacity-75 bg-gray-50 border-gray-200 hover:opacity-90 hover:shadow hover:bg-gray-100/60'
+                    ? 'hover:shadow-md hover:border-brand' // Hover toma el color de marca (verde por defecto)
+                    : 'opacity-75 bg-page border-border' // Retirada se funde con el fondo
                 }`}
         >
-            <div className="flex items-start justify-between">
-                {/* Info principal */}
-                <div className="flex items-start flex-1">
-                    {/* Icono: Gris neutro en lugar de verde */}
-                    <div className={`p-2.5 rounded-lg mr-3 ${shoe.active ? 'bg-gray-100 text-gray-700' : 'bg-gray-200 text-gray-500'
-                        }`}>
-                        <Footprints className="w-6 h-6" />
-                    </div>
+            {/* Contenedor flexible que mantiene altura fija */}
+            <div className="flex flex-row h-32">
 
-                    <div className="flex-1 mr-4">
-                        <div className="flex items-center flex-wrap gap-2">
-                            <h3 className="font-semibold text-gray-800 text-lg">
-                                {shoe.nickname || `${shoe.brand} ${shoe.model}`}
-                            </h3>
-                            {!shoe.active && (
-                                <span className="text-xs font-bold bg-gray-200 text-gray-600 px-2 py-0.5 rounded uppercase tracking-wide">
-                                    Retirada
+                {/* 1. IMAGEN */}
+                <div className="relative w-24 sm:w-32 flex-shrink-0 bg-page flex items-center justify-center overflow-hidden border-r border-border">
+                    {shoe.imageUrl ? (
+                        <img
+                            src={shoe.imageUrl}
+                            alt={shoe.model}
+                            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 
+                                ${!shoe.active ? 'grayscale' : ''}`}
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center text-muted">
+                            <Footprints className="w-8 h-8 sm:w-10 sm:h-10 mb-1" />
+                        </div>
+                    )}
+
+                    {!shoe.active && (
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center backdrop-blur-[1px]">
+                            <span className="bg-surface/90 text-main text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded shadow-sm uppercase tracking-wide">
+                                <span className="sm:hidden">Ret</span>
+                                <span className="hidden sm:inline">Retirada</span>
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* 2. CONTENIDO */}
+                <div className="flex-1 p-2 sm:p-4 flex flex-col justify-between min-w-0">
+                    <div>
+                        <div className="flex items-start justify-between mb-1 gap-1">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border border-transparent uppercase tracking-wider inline-block truncate ${getTypeStyle(shoe.type)}`}>
+                                {shoe.type}
+                            </span>
+                            {shoe.status === 'OVERDUE' && shoe.active && (
+                                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-1.5 py-0.5 rounded border border-rose-100 dark:border-rose-800 uppercase shrink-0">
+                                    Agotada
                                 </span>
                             )}
                         </div>
 
-                        {shoe.nickname && (
-                            <p className="text-sm text-gray-500 mb-2">
-                                {shoe.brand} {shoe.model}
-                            </p>
-                        )}
+                        <h3 className="text-sm sm:text-lg font-bold text-main leading-tight truncate">
+                            {shoe.nickname || shoe.model}
+                        </h3>
 
-                        {/* Barra de progreso */}
-                        {shoe.maxDistanceMeters ? (
-                            <div className="mt-2">
-                                <div className="flex justify-between text-xs text-gray-500 mb-1 font-medium">
-                                    <span className={percentage >= 100 ? 'text-red-500' : ''}>
+                        <p className="text-xs sm:text-sm text-muted font-medium truncate">
+                            {shoe.brand} {shoe.nickname ? shoe.model : ''}
+                        </p>
+                    </div>
+
+                    {/* Barra de Progreso */}
+                    <div className="mt-auto pt-2">
+                        {shoe.maxDistanceMeters && shoe.maxDistanceMeters > 0 ? (
+                            <>
+                                <div className="flex justify-between text-[10px] sm:text-xs text-muted mb-1 font-medium">
+                                    <span className={shoe.status === 'OVERDUE' ? 'text-rose-500 font-bold' : ''}>
                                         {formatDistance(shoe.totalDistanceMeters)}
-                                        <span className="font-normal text-gray-400 mx-1">/</span>
+                                        <span className="opacity-50 mx-1">/</span>
                                         {formatDistance(shoe.maxDistanceMeters)}
                                     </span>
-                                    <span>{Math.min(percentage, 100).toFixed(0)}%</span>
+                                    <span className="text-muted/70 hidden sm:inline">{percentage}%</span>
                                 </div>
-                                <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div className="h-1.5 sm:h-2 w-full bg-page rounded-full overflow-hidden">
                                     <div
-                                        className={`h-full ${getProgressColor(percentage)} transition-all duration-500`}
+                                        className={`h-full ${getStatusColor(shoe.status)} transition-all duration-500 rounded-full`}
                                         style={{ width: `${Math.min(percentage, 100)}%` }}
                                     />
                                 </div>
-                            </div>
+                            </>
                         ) : (
-                            <div className="mt-2 text-xs text-gray-400 font-medium">
-                                Distancia total: {formatDistance(shoe.totalDistanceMeters)} (Sin límite)
+                            <div className="flex items-center text-[10px] sm:text-xs text-muted font-medium bg-page p-1 sm:p-2 rounded border border-border truncate">
+                                <span className="mr-1 sm:mr-2">♾️</span>
+                                <span className="truncate">Total: {formatDistance(shoe.totalDistanceMeters)}</span>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Acciones */}
-                <div className="flex flex-col space-y-1 sm:flex-row sm:space-y-0 sm:space-x-1">
+                {/* 3. ACCIONES */}
+                <div className="flex flex-col justify-center border-l border-border bg-page/30 p-1 sm:p-2 space-y-1 sm:space-y-2 w-10 sm:w-auto items-center">
                     <button
-                        className={`p-2 rounded-lg transition-colors ${shoe.active
-                            ? 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
-                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'   
-                            }`}
+                        className="p-1.5 sm:p-2 rounded-lg transition-colors text-muted hover:text-brand hover:bg-surface border border-transparent hover:border-border hover:shadow-sm"
                         onClick={(e) => {
                             e.stopPropagation()
                             onToggleActive(shoe)
                         }}
-                        title={shoe.active ? 'Retirar zapatilla' : 'Reactivar zapatilla'}
                     >
-                        {shoe.active ? <Power className="w-5 h-5" /> : <RotateCcw className="w-5 h-5" />}
+                        {shoe.active ? <Power className="w-4 h-4 sm:w-5 sm:h-5" /> : <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </button>
 
                     <button
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-1.5 sm:p-2 text-muted hover:text-blue-500 hover:bg-surface border border-transparent hover:border-border hover:shadow-sm rounded-lg transition-colors"
                         onClick={(e) => {
                             e.stopPropagation()
                             onEdit(shoe)
                         }}
-                        title="Editar"
                     >
-                        <Pencil className="w-5 h-5" />
+                        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
 
                     <button
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-1.5 sm:p-2 text-muted hover:text-rose-500 hover:bg-surface border border-transparent hover:border-border hover:shadow-sm rounded-lg transition-colors"
                         onClick={(e) => {
                             e.stopPropagation()
                             onDelete(shoe.id)
                         }}
-                        title="Eliminar permanentemente"
                     >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                 </div>
             </div>

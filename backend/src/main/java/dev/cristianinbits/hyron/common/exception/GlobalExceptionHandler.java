@@ -19,6 +19,9 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -108,7 +111,7 @@ public class GlobalExceptionHandler {
             default -> "Duplicate entry detected";
         };
     }
-    
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
@@ -137,14 +140,28 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "Malformed JSON request");
     }
 
+    // @ExceptionHandler(Exception.class)
+    // public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+    //     // TODO: Log stacktrace here for debugging
+    //     // log.error("Unexpected error", ex);
+    //     return buildErrorResponse(
+    //             HttpStatus.INTERNAL_SERVER_ERROR,
+    //             "INTERNAL_SERVER_ERROR",
+    //             "Unexpected error occurred");
+    // }
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
-        // TODO: Log stacktrace here for debugging
-        // log.error("Unexpected error", ex);
-        return buildErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "INTERNAL_SERVER_ERROR",
-                "Unexpected error occurred");
+    public ResponseEntity<Object> handleAll(Exception ex) {
+        // Esta línea es VITAL para ver por qué falla Swagger
+        log.error("💥 ERROR NO CONTROLADO: ", ex);
+        
+        // O si no tienes logger configurado, usa esto temporalmente:
+        ex.printStackTrace(); 
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Ocurrió un error inesperado. Revisa los logs.");
     }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String error, String message) {

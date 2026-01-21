@@ -11,9 +11,55 @@
 
     /* Ocultar barra de scroll para IE, Edge and Firefox */
     .no-scrollbar {
-        -ms-overflow-style: none;
         /* IE and Edge */
-        scrollbar-width: none;
+        -ms-overflow-style: none;
         /* Firefox */
+        scrollbar-width: none;
+    }
+}
+
+/* 🎨 TEMA GLOBAL (Light & Dark) */
+@layer base {
+    :root {
+        /* --- MODO CLARO (Por defecto) --- */
+        /* Gray 50 (Fondo de pantalla) */
+        --bg-page: 249 250 251;
+
+        /* White (Fondo de tarjetas/menús) */
+        --bg-surface: 255 255 255;
+
+        /* Gray 900 (Títulos) */
+        --text-main: 17 24 39;
+
+        /* Gray 500 (Subtítulos) */
+        --text-muted: 107 114 128;
+
+        /* Gray 200 (Líneas finas) */
+        --border-color: 229 231 235;
+
+        /* Emerald 500 (Tu color principal, ej: Verde Run) */
+        --color-brand: 17 24 39;
+    }
+
+    /* --- MODO OSCURO (Se activa al poner class="dark" en el HTML) --- */
+    .dark {
+        /* Fondo: Zinc 900 - Un gris oscuro neutro, muy elegante */
+        --bg-page: 24 24 27;
+
+        /* Surface: Zinc 800 - Ligeramente más claro */
+        --bg-surface: 39 39 42;
+
+        /* Texto: Zinc 300 - Un gris claro suave. Cero fatiga visual. */
+        --text-main: 212 212 216;
+
+        /* Texto secundario: Zinc 500 */
+        --text-muted: 113 113 122;
+
+        /* Bordes: Zinc 800 (o 700 para más contraste) */
+        --border-color: 63 63 70;
+
+        /* Brand: Mantenemos tu verde, pero al ser el fondo neutro, 
+       destacará de forma más elegante sin vibrar */
+        --color-brand: 241 245 249;
     }
 }

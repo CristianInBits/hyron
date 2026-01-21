@@ -20,8 +20,9 @@ import dev.cristianinbits.hyron.hyrox.dto.HyroxItemResponse;
 
 import dev.cristianinbits.hyron.hyrox.repo.HyroxWorkoutDetailsRepository;
 import dev.cristianinbits.hyron.shoe.domain.Shoe;
-import dev.cristianinbits.hyron.shoe.dto.ShoeSummaryResponse;
+import dev.cristianinbits.hyron.shoe.dto.ShoeResponse;
 import dev.cristianinbits.hyron.shoe.repo.ShoeRepository;
+import dev.cristianinbits.hyron.shoe.service.ShoeMapper;
 import dev.cristianinbits.hyron.workout.domain.Workout;
 import dev.cristianinbits.hyron.workout.domain.WorkoutType;
 import dev.cristianinbits.hyron.workout.repo.WorkoutRepository;
@@ -36,6 +37,7 @@ public class HyroxServiceImpl implements HyroxService {
     private final HyroxWorkoutDetailsRepository hyroxRepository;
     private final WorkoutRepository workoutRepository;
     private final ShoeRepository shoeRepository;
+    private final ShoeMapper shoeMapper;
 
     @Override
     @Transactional
@@ -54,7 +56,7 @@ public class HyroxServiceImpl implements HyroxService {
         details.setNotes(normalizeString(request.notes()));
 
         if (request.shoeId() != null) {
-            Shoe shoe = shoeRepository.findByIdAndUserId(request.shoeId(), userId)
+            Shoe shoe = shoeRepository.findByIdAndUser_Id(request.shoeId(), userId)
                     .orElseThrow(() -> new NotFoundException("Shoe not found"));
             details.setShoe(shoe);
         } else {
@@ -179,15 +181,10 @@ public class HyroxServiceImpl implements HyroxService {
         return (value != null && !value.isBlank()) ? value.trim() : null;
     }
 
-    private ShoeSummaryResponse toSummaryResponse(Shoe shoe) {
-        return new ShoeSummaryResponse(
-                shoe.getId(),
-                shoe.getBrand(),
-                shoe.getModel(),
-                shoe.getNickname(),
-                null, // image
-                (long) shoe.getInitialDistanceMeters(), // totalDistance (fallback al inicial)
-                shoe.getMaxDistanceMeters()
-        );
+    private ShoeResponse toSummaryResponse(Shoe shoe) {
+        ShoeResponse shoeResponse = (shoe != null)
+                ? shoeMapper.toResponse(shoe)
+                : null;
+        return shoeResponse;
     }
 }
