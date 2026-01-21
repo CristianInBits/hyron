@@ -1,50 +1,45 @@
-import client from '../api/axiosClient'; // Asegúrate de que la ruta a tu cliente axios es correcta
+import client from '../api/axiosClient'
 import type {
     PageResult,
     Shoe,
     ShoeCreateRequest,
     ShoeQueryParams,
-    ShoeUpdateRequest
-} from '../types/shoe';
+    ShoeUpdateRequest,
+} from '../types/shoe'
 
+// API service: Shoes
 export const shoeService = {
-
-    // 1. OBTENER LISTA (Con filtros y paginación)
+    // List (pagination / filters)
     getMyShoes: async (params?: ShoeQueryParams) => {
-        // Axios convierte automáticamente el objeto params a ?page=0&size=10...
-        const response = await client.get<PageResult<Shoe>>('/v1/shoes', { params });
-        return response.data;
+        const response = await client.get<PageResult<Shoe>>('/v1/shoes', { params })
+        return response.data
     },
 
-    // 2. OBTENER DETALLE (Por ID)
+    // Detail by id
     getById: async (id: number) => {
-        const response = await client.get<Shoe>(`/v1/shoes/${id}`);
-        return response.data;
+        const response = await client.get<Shoe>(`/v1/shoes/${id}`)
+        return response.data
     },
 
-    // 3. CREAR (POST)
+    // Create
     create: async (data: ShoeCreateRequest) => {
-        const response = await client.post<Shoe>('/v1/shoes', data);
-        return response.data;
+        const response = await client.post<Shoe>('/v1/shoes', data)
+        return response.data
     },
 
-    // 4. ACTUALIZAR (PUT)
-    // Recibimos el ID y los datos por separado para mayor claridad
+    // Update by id
     update: async (id: number, data: ShoeUpdateRequest) => {
-        const response = await client.put<Shoe>(`/v1/shoes/${id}`, data);
-        return response.data;
+        const response = await client.put<Shoe>(`/v1/shoes/${id}`, data)
+        return response.data
     },
 
-    // 5. BORRAR (DELETE)
+    // Delete by id
     delete: async (id: number) => {
-        await client.delete(`/v1/shoes/${id}`);
+        await client.delete(`/v1/shoes/${id}`)
     },
 
-    // 6. TOGGLE ACTIVE (Un método especial muy útil)
-    // A veces queremos solo archivar la zapatilla sin editar todo el formulario.
-    // Como usamos PUT, tenemos que "trucar" esto: pedimos la zapatilla, cambiamos active y la guardamos.
+    // Toggle "active" by sending a full update payload
     toggleActive: async (shoe: Shoe) => {
-        // Creamos el objeto update basándonos en la zapatilla actual
         const updateData: ShoeUpdateRequest = {
             brand: shoe.brand,
             model: shoe.model,
@@ -57,11 +52,10 @@ export const shoeService = {
             favorite: shoe.favorite,
             initialDistanceMeters: shoe.initialDistanceMeters,
             maxDistanceMeters: shoe.maxDistanceMeters,
-            // AQUÍ ESTÁ EL CAMBIO MÁGICO
-            active: !shoe.active
-        };
+            active: !shoe.active,
+        }
 
-        const response = await client.put<Shoe>(`/v1/shoes/${shoe.id}`, updateData);
-        return response.data;
-    }
-};
+        const response = await client.put<Shoe>(`/v1/shoes/${shoe.id}`, updateData)
+        return response.data
+    },
+}

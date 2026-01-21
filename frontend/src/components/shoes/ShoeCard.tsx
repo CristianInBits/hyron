@@ -1,7 +1,9 @@
-import { Footprints, Pencil, Trash2, Power, RotateCcw } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Footprints, Pencil, Trash2, RotateCcw, MoreVertical, Archive } from 'lucide-react'
 import type { Shoe, ShoeStatus, ShoeType } from '../../types/shoe'
 import { useSettings } from '../../context/SettingsContext'
 
+// Types
 type ShoeCardProps = {
     shoe: Shoe
     onEdit: (shoe: Shoe) => void
@@ -10,48 +12,71 @@ type ShoeCardProps = {
 }
 
 function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
-
+    // Context / derived values
     const { formatDistance } = useSettings()
-    const percentage = shoe.usagePercent ?? 0;
+    const percentage = shoe.usagePercent ?? 0
 
-    // COLORES DE ESTADO (Semánticos siempre que sea posible)
+    // State + refs
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    // Effects
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
+    // Helpers (styles)
     const getStatusColor = (status: ShoeStatus) => {
         switch (status) {
-            case 'OK': return 'bg-emerald-500'; // Verde siempre se ve bien
-            case 'WARNING': return 'bg-amber-500';
-            case 'OVERDUE': return 'bg-rose-500';
-            default: return 'bg-muted';
+            case 'OK': return 'bg-emerald-500'
+            case 'WARNING': return 'bg-amber-500'
+            case 'OVERDUE': return 'bg-rose-500'
+            default: return 'bg-muted'
         }
     }
 
-    // ETIQUETAS DE TIPO
-    // Adaptadas para que se vean bien en ambos modos usando opacidad en oscuro
     const getTypeStyle = (type: ShoeType) => {
         switch (type) {
-            case 'RUNNING': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200';
-            case 'TRAIL': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200';
-            case 'HYROX': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200';
-            case 'CROSSFIT': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200';
-            case 'WALKING': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200';
-            default: return 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-300';
+            case 'RUNNING': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200'
+            case 'TRAIL': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'
+            case 'HYROX': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200'
+            case 'CROSSFIT': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200'
+            case 'WALKING': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'
+            default: return 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-300'
         }
     }
 
+    const getThemeClass = (type: ShoeType) => {
+        switch (type) {
+            case 'RUNNING': return 'theme-run'
+            case 'TRAIL': return 'theme-trail'
+            case 'HYROX': return 'theme-hyrox'
+            case 'CROSSFIT': return 'theme-crossfit'
+            case 'WALKING': return 'theme-walking'
+            default: return ''
+        }
+    }
+
+    // Render / UI
     return (
         <div
-            className={`group relative rounded-xl shadow-sm border overflow-hidden transition-all duration-300
-            bg-surface
-            border-border
-            ${shoe.active
-                    ? 'hover:shadow-md hover:border-brand' // Hover toma el color de marca (verde por defecto)
-                    : 'opacity-75 bg-page border-border' // Retirada se funde con el fondo
-                }`}
+            className={`
+                ${getThemeClass(shoe.type)}
+                group relative rounded-xl shadow-sm border transition-all duration-300
+                bg-surface border-border
+                ${shoe.active ? 'hover:shadow-md hover:border-brand' : 'opacity-75 bg-page border-border'}
+            `}
         >
-            {/* Contenedor flexible que mantiene altura fija */}
             <div className="flex flex-row h-32 sm:h-auto">
 
-                {/* --- 1. IMAGEN --- */}
-                <div className="relative w-24 sm:w-32 flex-shrink-0 bg-page flex items-center justify-center overflow-hidden border-r border-border">
+                {/* UI: Imagen */}
+                <div className="relative w-24 sm:w-32 flex-shrink-0 bg-page flex items-center justify-center overflow-hidden border-r border-border rounded-l-xl">
                     {shoe.imageUrl ? (
                         <img
                             src={shoe.imageUrl}
@@ -68,53 +93,36 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                     {!shoe.active && (
                         <div className="absolute inset-0 bg-black/20 flex items-center justify-center backdrop-blur-[1px]">
                             <span className="bg-surface/90 text-main text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded shadow-sm uppercase tracking-wide">
-                                <span className="sm:hidden">Ret</span>
-                                <span className="hidden sm:inline">Retirada</span>
+                                Retirada
                             </span>
                         </div>
                     )}
                 </div>
 
-                {/* 2. CONTENIDO CENTRAL */}
+                {/* UI: Contenido central */}
                 <div className="flex-1 p-2 sm:p-4 flex flex-col min-w-0">
-
-                    {/* --- FILA 0: Nickname (Personalización del usuario) --- */}
-                    {/* Solo lo mostramos si existe. Usamos 'text-brand' para que coja el color del deporte */}
-                    {shoe.nickname && (
-                        <div className="mb-0.5 leading-none">
-                            <span className="text-xs italic font-medium text-brand opacity-90">
-                                "{shoe.nickname}"
+                    <div>
+                        <div className="flex items-start justify-between mb-1 gap-1">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border border-transparent uppercase tracking-wider inline-block truncate ${getTypeStyle(shoe.type)}`}>
+                                {shoe.type}
                             </span>
                         </div>
-                    )}
 
-                    {/* --- FILA 1: Modelo (La información técnica importante) --- */}
-                    {/* Texto grande, negro (main) y negrita */}
-                    <h3 className="text-sm sm:text-lg font-bold text-main leading-tight truncate mb-1.5">
-                        {shoe.model}
-                    </h3>
+                        {shoe.nickname && (
+                            <div className="mb-0.5 leading-none">
+                                <span className="text-xs italic font-medium text-main opacity-90">"{shoe.nickname}"</span>
+                            </div>
+                        )}
 
-                    {/* --- FILA 2: Marca • Badge --- */}
-                    <div className="flex items-center gap-1.5 mb-1">
-                        {/* Marca (Texto gris discreto) */}
-                        <span className="text-xs text-muted font-medium uppercase tracking-wide truncate">
-                            {shoe.brand}
-                        </span>
+                        <h3 className="text-sm sm:text-lg font-bold text-main leading-tight truncate mb-1.5">
+                            {shoe.model}
+                        </h3>
 
-                        {/* Separador */}
-                        <span className="text-muted/40 text-[10px]">•</span>
-
-                        {/* Badge de Tipo (Colores según deporte) */}
-                        <span className={`
-            text-[10px] font-bold px-1.5 py-0.5 rounded border border-transparent 
-            uppercase tracking-wider truncate
-            ${getTypeStyle(shoe.type)}
-        `}>
-                            {shoe.type}
-                        </span>
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-xs text-muted font-medium uppercase tracking-wide truncate">{shoe.brand}</span>
+                        </div>
                     </div>
 
-                    {/* --- FILA 3: Barra de Progreso (Empujada al fondo) --- */}
                     <div className="mt-auto pt-2">
                         {shoe.maxDistanceMeters && shoe.maxDistanceMeters > 0 ? (
                             <>
@@ -126,8 +134,6 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                                     </span>
                                     <span className="text-muted/70 hidden sm:inline">{percentage}%</span>
                                 </div>
-
-                                {/* Fondo de la barra */}
                                 <div className="h-1.5 sm:h-2 w-full bg-page rounded-full overflow-hidden">
                                     <div
                                         className={`h-full ${getStatusColor(shoe.status)} transition-all duration-500 rounded-full`}
@@ -144,38 +150,58 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                     </div>
                 </div>
 
-                {/* 3. ACCIONES */}
-                <div className="flex flex-col justify-center border-l border-border bg-page/30 p-1 sm:p-2 space-y-1 sm:space-y-2 w-10 sm:w-auto items-center">
+                {/* UI: Zona de acción */}
+                <div className="flex flex-col justify-center border-l border-border bg-page/30 w-10 sm:w-12 items-center relative rounded-r-xl">
                     <button
-                        className="p-1.5 sm:p-2 rounded-lg transition-colors text-muted hover:text-brand hover:bg-surface border border-transparent hover:border-border hover:shadow-sm"
                         onClick={(e) => {
                             e.stopPropagation()
-                            onToggleActive(shoe)
+                            setIsMenuOpen(!isMenuOpen)
                         }}
+                        className={`p-2 rounded-full transition-colors hover:bg-surface hover:text-brand 
+                            ${isMenuOpen ? 'bg-surface text-brand shadow-sm' : 'text-muted'}`}
                     >
-                        {shoe.active ? <Power className="w-4 h-4 sm:w-5 sm:h-5" /> : <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />}
+                        <MoreVertical className="w-5 h-5" />
                     </button>
 
-                    <button
-                        className="p-1.5 sm:p-2 text-muted hover:text-blue-500 hover:bg-surface border border-transparent hover:border-border hover:shadow-sm rounded-lg transition-colors"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            onEdit(shoe)
-                        }}
-                    >
-                        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
+                    {/* UI: Menú flotante */}
+                    {isMenuOpen && (
+                        <div
+                            ref={menuRef}
+                            className="absolute top-10 right-2 z-50 w-48 bg-surface border border-border rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="p-1 flex flex-col gap-0.5">
+                                <button
+                                    onClick={() => { setIsMenuOpen(false); onEdit(shoe) }}
+                                    className="w-full text-left px-3 py-2.5 text-sm text-main hover:bg-page rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                    <Pencil className="w-4 h-4 text-muted" />
+                                    <span>Editar</span>
+                                </button>
 
-                    <button
-                        className="p-1.5 sm:p-2 text-muted hover:text-rose-500 hover:bg-surface border border-transparent hover:border-border hover:shadow-sm rounded-lg transition-colors"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            onDelete(shoe.id)
-                        }}
-                    >
-                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
+                                <button
+                                    onClick={() => { setIsMenuOpen(false); onToggleActive(shoe) }}
+                                    className={`w-full text-left px-3 py-2.5 text-sm hover:bg-page rounded-lg flex items-center gap-2 transition-colors
+                                        ${shoe.active ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}
+                                >
+                                    {shoe.active ? <Archive className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
+                                    <span>{shoe.active ? 'Retirar' : 'Reactivar'}</span>
+                                </button>
+
+                                <div className="h-px bg-border my-0.5" />
+
+                                <button
+                                    onClick={() => { setIsMenuOpen(false); onDelete(shoe.id) }}
+                                    className="w-full text-left px-3 py-2.5 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span>Borrar</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
+
             </div>
         </div>
     )

@@ -1,43 +1,30 @@
 import { useState } from 'react'
 import { Footprints, Plus } from 'lucide-react'
-import { useQueryClient, useMutation } from '@tanstack/react-query'
 
-// IMPORTS NUEVOS: Traemos los hooks y tipos
-import { useShoes, useCreateShoe, useUpdateShoe, useDeleteShoe } from '../hooks/useShoes'
+import { useShoes, useCreateShoe, useUpdateShoe, useDeleteShoe, useToggleShoeActive} from '../hooks/useShoes'
 import type { Shoe, ShoeCreateRequest, ShoeUpdateRequest } from '../types/shoe'
-import { shoeService } from '../services/shoeService'
 
 import Modal from '../components/ui/Modal'
 import ShoeCard from '../components/shoes/ShoeCard'
 import ShoeForm from '../components/shoes/ShoeForm'
 
+// Page
 function ShoesPage() {
+    // Data (queries)
+    const { data, isLoading, isError, error } = useShoes()
+    const shoes = data?.content || []
 
-    // 1. CARGA DE DATOS AUTOMÁTICA 📡
-    // params vacío = carga la primera página por defecto
-    const { data, isLoading, isError, error } = useShoes();
+    // Mutations (actions)
+    const createMutation = useCreateShoe()
+    const updateMutation = useUpdateShoe()
+    const deleteMutation = useDeleteShoe()
+    const toggleMutation = useToggleShoeActive()
 
-    // Extraemos la lista real del objeto paginado
-    const shoes = data?.content || [];
-
-    // 2. HOOKS DE ACCIÓN ⚡
-    const createMutation = useCreateShoe();
-    const updateMutation = useUpdateShoe();
-    const deleteMutation = useDeleteShoe();
-
-    // Hook manual para el Toggle (porque no lo creamos en useShoes.ts)
-    const queryClient = useQueryClient();
-    const toggleMutation = useMutation({
-        mutationFn: (shoe: Shoe) => shoeService.toggleActive(shoe),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shoes'] })
-    });
-
-    // 3. ESTADOS DE LA UI (Modal) 🖼️
+    // UI state (modal)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingShoe, setEditingShoe] = useState<Shoe | null>(null)
 
-    // --- MANEJADORES DE EVENTOS ---
-
+    // Handlers
     const handleCreate = () => {
         setEditingShoe(null)
         setIsModalOpen(true)
@@ -50,33 +37,26 @@ function ShoesPage() {
 
     const handleDelete = async (id: number) => {
         if (!confirm('¿Estás seguro de eliminar esta zapatilla permanentemente?')) return
-        // Usamos el hook, no llamamos al servicio directamente
-        await deleteMutation.mutateAsync(id);
+        await deleteMutation.mutateAsync(id)
     }
 
     const handleToggleActive = async (shoe: Shoe) => {
-        // Usamos la mutación manual que definimos arriba
-        await toggleMutation.mutateAsync(shoe);
+        await toggleMutation.mutateAsync(shoe)
     }
 
     const handleSubmit = async (formData: ShoeCreateRequest) => {
         try {
             if (editingShoe) {
-                // MODO EDICIÓN
-                // TypeScript necesita que convirtamos el formData a ShoeUpdateRequest
-                // Como usamos un formulario unificado, pasamos los datos tal cual
                 await updateMutation.mutateAsync({
                     id: editingShoe.id,
-                    data: formData as unknown as ShoeUpdateRequest // Cast seguro aquí
-                });
+                    data: formData as unknown as ShoeUpdateRequest,
+                })
             } else {
-                // MODO CREACIÓN
-                await createMutation.mutateAsync(formData);
+                await createMutation.mutateAsync(formData)
             }
-            setIsModalOpen(false);
+            setIsModalOpen(false)
         } catch (err) {
-            console.error("Error al guardar:", err);
-            // Aquí podrías poner un toast o notificación de error
+            console.error('Error al guardar:', err)
         }
     }
 
@@ -85,13 +65,14 @@ function ShoesPage() {
         setEditingShoe(null)
     }
 
-    // Filtramos visualmente (aunque podríamos pedir filtrado al backend también)
-    const activeShoes = shoes.filter(s => s.active)
-    const inactiveShoes = shoes.filter(s => !s.active)
+    // Derived UI lists
+    const activeShoes = shoes.filter((s) => s.active)
+    const inactiveShoes = shoes.filter((s) => !s.active)
 
+    // Render / UI
     return (
         <div>
-            {/* Header */}
+            {/* UI: Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                     <div className="p-2 bg-gray-100 rounded-lg mr-3">
@@ -112,17 +93,17 @@ function ShoesPage() {
                 </button>
             </div>
 
-            {/* Estado de Carga */}
+            {/* UI: Loading */}
             {isLoading && <p className="text-gray-500 text-center py-12">Cargando zapatillas...</p>}
 
-            {/* Estado de Error */}
+            {/* UI: Error */}
             {isError && (
                 <div className="text-red-600 mb-4 bg-red-50 p-3 rounded-lg text-sm border border-red-100">
                     Error al cargar: {error?.message}
                 </div>
             )}
 
-            {/* Estado Vacío */}
+            {/* UI: Empty state */}
             {!isLoading && !isError && shoes.length === 0 && (
                 <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
                     <Footprints className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -136,13 +117,13 @@ function ShoesPage() {
                 </div>
             )}
 
-            {/* LISTA DE ZAPATILLAS */}
+            {/* UI: List */}
             {!isLoading && !isError && shoes.length > 0 && (
                 <>
-                    {/* Zapatillas activas */}
+                    {/* UI: Active shoes */}
                     {activeShoes.length > 0 && (
                         <div className="space-y-3 mb-6">
-                            {activeShoes.map(shoe => (
+                            {activeShoes.map((shoe) => (
                                 <ShoeCard
                                     key={shoe.id}
                                     shoe={shoe}
@@ -154,7 +135,7 @@ function ShoesPage() {
                         </div>
                     )}
 
-                    {/* Zapatillas retiradas */}
+                    {/* UI: Inactive shoes */}
                     {inactiveShoes.length > 0 && (
                         <div className="mt-8 pt-6 border-t border-gray-100">
                             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
@@ -164,7 +145,7 @@ function ShoesPage() {
                                 </span>
                             </h2>
                             <div className="space-y-3 opacity-75">
-                                {inactiveShoes.map(shoe => (
+                                {inactiveShoes.map((shoe) => (
                                     <ShoeCard
                                         key={shoe.id}
                                         shoe={shoe}
@@ -179,17 +160,13 @@ function ShoesPage() {
                 </>
             )}
 
-            {/* Modal de Formulario */}
+            {/* UI: Modal */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 title={editingShoe ? 'Editar Zapatilla' : 'Nueva Zapatilla'}
             >
-                <ShoeForm
-                    shoe={editingShoe}
-                    onSubmit={handleSubmit}
-                    onCancel={handleCloseModal}
-                />
+                <ShoeForm shoe={editingShoe} onSubmit={handleSubmit} onCancel={handleCloseModal} />
             </Modal>
         </div>
     )
