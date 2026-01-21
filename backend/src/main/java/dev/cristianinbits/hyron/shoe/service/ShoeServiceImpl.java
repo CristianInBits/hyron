@@ -31,11 +31,14 @@ import static java.util.Map.entry;
 /**
  * Implementación del dominio Shoes.
  *
- * <p>Notas:
+ * <p>
+ * Notas:
  * <ul>
- *   <li>Seguridad: siempre se filtra por userId para evitar acceso a recursos ajenos.</li>
- *   <li>Delete: soft delete poniendo active=false.</li>
- *   <li>Update (PUT): reemplaza campos configurables, pero NO toca accumulatedDistanceMeters.</li>
+ * <li>Seguridad: siempre se filtra por userId para evitar acceso a recursos
+ * ajenos.</li>
+ * <li>Delete: soft delete poniendo active=false.</li>
+ * <li>Update (PUT): reemplaza campos configurables, pero NO toca
+ * accumulatedDistanceMeters.</li>
  * </ul>
  */
 @Service
@@ -50,13 +53,11 @@ public class ShoeServiceImpl implements ShoeService {
             entry("purchaseDate", "purchaseDate"),
             entry("active", "active"),
             entry("favorite", "favorite"),
-            entry("type", "type")
-    );
+            entry("type", "type"));
 
     // Desempate por ID (lo más nuevo creado)
-    private static final Sort DEFAULT_SORT =
-            Sort.by("purchaseDate").descending()
-                    .and(Sort.by("id").descending()); 
+    private static final Sort DEFAULT_SORT = Sort.by("purchaseDate").descending()
+            .and(Sort.by("id").descending());
 
     private final ShoeRepository shoeRepository;
     private final UserRepository userRepository;
@@ -107,9 +108,7 @@ public class ShoeServiceImpl implements ShoeService {
         Pageable pageable = PageQueryMapper.toPageable(pageQuery, DEFAULT_SORT, ALLOWED_SORTS);
 
         // 1. Especificación base: Pertenencia al usuario
-        Specification<Shoe> spec = where((root, query, cb) -> 
-            cb.equal(root.get("user").get("id"), userId)
-        );
+        Specification<Shoe> spec = where((root, query, cb) -> cb.equal(root.get("user").get("id"), userId));
 
         // 2. Filtros dinámicos
         if (type != null) {
@@ -130,10 +129,12 @@ public class ShoeServiceImpl implements ShoeService {
         Shoe shoe = shoeRepository.findByIdAndUser_Id(id, userId)
                 .orElseThrow(() -> new ShoeNotFoundException(id));
 
-        if (shoe.isActive()) {
-            shoe.setActive(false);
-            shoeRepository.save(shoe);
+        if (shoe.getTotalDistanceMeters() > 0) {
+            throw new IllegalStateException(
+                    "No se puede eliminar una zapatilla con historial. Utiliza la opción 'Retirar'.");
         }
+
+        shoeRepository.delete(shoe);
     }
 
     /**
