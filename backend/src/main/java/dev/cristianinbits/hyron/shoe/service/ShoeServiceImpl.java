@@ -129,7 +129,7 @@ public class ShoeServiceImpl implements ShoeService {
         Shoe shoe = shoeRepository.findByIdAndUser_Id(id, userId)
                 .orElseThrow(() -> new ShoeNotFoundException(id));
 
-        if (shoe.getTotalDistanceMeters() > 0) {
+        if (shoe.getAccumulatedDistanceMeters() > 0) {
             throw new IllegalStateException(
                     "No se puede eliminar una zapatilla con historial. Utiliza la opción 'Retirar'.");
         }

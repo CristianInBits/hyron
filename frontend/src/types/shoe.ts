@@ -3,63 +3,74 @@ export type ShoeStatus = 'OK' | 'WARNING' | 'OVERDUE';
 
 // --- RESPONSE (Lo que recibes al leer una zapatilla) ---
 export interface Shoe {
+    // IDs
     id: number;
+
+    // Datos obligatorios importantes
     brand: string;
     model: string;
+
+    // Datos opcionales
     nickname: string | null;
-    type: ShoeType;
     imageUrl: string | null;
     colorway: string | null;
     notes: string | null;
+    purchaseDate: string | null;
+
+    // Metadatos/Flags
+    type: ShoeType;
     favorite: boolean;
-    purchaseDate: string;
     active: boolean;
 
-    // Métricas calculadas
+    // Métricas
     initialDistanceMeters: number;
     accumulatedDistanceMeters: number;
-    maxDistanceMeters: number;
+    maxDistanceMeters: number | null;
+
+    // Métricas calculadas
     totalDistanceMeters: number;
-    remainingDistanceMeters: number;
-    usagePercent: number;
-    status: ShoeStatus;
+    remainingDistanceMeters: number | null;
+    usagePercent: number | null;
+    status: ShoeStatus | null;
 }
 
 // --- CREATE REQUEST (POST) ---
 export interface ShoeCreateRequest {
     brand: string;
     model: string;
-    nickname?: string;
-    type?: ShoeType;
-    imageUrl?: string;
-    colorway?: string;
-    notes?: string;
-    favorite?: boolean;
-    purchaseDate?: string;
-    initialDistanceMeters?: number;
-    maxDistanceMeters?: number;
-    active?: boolean;
+
+    nickname: string | null;
+    imageUrl: string | null;
+    colorway: string | null;
+    notes: string | null;
+    purchaseDate: string | null;
+
+    type: ShoeType;
+    favorite: boolean;
+    active: boolean;
+
+    initialDistanceMeters: number;
+    maxDistanceMeters: number | null;
 }
 
 // --- UPDATE REQUEST (PUT) ---
 export interface ShoeUpdateRequest {
     brand: string;
     model: string;
+
+    nickname: string | null;
+    imageUrl: string | null;
+    colorway: string | null;
+    notes: string | null;
+    purchaseDate: string | null;
+
     type: ShoeType;
-    
-    // Campos que permitimos borrar enviando 'null' o modificar enviando string
-    nickname?: string | null;
-    imageUrl?: string | null;
-    colorway?: string | null;
-    notes?: string | null;
-    
-    purchaseDate?: string;
-    favorite?: boolean;
-    active?: boolean;
+    favorite: boolean;
+    active: boolean;
 
     // Métricas editables
-    initialDistanceMeters?: number;
-    maxDistanceMeters?: number;
+    initialDistanceMeters: number;
+    maxDistanceMeters: number | null;
 }
 
 // --- PAGINACIÓN (PageResult) ---

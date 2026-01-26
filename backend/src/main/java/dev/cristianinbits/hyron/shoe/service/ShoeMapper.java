@@ -33,17 +33,16 @@ public class ShoeMapper {
 
         shoe.setBrand(request.brand());
         shoe.setModel(request.model());
-
-        shoe.setNickname(request.nickname());
-
+        
         shoe.setType(request.type() != null ? request.type() : ShoeType.RUNNING);
-
+        
+        shoe.setNickname(request.nickname());
         shoe.setImageUrl(request.imageUrl());
         shoe.setColorway(request.colorway());
         shoe.setNotes(request.notes());
 
-        shoe.setFavorite(request.favorite() != null && request.favorite());
-        shoe.setActive(request.active() == null || request.active());
+        shoe.setFavorite(request.favorite());
+        shoe.setActive(request.active());
 
         shoe.setPurchaseDate(request.purchaseDate());
 

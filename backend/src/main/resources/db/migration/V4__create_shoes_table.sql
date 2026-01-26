@@ -7,7 +7,7 @@ CREATE TABLE shoes (
     brand                       VARCHAR(50) NOT NULL,
     model                       VARCHAR(100) NOT NULL,
     nickname                    VARCHAR(50),
-    type                        VARCHAR(20) NOT NULL DEFAULT 'RUNNING', -- Nuevo campo Enum
+    type                        VARCHAR(20) NOT NULL DEFAULT 'RUNNING',
     
     -- Detalles Visuales y Notas (Nuevos)
     image_url                   VARCHAR(500),
@@ -16,12 +16,12 @@ CREATE TABLE shoes (
 
     -- Métricas de Distancia
     initial_distance_meters     INTEGER NOT NULL DEFAULT 0,
-    accumulated_distance_meters INTEGER NOT NULL DEFAULT 0, -- Nuevo (lo que suma la app)
-    max_distance_meters         INTEGER,                    -- Nullable (sin límite)
+    accumulated_distance_meters INTEGER NOT NULL DEFAULT 0,
+    max_distance_meters         INTEGER,
     
     -- Fechas y Estados
-    purchase_date               DATE,                       -- Nuevo
-    favorite                    BOOLEAN NOT NULL DEFAULT FALSE, -- Nuevo
+    purchase_date               DATE,
+    favorite                    BOOLEAN NOT NULL DEFAULT FALSE,
     active                      BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -46,12 +46,12 @@ ALTER TABLE shoes
     CHECK (max_distance_meters IS NULL OR max_distance_meters > 0);
 
 -- 2. Integridad del Enum (Opcional pero recomendado)
--- Esto asegura que nadie inserte "FUTBOL" o textos raros en la base de datos
+-- Esto asegura que nadie inserte más tipos en la base de datos
 ALTER TABLE shoes
     ADD CONSTRAINT chk_shoes_type_enum
     CHECK (type IN ('RUNNING', 'TRAIL', 'CROSSFIT', 'HYROX', 'WALKING'));
 
 -- ÍNDICES (Performance)
 CREATE INDEX idx_shoes_user ON shoes (user_id);
--- Este índice compuesto es vital para tu método getMyShoes(active, date)
+-- Este índice compuesto es vital para el método getMyShoes(active, date)
 CREATE INDEX idx_shoes_user_active_date ON shoes (user_id, active, purchase_date DESC);

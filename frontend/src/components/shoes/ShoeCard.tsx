@@ -73,7 +73,7 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                 ${shoe.active ? 'hover:shadow-md hover:border-brand' : 'opacity-75 bg-page border-border'}
             `}
         >
-            <div className="flex flex-row h-32 sm:h-auto">
+            <div className="flex flex-row min-h-[8rem] h-auto sm:h-auto">
 
                 {/* UI: Imagen */}
                 <div className="relative w-24 sm:w-32 flex-shrink-0 bg-page flex items-center justify-center overflow-hidden border-r border-border rounded-l-xl">
@@ -136,7 +136,7 @@ function ShoeCard({ shoe, onEdit, onDelete, onToggleActive }: ShoeCardProps) {
                                 </div>
                                 <div className="h-1.5 sm:h-2 w-full bg-page rounded-full overflow-hidden">
                                     <div
-                                        className={`h-full ${getStatusColor(shoe.status)} transition-all duration-500 rounded-full`}
+                                        className={`h-full ${getStatusColor(shoe.status || 'OK')} transition-all duration-500 rounded-full`}
                                         style={{ width: `${Math.min(percentage, 100)}%` }}
                                     />
                                 </div>
