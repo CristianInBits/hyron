@@ -24,7 +24,7 @@ import { runService } from '../services/runService'
 import { getErrorMessage } from '../services/errorHandler'
 
 // --- TIPOS ---
-import type { ShoeSummaryResponse } from '../types/shoe'
+import type { Shoe } from '../types/shoe'
 import type {
     RunDetailsCreateRequest,
     RunIntervalRequest,
@@ -48,7 +48,7 @@ export default function NewRunPage({ userId }: Props) {
     const [notes, setNotes] = useState('')
 
     // Material
-    const [shoes, setShoes] = useState<ShoeSummaryResponse[]>([])
+    const [shoes, setShoes] = useState<Shoe[]>([])
     const [selectedShoeId, setSelectedShoeId] = useState<number | null>(null)
 
     // UI States
@@ -78,8 +78,8 @@ export default function NewRunPage({ userId }: Props) {
             setIsLoadingData(true)
             try {
                 // Cargar zapatillas
-                const shoesData = await shoeService.getActiveSummary(userId)
-                setShoes(shoesData)
+                const shoesData = await shoeService.getMyShoes()
+                setShoes(shoesData.content)
             } catch (err) {
                 console.error("Error cargando datos:", err)
             } finally {

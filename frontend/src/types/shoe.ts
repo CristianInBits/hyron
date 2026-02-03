@@ -36,34 +36,41 @@ export interface Shoe {
 
 // --- CREATE REQUEST (POST) ---
 export interface ShoeCreateRequest {
+    // Datos obligatorios importantes
     brand: string;
     model: string;
 
+    // Datos opcionales
     nickname: string | null;
     imageUrl: string | null;
     colorway: string | null;
     notes: string | null;
     purchaseDate: string | null;
 
+    // Metadatos/Flags
     type: ShoeType;
     favorite: boolean;
     active: boolean;
 
+    // Métricas
     initialDistanceMeters: number;
     maxDistanceMeters: number | null;
 }
 
 // --- UPDATE REQUEST (PUT) ---
 export interface ShoeUpdateRequest {
+    // Datos obligatorios importantes
     brand: string;
     model: string;
 
+    // Datos opcionales
     nickname: string | null;
     imageUrl: string | null;
     colorway: string | null;
     notes: string | null;
     purchaseDate: string | null;
 
+    // Metadatos/Flags
     type: ShoeType;
     favorite: boolean;
     active: boolean;
